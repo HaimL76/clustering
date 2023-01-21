@@ -44,7 +44,27 @@ def cluster_image(full_path: str):
 
     centroids = get_centroids(list_samples, 10)
 
+    print(len(centroids))
+
     for centroid in centroids:
+        centroid.calculate_convex_hull()
+
+        # Green color in BGR
+        color = (0, 255, 0)
+
+        # Line thickness of 9 px
+        thickness = 3
+
+        prev_point = None
+
+        print(f'{centroid.index}, {len(centroid.convex_hull)}')
+
+        for curr_point in centroid.convex_hull:
+            if prev_point is not None:
+                cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
+
+            prev_point = curr_point
+
         for sample in centroid.list_samples:
             image[sample.y, sample.x] = [255, 0, 0]
 
