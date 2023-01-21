@@ -5,9 +5,10 @@ class MyPoint(object):
 
 
 class Centroid(object):
-    def __init__(self, c_x: float, c_y: float):
+    def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
         self.list_samples: list = []
+        self.index = i
 
     def calculate_center(self):
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+from kmeans import get_centroids
 from mypoint import Sample
 
 
@@ -38,11 +39,14 @@ def cluster_image(full_path: str):
 
     for i in range(num_rows):
         for j in range(num_cols):
-            if (corners[i, j] > thresh):
-                list_samples.append(Sample(i, j))
-                ##image[i, j] = [255, 0, 0]
+            if corners[i, j] > thresh:
+                list_samples.append(Sample(j, i))
 
+    centroids = get_centroids(list_samples, 10)
 
+    for centroid in centroids:
+        for sample in centroid.list_samples:
+            image[sample.y, sample.x] = [255, 0, 0]
 
     ##print(f'list corners = {list_corners}')
 
