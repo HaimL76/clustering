@@ -42,7 +42,7 @@ def cluster_image(full_path: str):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
 
-    k = 10
+    k = 55
 
     centroids = get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
@@ -82,12 +82,12 @@ def cluster_image(full_path: str):
 
         ##print(f'center point = {center_point}')
 
-            ##print(f'{curr_point.x}, {curr_point.y}, {num_cols}, {num_rows}')
+        ##print(f'{curr_point.x}, {curr_point.y}, {num_cols}, {num_rows}')
 
-            #####if prev_point is not None:
-            #######cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
+        #####if prev_point is not None:
+        #######cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
 
-            ##prev_point = curr_point
+        ##prev_point = curr_point
 
         font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -98,22 +98,16 @@ def cluster_image(full_path: str):
             y = int(sample.y)
             x = int(sample.x)
 
-            if y < num_rows and x < num_cols:
-                ##image[y, x] = [r, g, b]
+            if False:  # y < num_rows and x < num_cols:
                 cv2.putText(img=image, text=f'{centroid.index}',
                             org=(x, y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
-                            color=(r, g, b), thickness=1)
+                            color=color, thickness=1)
 
         for curr_point in centroid.convex_hull:
-            for a in range(24):
-                y = int(curr_point.y - 12 + a)
+            if prev_point:
+                cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=3)
 
-                for j in range(24):
-                    x = int(curr_point.x - 12 + j)
-
-                    if y < num_rows and x < num_cols:
-                        ##image[y, x] = [r, g, b]
-                        pass
+            prev_point = curr_point
 
     ##print(f'list corners = {list_corners}')
 
