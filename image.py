@@ -82,13 +82,12 @@ def cluster_image(full_path: str):
 
         ##print(f'center point = {center_point}')
 
-        for curr_point in centroid.convex_hull:
             ##print(f'{curr_point.x}, {curr_point.y}, {num_cols}, {num_rows}')
 
             #####if prev_point is not None:
             #######cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
 
-            prev_point = curr_point
+            ##prev_point = curr_point
 
         font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -96,14 +95,25 @@ def cluster_image(full_path: str):
         ##          color=(0, 0, 255), thickness=1)
 
         for sample in centroid.list_samples:
-            for a in range(size):
-                y = int(sample.y - half_size + a)
+            y = int(sample.y)
+            x = int(sample.x)
 
-                for j in range(size):
-                    x = int(sample.x - half_size + j)
+            if y < num_rows and x < num_cols:
+                ##image[y, x] = [r, g, b]
+                cv2.putText(img=image, text=f'{centroid.index}',
+                            org=(x, y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
+                            color=(r, g, b), thickness=1)
+
+        for curr_point in centroid.convex_hull:
+            for a in range(24):
+                y = int(curr_point.y - 12 + a)
+
+                for j in range(24):
+                    x = int(curr_point.x - 12 + j)
 
                     if y < num_rows and x < num_cols:
-                        image[y, x] = [r, g, b]
+                        ##image[y, x] = [r, g, b]
+                        pass
 
     ##print(f'list corners = {list_corners}')
 
