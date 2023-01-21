@@ -3,7 +3,8 @@ from mypoint import Centroid, Sample
 
 def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: int = 0, num_cols: int = 0):
     if not isinstance(list_samples, list) or len(list_samples) < 1:
-        raise ValueError("list samples")
+        ##raise ValueError("list samples")
+        return None
 
     if centroids is None:
         quant_rows = 0

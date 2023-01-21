@@ -35,7 +35,8 @@ class ConvexHull(object):
         Computes the points that make up the convex hull.
         :return:
         '''
-        ##points = self._points
+        if not isinstance(points, list) or len(points) < 1:
+            return None
 
         hull_points: list = []
 

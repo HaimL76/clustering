@@ -42,7 +42,7 @@ def cluster_image(full_path: str):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
 
-    k = 55
+    k = 155
 
     centroids = get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
@@ -75,8 +75,8 @@ def cluster_image(full_path: str):
 
         prev_point = None
 
-        print(
-            f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
+        if centroid.convex_hull:
+            print(f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
 
         center_point = (int(centroid.center.x), int(centroid.center.y))
 
@@ -107,11 +107,12 @@ def cluster_image(full_path: str):
                             org=(x, y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
                             color=color, thickness=1)
 
-        for curr_point in centroid.convex_hull:
-            if prev_point:
-                cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=3)
+        if isinstance(centroid.convex_hull, list) and len(centroid.convex_hull):
+            for curr_point in centroid.convex_hull:
+                if curr_point and prev_point:
+                    cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=3)
 
-            prev_point = curr_point
+                prev_point = curr_point
 
     ##print(f'list corners = {list_corners}')
 

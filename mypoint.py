@@ -31,10 +31,18 @@ class Centroid(object):
         ##print(f'{self.index}, {len(self.list_samples)}')
         ch = ConvexHull()
 
-        list_points: list = ch.compute_hull(self.list_samples)
+        ##list_points: list = ch.compute_hull(self.list_samples)
 
-        if isinstance(list_points, list) and len(list_points) > 0:
-            self.convex_hull = list(map(lambda p: MyPoint(p.x, p.y), list_points))
+        self.convex_hull = ch.compute_hull(self.list_samples)
+
+        ##if isinstance(list_points, list) and len(list_points) > 0:
+            ##if isinstance(list_points, list) and len(list_points) > 0:
+                ##self.convex_hull =
+
+                ##for point in list_points:
+                    ##if point:
+                        ##self.convex_hull = MyPoint(point.)
+                            ##list(map(lambda p: MyPoint(p.x, p.y), list_points))
 
 
 class Sample(MyPoint):
