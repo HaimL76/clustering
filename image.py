@@ -78,7 +78,11 @@ def cluster_image(full_path: str):
         print(
             f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
 
-        center_point = (int(centroid.center.y), int(centroid.center.x))
+        center_point = (int(centroid.center.x), int(centroid.center.y))
+
+        cv2.putText(img=image, text=f'{centroid.index}',
+                    org=(center_point[0], center_point[1]), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
+                    color=color, thickness=2)
 
         ##print(f'center point = {center_point}')
 
