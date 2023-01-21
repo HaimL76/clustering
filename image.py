@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from mypoint import Sample
+
 
 def cluster_image(full_path: str):
     print("hello, world!")
@@ -32,12 +34,12 @@ def cluster_image(full_path: str):
 
     thresh = 0.01 * corners.max()
 
-    list_corners = []
+    list_samples: list = []
 
     for i in range(num_rows):
         for j in range(num_cols):
             if (corners[i, j] > thresh):
-                list_corners.append([i, j])
+                list_samples.append(Sample(i, j))
                 ##image[i, j] = [255, 0, 0]
 
 
