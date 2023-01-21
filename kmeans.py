@@ -1,19 +1,33 @@
-from mypoint import Centroid
+from mypoint import Centroid, Sample
 
 
-def get_centroids(list_samples: list, k: int, centroids: list = None):
+def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: int = 0, num_cols: int = 0):
     if not isinstance(list_samples, list) or len(list_samples) < 1:
         raise ValueError("list samples")
 
     if centroids is None:
+        quant_rows = 0
+        quant_cols = 0
+
+        if num_rows > 0 and num_cols > 0:
+            quant_rows = num_rows / k
+            quant_cols = num_cols / k
+
         centroids = []
 
         quant = len(list_samples) / k
 
         for i in range(k):
-            sample = list_samples[int(i * quant)]
+            center = None
 
-            centroids.append(Centroid(i, sample.x, sample.y))
+            if quant_rows > 0 and quant_cols > 0:
+                center = Sample(i * quant_cols, i * quant_rows)
+            else:
+                center = list_samples[int(i * quant)]
+
+            print(f'{i}, {center.x}, {center.y}')
+
+            centroids.append(Centroid(i, center.x, center.y))
 
     changed: int = 0
 

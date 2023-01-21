@@ -42,31 +42,68 @@ def cluster_image(full_path: str):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
 
-    centroids = get_centroids(list_samples, 10)
+    k = 10
+
+    centroids = get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
     print(len(centroids))
 
-    for centroid in centroids:
+    colors = 255 * 255 * 255
+
+    quant_colors = colors / k
+
+    size = 4
+
+    half_size = size / 2
+
+    for i in range(len(centroids)):
+        centroid = centroids[i]
+
+        color: int = i * quant_colors
+
+        r: int = color % 255
+        g: int = (color / 255) % 255
+        b: int = (color / 255) / 255
+
         centroid.calculate_convex_hull()
 
         # Green color in BGR
-        color = (0, 255, 0)
+        color = (r, g, b)
 
         # Line thickness of 9 px
         thickness = 3
 
         prev_point = None
 
-        print(f'{centroid.index}, {len(centroid.convex_hull)}')
+        print(
+            f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
+
+        center_point = (int(centroid.center.y), int(centroid.center.x))
+
+        ##print(f'center point = {center_point}')
 
         for curr_point in centroid.convex_hull:
-            if prev_point is not None:
-                cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
+            ##print(f'{curr_point.x}, {curr_point.y}, {num_cols}, {num_rows}')
+
+            #####if prev_point is not None:
+            #######cv2.line(image, (prev_point.y, prev_point.x), (curr_point.y, curr_point.x), color=color, thickness=thickness)
 
             prev_point = curr_point
 
+        font = cv2.FONT_HERSHEY_SIMPLEX
+
+        ##cv2.putText(img=image, text=f'{centroid.index}, {center_point[0]}, {center_point[1]}', org=center_point, fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
+        ##          color=(0, 0, 255), thickness=1)
+
         for sample in centroid.list_samples:
-            image[sample.y, sample.x] = [255, 0, 0]
+            for a in range(size):
+                y = int(sample.y - half_size + a)
+
+                for j in range(size):
+                    x = int(sample.x - half_size + j)
+
+                    if y < num_rows and x < num_cols:
+                        image[y, x] = [r, g, b]
 
     ##print(f'list corners = {list_corners}')
 

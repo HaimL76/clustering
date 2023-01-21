@@ -28,11 +28,8 @@ class Centroid(object):
             self.center = MyPoint(s_x / len0, s_y / len0)
 
     def calculate_convex_hull(self):
-        print(f'{self.index}, {len(self.list_samples)}')
+        ##print(f'{self.index}, {len(self.list_samples)}')
         ch = ConvexHull()
-
-        for sample in self.list_samples:
-            ch.add(Point(sample.x, sample.y))
 
         list_points: list = ch.compute_hull(self.list_samples)
 
@@ -41,7 +38,7 @@ class Centroid(object):
 
 
 class Sample(MyPoint):
-    def __init__(self, c_x: float, c_y: float, cent: Centroid=None):
+    def __init__(self, c_x: float, c_y: float, cent: Centroid = None):
         super().__init__(c_x, c_y)
 
         self.centroid = cent
