@@ -74,16 +74,21 @@ class Centroid(object):
                 sample = tuple_sample[0]
                 d = tuple_sample[1]
 
-                d_from_var = numpy.abs(d - var)
+                num_var: float = numpy.abs(d / var)
 
-                if d_from_var < 10:
+                if num_var < 3:
                     centroid_in.list_samples.append(sample)
                 else:
                     centroid_out.list_samples.append(sample)
 
-            quarter: int = len(result_samples) / 4
+            len_in = len(centroid_in.list_samples)
+            len_out = len(centroid_out.list_samples)
 
-            if len(centroid_in.list_samples) > quarter and len(centroid_out.list_samples) > quarter:
+            print(f'len in = {len_in}, len out = {len_out}')
+
+            quarter: float = 50## len(result_samples) / 20
+
+            if len_in > quarter and len_out > quarter:
                 for sample in centroid_in.list_samples:
                     sample.centroid = centroid_in
 

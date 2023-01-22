@@ -1,7 +1,7 @@
 from mypoint import Centroid, Sample
 
 
-def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: int = 0, num_cols: int = 0, highest_index: int = 0):
+def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: int = 0, num_cols: int = 0):##, highest_index: int = 0):
     if not isinstance(list_samples, list) or len(list_samples) < 1:
         ##raise ValueError("list samples")
         return None
@@ -29,8 +29,6 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
             print(f'{i}, {center.x}, {center.y}')
 
             centroids.append(Centroid(i, center.x, center.y))
-
-            highest_index = i
 
     changed: int = 0
 
@@ -71,18 +69,17 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
             new_centroids: list = centroid.calculate_std()
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:
-                centroids.remove(centroid)
-
                 for new_cent in new_centroids:
-                    highest_index += 1
-                    new_cent.index = highest_index
+                    new_cent.index = len(centroids)
 
                     centroids.append(new_cent)
 
-            print(f'highest index = {highest_index}')
+                centroids.remove(centroid)
+
+            print(f'len centroids = {len(centroids)}')
 
             centroid.list_samples = []
 
-        return get_centroids(list_samples, k, centroids, num_rows=num_rows, num_cols=num_cols, highest_index=highest_index)
+        return get_centroids(list_samples, k, centroids, num_rows=num_rows, num_cols=num_cols)#, highest_index=highest_index)
 
     return centroids
