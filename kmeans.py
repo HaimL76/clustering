@@ -53,12 +53,8 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
         if associated_centroid is None or associated_centroid != cent:
             changed += 1
 
-            ##print(f'changed: {changed}')
-
         sample.centroid = cent
         cent.list_samples.append(sample)
-
-        ##print(cent.index)
 
     print(f'changed = {changed}')
 
@@ -70,6 +66,10 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:
                 for new_cent in new_centroids:
+                    new_cent.calculate_center()
+
+                    new_cent.list_sample = []
+
                     new_cent.index = len(centroids)
 
                     centroids.append(new_cent)

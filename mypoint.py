@@ -84,11 +84,11 @@ class Centroid(object):
             len_in = len(centroid_in.list_samples)
             len_out = len(centroid_out.list_samples)
 
-            print(f'len in = {len_in}, len out = {len_out}')
+            ##print(f'len in = {len_in}, len out = {len_out}')
 
-            quarter: float = 50## len(result_samples) / 20
+            critical_number: float = 100## len(result_samples) / 20
 
-            if len_in > quarter and len_out > quarter:
+            if len_in > critical_number and len_out > critical_number:
                 for sample in centroid_in.list_samples:
                     sample.centroid = centroid_in
 
