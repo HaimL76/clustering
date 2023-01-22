@@ -80,7 +80,7 @@ def cluster_image(full_path: str, k: int):
 
         cv2.putText(img=image, text=f'{centroid.index}',
                     org=(center_point[0], center_point[1]), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
-                    color=color, thickness=2)
+                    color=color, thickness=1)
 
         ##print(f'center point = {center_point}')
 
@@ -108,7 +108,7 @@ def cluster_image(full_path: str, k: int):
         if isinstance(centroid.convex_hull, list) and len(centroid.convex_hull):
             for curr_point in centroid.convex_hull:
                 if curr_point and prev_point:
-                    cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=3)
+                    cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=1)
 
                 prev_point = curr_point
 

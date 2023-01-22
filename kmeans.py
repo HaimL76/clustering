@@ -74,9 +74,12 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
 
                     centroids.append(new_cent)
 
+                    print(f'added {new_cent.index}')
+
                 centroids.remove(centroid)
 
-            print(f'len centroids = {len(centroids)}')
+                print(f'removed {centroid.index}')
+                print(f'len centroids = {len(centroids)}')
 
             centroid.list_samples = []
 

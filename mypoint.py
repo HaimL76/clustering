@@ -1,4 +1,5 @@
 import numpy
+from matplotlib import pyplot as plt
 
 from convex import ConvexHull, Point
 
@@ -27,6 +28,7 @@ def calculate_std(center: MyPoint, list_samples: list):
     s /= len(list_samples)
 
     return result_samples, numpy.sqrt(s)
+
 
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
@@ -60,35 +62,57 @@ class Centroid(object):
         new_centroids: list = []
 
         if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
-            std_tuple = calculate_std(self.center,  self.list_samples)
+            std_tuple = calculate_std(self.center, self.list_samples)
 
             result_samples: Sample = std_tuple[0]
             std: float = std_tuple[1]
+
+            if std < 0.001:
+                return new_centroids
 
             var: float = std * std
 
             centroid_in: Centroid = Centroid(0, 0, 0)
             centroid_out: Centroid = Centroid(0, 0, 0)
 
+            stds: dict = {}
+
             for tuple_sample in result_samples:
                 sample = tuple_sample[0]
                 d = tuple_sample[1]
 
-                num_var: float = numpy.abs(d / var)
+                num_var: float = float(d) / float(var)
+
+                key = int(num_var)
+
+                if key not in stds:
+                    stds[key] = 0
+
+                stds[key] += 1
 
                 if num_var < 3:
                     centroid_in.list_samples.append(sample)
                 else:
                     centroid_out.list_samples.append(sample)
 
+            ##print(f'stds = {stds}')
+
+            ##plt.bar(list(stds.keys()), stds.values(), color='g')
+            ##plt.show()
+
             len_in = len(centroid_in.list_samples)
             len_out = len(centroid_out.list_samples)
 
             ##print(f'len in = {len_in}, len out = {len_out}')
 
-            critical_number: float = 100## len(result_samples) / 20
+            critical_number: float = 38##35# 100  ## len(result_samples) / 20
+
+            part: float = float(len_out) / float(len_in)
+
+            ##print(f'part = {part}, len in = {len_in}, len out = {len_out}')
 
             if len_in > critical_number and len_out > critical_number:
+            ##if part > 0.05:
                 for sample in centroid_in.list_samples:
                     sample.centroid = centroid_in
 
@@ -100,7 +124,6 @@ class Centroid(object):
                 new_centroids.append(centroid_out)
 
         return new_centroids
-
 
 
 class Sample(MyPoint):
