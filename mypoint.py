@@ -1,3 +1,5 @@
+import numpy
+
 from convex import ConvexHull, Point
 
 
@@ -6,6 +8,25 @@ class MyPoint(object):
         self.x: float = c_x
         self.y: float = c_y
 
+
+def calculate_std(center: MyPoint, list_samples: list):
+    result_samples: list = []
+
+    s: float = 0
+
+    for sample in list_samples:
+        dx = sample.x - center.x
+        dy = sample.y - center.y
+
+        d = dx * dx + dy * dy
+
+        result_samples.append((sample, d))
+
+        s += d
+
+    s /= len(list_samples)
+
+    return result_samples, numpy.sqrt(s)
 
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
@@ -35,14 +56,46 @@ class Centroid(object):
 
         self.convex_hull = ch.compute_hull(self.list_samples)
 
-        ##if isinstance(list_points, list) and len(list_points) > 0:
-            ##if isinstance(list_points, list) and len(list_points) > 0:
-                ##self.convex_hull =
+    def calculate_std(self):
+        new_centroids: list = []
 
-                ##for point in list_points:
-                    ##if point:
-                        ##self.convex_hull = MyPoint(point.)
-                            ##list(map(lambda p: MyPoint(p.x, p.y), list_points))
+        if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+            std_tuple = calculate_std(self.center,  self.list_samples)
+
+            result_samples: Sample = std_tuple[0]
+            std: float = std_tuple[1]
+
+            var: float = std * std
+
+            centroid_in: Centroid = Centroid(0, 0, 0)
+            centroid_out: Centroid = Centroid(0, 0, 0)
+
+            for tuple_sample in result_samples:
+                sample = tuple_sample[0]
+                d = tuple_sample[1]
+
+                d_from_var = numpy.abs(d - var)
+
+                if d_from_var < 10:
+                    centroid_in.list_samples.append(sample)
+                else:
+                    centroid_out.list_samples.append(sample)
+
+            quarter: int = len(result_samples) / 4
+
+            if len(centroid_in.list_samples) > quarter and len(centroid_out.list_samples) > quarter:
+                for sample in centroid_in.list_samples:
+                    sample.centroid = centroid_in
+
+                new_centroids.append(centroid_in)
+
+                for sample in centroid_out.list_samples:
+                    sample.centroid = centroid_out
+
+                new_centroids.append(centroid_out)
+
+        return new_centroids
+
 
 
 class Sample(MyPoint):

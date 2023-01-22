@@ -5,7 +5,7 @@ from kmeans import get_centroids
 from mypoint import Sample
 
 
-def cluster_image(full_path: str):
+def cluster_image(full_path: str, k: int):
     print("hello, world!")
     # Reading an image in default mode
     image = cv2.imread(full_path)
@@ -41,8 +41,6 @@ def cluster_image(full_path: str):
         for j in range(num_cols):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
-
-    k = 155
 
     centroids = get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
