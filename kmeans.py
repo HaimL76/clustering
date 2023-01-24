@@ -1,4 +1,14 @@
+from threading import Thread
+
 from mypoint import Centroid, Sample
+
+
+def centroid_calculate_center(centroid: Centroid):
+    centroid.calculate_center()
+
+    ##print(f'index = {centroid.index}')
+
+    return centroid.index
 
 
 def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: int = 0, num_cols: int = 0):##, highest_index: int = 0):
@@ -59,9 +69,20 @@ def get_centroids(list_samples: list, k: int, centroids: list = None, num_rows: 
     print(f'changed = {changed}')
 
     if changed > 0:
+        ts: list = []
+
         for centroid in centroids:
             centroid.calculate_center()
 
+        if False:
+            for centroid in centroids:
+                t = Thread(target=centroid_calculate_center, args=[centroid])
+                t.start()
+
+            for t in ts:
+                t.join()
+
+        for centroid in centroids:
             new_centroids: list = centroid.calculate_std()
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:

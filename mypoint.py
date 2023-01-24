@@ -105,7 +105,7 @@ class Centroid(object):
 
             ##print(f'len in = {len_in}, len out = {len_out}')
 
-            critical_number: float = 38##35# 100  ## len(result_samples) / 20
+            critical_number: float = 38## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
 
             part: float = float(len_out) / float(len_in)
 

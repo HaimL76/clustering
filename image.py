@@ -6,7 +6,9 @@ from mypoint import Sample
 
 
 def cluster_image(full_path: str, k: int):
-    print("hello, world!")
+    import multiprocessing as mp
+    print("Number of processors: ", mp.cpu_count())
+
     # Reading an image in default mode
     image = cv2.imread(full_path)
 
