@@ -34,8 +34,27 @@ class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
         self.list_samples: list = []
-        self.index = i
+        self.index: int = i
         self.convex_hull = []
+        self.L: float = 0
+        self.T: float = 0
+        self.R: float = 0
+        self.B: float = 0
+
+    def append_sample(self, point: MyPoint):
+        self.list_samples.append(point)
+
+        if point.x < self.L:
+            self.L = point.x
+
+        if point.y < self.T:
+            self.T = point.y
+
+        if point.x > self.R:
+            self.R = point.x
+
+        if point.y > self.B:
+            self.B = point.y
 
     def calculate_center(self):
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
@@ -91,9 +110,9 @@ class Centroid(object):
                 stds[key] += 1
 
                 if num_var < 3:
-                    centroid_in.list_samples.append(sample)
+                    centroid_in.append_sample(sample)
                 else:
-                    centroid_out.list_samples.append(sample)
+                    centroid_out.append_sample(sample)
 
             ##print(f'stds = {stds}')
 
