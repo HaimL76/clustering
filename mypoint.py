@@ -131,11 +131,14 @@ class Centroid(object):
             ##print(f'part = {part}, len in = {len_in}, len out = {len_out}')
 
             if len_in > critical_number and len_out > critical_number:
+                centroid_in.center = self.center
             ##if part > 0.05:
                 for sample in centroid_in.list_samples:
                     sample.centroid = centroid_in
 
                 new_centroids.append(centroid_in)
+
+                centroid_out.calculate_center()
 
                 for sample in centroid_out.list_samples:
                     sample.centroid = centroid_out

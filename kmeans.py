@@ -46,8 +46,6 @@ class KMeans:
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:
                 for new_cent in new_centroids:
-                    new_cent.calculate_center()
-
                     new_cent.list_sample = []
 
                     new_cent.index = self.set_highest_index()
