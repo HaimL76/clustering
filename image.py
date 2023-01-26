@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 
-from kmeans import get_centroids
+from kmeans import KMeans
 from mypoint import Sample
 
 
 def cluster_image(full_path: str, k: int):
+    print(full_path)
     import multiprocessing as mp
     print("Number of processors: ", mp.cpu_count())
 
@@ -26,9 +27,6 @@ def cluster_image(full_path: str, k: int):
 
     ret, dst = cv2.threshold(corners, 0.01 * corners.max(), 255, 0)
 
-    ##print(type(ret))
-    ##print(type(dst))
-
     num_rows = corners.shape[0]
     num_cols = corners.shape[1]
 
@@ -44,7 +42,9 @@ def cluster_image(full_path: str, k: int):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
 
-    centroids = get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+    kmeans: KMeans = KMeans()
+
+    centroids = kmeans.get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
     print(len(centroids))
 
