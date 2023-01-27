@@ -61,11 +61,35 @@ class KMeans:
 
             centroid.list_samples = []
 
-    def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
-        if not isinstance(list_samples, list) or len(list_samples) < 1:
-            ##raise ValueError("list samples")
-            return None
+    def associate_samples_to_centroids(self, list_samples: list):
+        associations_changed: int = 0
 
+        for sample in list_samples:
+            min0 = None
+            cent = None
+
+            if not sample.disabled:
+                for centroid in self.list_centroids:
+                    dx = sample.x - centroid.center.x
+                    dy = sample.y - centroid.center.y
+
+                    d = dx * dx + dy * dy
+
+                    if min0 is None or d < min0:
+                        min0 = d
+                        cent = centroid
+
+                associated_centroid = sample.centroid
+
+                if associated_centroid is None or associated_centroid != cent:
+                    associations_changed += 1
+
+                sample.centroid = cent
+                cent.append_sample(sample)
+
+        return associations_changed
+
+    def initialize_centroids(self, num_rows: int, num_cols: int, list_samples: list, k: int):
         if self.list_centroids is None or len(self.list_centroids) < 1:
             quant_rows = 0
             quant_cols = 0
@@ -88,41 +112,24 @@ class KMeans:
 
                 self.list_centroids.append(Centroid(self.set_highest_index(), center.x, center.y))
 
-        changed: int = 0
+    def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
+        if not isinstance(list_samples, list) or len(list_samples) < 1:
+            ##raise ValueError("list samples")
+            return None
 
-        for sample in list_samples:
-            min0 = None
-            cent = None
+        self.initialize_centroids(num_rows=num_rows, num_cols=num_cols, list_samples=list_samples, k=k)
 
-            if not sample.disabled:
-                for centroid in self.list_centroids:
-                    dx = sample.x - centroid.center.x
-                    dy = sample.y - centroid.center.y
+        associations_changed: int = self.associate_samples_to_centroids(list_samples=list_samples)
 
-                    d = dx * dx + dy * dy
+        print(f'associations_changed = {associations_changed}')
 
-                    if min0 is None or d < min0:
-                        min0 = d
-                        cent = centroid
-
-                associated_centroid = sample.centroid
-
-                if associated_centroid is None or associated_centroid != cent:
-                    changed += 1
-
-                sample.centroid = cent
-                cent.append_sample(sample)
-
-        print(f'changed = {changed}')
-
-        if changed > 0:
+        if associations_changed > 0:
             self.recalculate_centers()
-
-            self.calculate_centroids_by_standard_deviations()
-
             self.clear_centroids()
 
             self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
+
+        #self.calculate_centroids_by_standard_deviations()
 
     def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
         self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
