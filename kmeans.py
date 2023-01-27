@@ -40,9 +40,9 @@ class KMeans:
 
         return index
 
-    def calculate_standard_deviations(self):
+    def calculate_centroids_by_standard_deviations(self):
         for centroid in self.list_centroids:
-            new_centroids: list = centroid.calculate_std()
+            new_centroids: list = centroid.get_new_centroids_by_standard_deviation()
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:
                 for new_cent in new_centroids:
@@ -94,30 +94,31 @@ class KMeans:
             min0 = None
             cent = None
 
-            for centroid in self.list_centroids:
-                dx = sample.x - centroid.center.x
-                dy = sample.y - centroid.center.y
+            if not sample.disabled:
+                for centroid in self.list_centroids:
+                    dx = sample.x - centroid.center.x
+                    dy = sample.y - centroid.center.y
 
-                d = dx * dx + dy * dy
+                    d = dx * dx + dy * dy
 
-                if min0 is None or d < min0:
-                    min0 = d
-                    cent = centroid
+                    if min0 is None or d < min0:
+                        min0 = d
+                        cent = centroid
 
-            associated_centroid = sample.centroid
+                associated_centroid = sample.centroid
 
-            if associated_centroid is None or associated_centroid != cent:
-                changed += 1
+                if associated_centroid is None or associated_centroid != cent:
+                    changed += 1
 
-            sample.centroid = cent
-            cent.append_sample(sample)
+                sample.centroid = cent
+                cent.append_sample(sample)
 
         print(f'changed = {changed}')
 
         if changed > 0:
             self.recalculate_centers()
 
-            self.calculate_standard_deviations()
+            self.calculate_centroids_by_standard_deviations()
 
             self.clear_centroids()
 

@@ -10,7 +10,7 @@ class MyPoint(object):
         self.y: float = c_y
 
 
-def calculate_std(center: MyPoint, list_samples: list):
+def calculate_standard_deviation(center: MyPoint, list_samples: list):
     result_samples: list = []
 
     s: float = 0
@@ -77,11 +77,11 @@ class Centroid(object):
 
         self.convex_hull = ch.compute_hull(self.list_samples)
 
-    def calculate_std(self):
+    def get_new_centroids_by_standard_deviation(self):
         new_centroids: list = []
 
         if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
-            std_tuple = calculate_std(self.center, self.list_samples)
+            std_tuple = calculate_standard_deviation(self.center, self.list_samples)
 
             result_samples: Sample = std_tuple[0]
             std: float = std_tuple[1]
@@ -124,26 +124,30 @@ class Centroid(object):
 
             ##print(f'len in = {len_in}, len out = {len_out}')
 
-            critical_number: float = 38## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
+            critical_number: float = 38  ## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
 
             part: float = float(len_out) / float(len_in)
 
             ##print(f'part = {part}, len in = {len_in}, len out = {len_out}')
 
-            if len_in > critical_number and len_out > critical_number:
+            if True:  # len_in > critical_number and len_out > critical_number:
                 centroid_in.center = self.center
-            ##if part > 0.05:
+                ##if part > 0.05:
                 for sample in centroid_in.list_samples:
                     sample.centroid = centroid_in
 
                 new_centroids.append(centroid_in)
 
+            if len_out > critical_number:
                 centroid_out.calculate_center()
 
                 for sample in centroid_out.list_samples:
                     sample.centroid = centroid_out
 
                 new_centroids.append(centroid_out)
+            else:
+                for sample in centroid_out.list_samples:
+                    sample.disabled = True
 
         return new_centroids
 
@@ -153,3 +157,4 @@ class Sample(MyPoint):
         super().__init__(c_x, c_y)
 
         self.centroid = cent
+        self.disabled = False
