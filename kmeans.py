@@ -41,25 +41,23 @@ class KMeans:
         return index
 
     def calculate_centroids_by_standard_deviations(self):
+        number_centroids_changed: int = 0
+
         for centroid in self.list_centroids:
             new_centroids: list = centroid.get_new_centroids_by_standard_deviation()
 
             if isinstance(new_centroids, list) and len(new_centroids) > 0:
                 for new_cent in new_centroids:
-                    new_cent.list_sample = []
-
                     new_cent.index = self.set_highest_index()
 
                     self.list_centroids.append(new_cent)
 
-                    print(f'added {new_cent.index}')
+                    number_centroids_changed += 1
 
                 self.list_centroids.remove(centroid)
+                centroid.list_samples = []
 
-                print(f'removed {centroid.index}')
-                print(f'len centroids = {len(self.list_centroids)}')
-
-            centroid.list_samples = []
+        return number_centroids_changed
 
     def associate_samples_to_centroids(self, list_samples: list):
         associations_changed: int = 0
@@ -113,23 +111,33 @@ class KMeans:
                 self.list_centroids.append(Centroid(self.set_highest_index(), center.x, center.y))
 
     def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
+        print("enter calculate centroids")
+
         if not isinstance(list_samples, list) or len(list_samples) < 1:
-            ##raise ValueError("list samples")
-            return None
+            return
 
         self.initialize_centroids(num_rows=num_rows, num_cols=num_cols, list_samples=list_samples, k=k)
 
         associations_changed: int = self.associate_samples_to_centroids(list_samples=list_samples)
 
         print(f'associations_changed = {associations_changed}')
+        
+        number_centroids_changed: int = self.calculate_centroids_by_standard_deviations()
+
+        print(f'number_centroids_changed = {number_centroids_changed}')
+
+        if associations_changed < 1 and number_centroids_changed < 1:
+            return
+
+        ##if number_centroids_changed > 0:
+          ##  self.recalculate_centers()
+           ## self.clear_centroids()
+            ##self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
 
         if associations_changed > 0:
             self.recalculate_centers()
             self.clear_centroids()
-
             self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
-
-        #self.calculate_centroids_by_standard_deviations()
 
     def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
         self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)

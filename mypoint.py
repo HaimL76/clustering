@@ -114,21 +114,15 @@ class Centroid(object):
                 else:
                     centroid_out.append_sample(sample)
 
-            ##print(f'stds = {stds}')
-
-            ##plt.bar(list(stds.keys()), stds.values(), color='g')
-            ##plt.show()
-
             len_in = len(centroid_in.list_samples)
             len_out = len(centroid_out.list_samples)
 
-            ##print(f'len in = {len_in}, len out = {len_out}')
+            if len_out < 1:
+                return new_centroids
 
             critical_number: float = 38  ## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
 
             part: float = float(len_out) / float(len_in)
-
-            ##print(f'part = {part}, len in = {len_in}, len out = {len_out}')
 
             if True:  # len_in > critical_number and len_out > critical_number:
                 centroid_in.center = self.center
