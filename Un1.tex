@@ -1,0 +1,177 @@
+\documentclass[12pt]{article}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{tikz-cd}
+\usepackage{xcolor}
+
+
+\begin{document}
+
+
+\textbf{Exercise}
+Let \( \{ E_{i,j} \}_{i<j} \) be the set of all elementary matrices, of this form. \newline
+Prove that \( E_{i,j}^{-1}=(b_{l,k}) \) is \( E_{i,j}=(a_{l,k}) \), when we substitute \( a_{i,j}=1 \) with \( b_{i,j}=-1 \) \newline
+
+\textbf{Proof}
+We can see that directly from the fact that if we multiply \( E_{i,j}^{-1} \) by \( E_{i,j} \) from the left 
+then \( E_{i,j} \) is operating on \( E_{i,j}^{-1} \) by adding row \( j \) to row \(i \) \newline
+So, in the product matrix, \( (c_{l,k}) \), in order to have \( 1 \) \newline 
+on the main diagonal, we need them to exist on the main diagonal
+of \( E_{i,j}^{-1} \), to begin with. Now, in order to have \( c_{i,j}=0 \), we need to have the addition of \( j \) to \( i \)
+giving \( c_{i,j}=a_{i,j}+b_{i,j}=0 \Rightarrow b_{i,j}=-a_{i,j}=-1 \) \newline
+
+\textbf{Exercise} Prove that if \( (a_{ij})=E_{i,j}, i<j \) is an elementary matrix, \newline
+then \( \forall m \in \mathbb(N), E_{i,j}^m \) is \(E_{i,j} \), but with \( a_{ij}=m \) \newline
+$$
+	E_{i,j} = \begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & 1 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix}
+	\quad
+	$$
+
+$$ E_{i,j}^2=E_{i,j} \cdot E_{i,j} $$
+
+Since \( E_{i,j} \) is en elemntary matrix, then it operates on the right matrix
+as an addition of row \( j \) to row \( i \) \newline
+
+So, $$
+	E_{i,j}^2 = \begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & 2 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix}
+	\quad
+	$$
+
+We assume this is true for all \( E_{i,j}^m \), now we prove for \( E_{i,j}^{m+1} \)
+$$
+	E_{i,j}^{m+1} = E_{i,j} \cdot E_{i,j}^{m}=\begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & 1 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & 1 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix}^{m}
+	\quad
+	$$
+(by the assumption)
+$$
+	=\begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & 1 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & m & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & 0 & \dots & 0 & 0 \\
+	0 & 1 & \dots & 0 & 0 \\
+	0 & 0 & \ddots & m+1 & 0 \\
+	0 & 0 & \dots & 1 & 0 \\
+	0 & 0 & \dots & 0 & 1 \\
+	\end{pmatrix}
+	\quad
+	$$
+
+\newpage
+\underline{\textbf{Commutators of elementary matrices}} \newline
+
+Let \( \{ E_{i,j} \}_{i<j} \) be the set of all elementary matrices of this form. \newline
+
+\textbf{Exercise}
+\( (a_{l,m})=E_{i,j}^{-1} \) is the matrix with \( 1 \) on the main diagonal, and \( -1 \) in \( a_{i,j} \) \newline
+\textbf{Proof}
+We can see that directly from the fact that in order to have \newline \( (c_{l,m})=(a_{l,m}) \cdot (b_{l,m})=E_{i,j} \cdot E_{i,j}^{-1}=I \), \newline
+we need to have \( c_{i,j}=0 \), which means that adding row \( j \) to row \( i \), in \( E_{i,j}^{-1} \) (by the left multiplication of \( E_{i,j} \)) \newline
+must give \( a_{i,j}+b_{i,j}=c_{i,j}=0 \Rightarrow b_{i,j}=-a_{i,j}=-1 \) \newline
+
+\textbf{Exercise}
+\( [E_{i,j},E_{j,k}]=E_{i,k} \) \newline
+\textbf{Proof}
+\( E_{i,j} \) is operating from left on \( E_{j,k} \) by addition of row \( j \) to row \( i \),
+so, the product matrix, \( (a_{l,m}=E_{i,j},\cdot E_{j,k} \) has \( 1 \) on the main diagonal and in \( a_{j,k},a_{i,j},a_{i,k} \) \newline
+\( E_{i,j}^{-1} \) is operating from left on \( E_{j,k}^{-1} \) byt subtraction of row \( j \) from row \( i \),
+so, the product matrix, \( (b_{l,m}=E_{i,j}^{-1},\cdot E_{j,k}^{-1} \) has \( 1 \) on the main diagonal and in \( b_{i,k} \), \newline
+and \( -1 \) in \( b_{j,k},b_{i,j} \) \newline
+Multiplying \( (a_{l,m} \cdot (b_{l,m}) \) yields a product matrix, \( (c_{l,m} \) with \( 1 \) on the main diagonal, and, \newline
+since \( a_{i,i}=a_{i,j}=a_{i,k}=1 \), with all other cells in row \( j \) being \(0 \),
+and since  \( b_{i,k}=b_{k,k}=1 \), and \( b_{j,k}=-1 \), multiplying row \( (a_{l,m})_{i} \) by column \( (b_{l,m})_{k} \) yields
+the value \( c_{i,k}=b_{i,k}+b_{j,k}+b_{k,k}=1-1+1=1 \) \newline
+We can see that multiplying \( (a_{l,m})_{i} \cdot (b_{l,m})_{j} \)
+yields \( c_{i,j}=a_{i,i} \cdot b_{i,j}+a_{i,j} \cdot b_{j,j}=1 \cdot -1+1 \cdot 1=1-1=0 \) \newline
+And, we can see that multiplying \( (a_{l,m})_{j} \cdot (b_{l,m})_{k} \)
+yields \( c_{i,j}=a_{j,j} \cdot b_{j,k}+a_{j,k} \cdot b_{k,k}=1 \cdot -1+1 \cdot 1=1-1=0 \)
+
+For example, \( n=4 \), \newline
+$$ E_{1,2} \cdot E_{2,3}=\begin{pmatrix} 
+	1 & 1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & 1 & 1 & 0 \\
+	0 & 1 & 1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} $$
+$$  E_{1,2}^{-1} \cdot E_{2,3}^{-1}=\begin{pmatrix} 
+	1 & -1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & 0 & 0 \\
+	0 & 1 & -1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & -1 & 1 & 0 \\
+	0 & 1 & -1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \newline
+$$
+$$  [E_{1,2} \cdot E_{2,3}]=E_{1,2} \cdot E_{2,3} \cdot E_{1,2}^{-1} \cdot E_{2,3}^{-1}=$$
+$$=\begin{pmatrix} 
+	1 & 1 & 1 & 0 \\
+	0 & 1 & 1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & -1 & 1 & 0 \\
+	0 & 1 & -1 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & 0 & 1 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+\end{pmatrix}=E_{1,3}$$
+
+\end{document}
