@@ -20,7 +20,7 @@ class Centroid(object):
         self.T: float = 0
         self.R: float = 0
         self.B: float = 0
-        self.max_distance: float = 0
+        self.intercluster_squared_distance: float = 0
 
     def calculate_standard_deviation(self):
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
@@ -80,19 +80,17 @@ class Centroid(object):
             self.center = MyPoint(s_x / len0, s_y / len0)
 
     def calculate_convex_hull(self, calculate_center: bool = False, calculate_diameter: bool = True):
-        ##print(f'{self.index}, {len(self.list_samples)}')
-        ch = ConvexHull(calculate_diameter=calculate_center)
-
-        ##list_points: list = ch.compute_hull(self.list_samples)
+        ch = ConvexHull(calculate_diameter=calculate_diameter)
 
         tup: tuple = ch.compute_hull(self.list_samples)
 
         if isinstance(tup, tuple) and len(tup) > 0:
             self.convex_hull = tup[0]
+            self.intercluster_squared_distance = tup[1]
+
+        print(f'cluster index = {self.index}, cluster intercluster squared distance = {self.intercluster_squared_distance}')
 
         if isinstance(self.convex_hull, list) and len(self.convex_hull) > 0:
-            #print(f'convex hull = {len(self.convex_hull)}')
-
             s_x: float = 0
             s_y: float = 0
 
