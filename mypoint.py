@@ -20,6 +20,7 @@ class Centroid(object):
         self.T: float = 0
         self.R: float = 0
         self.B: float = 0
+        self.max_distance: float = 0
 
     def calculate_standard_deviation(self):
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
@@ -39,6 +40,18 @@ class Centroid(object):
             return numpy.sqrt(s)
 
     def append_sample(self, point: MyPoint):
+        if False and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+            for sample in self.list_samples:
+                dx: float = sample.x - point.x
+                dy: float = sample.y - point.y
+
+                d = dx * dx + dy * dy
+
+                #print(f'd = {d}')
+
+                if d > self.max_distance:
+                    self.max_distance = d
+
         self.list_samples.append(point)
 
         if point.x < self.L:
@@ -66,13 +79,26 @@ class Centroid(object):
 
             self.center = MyPoint(s_x / len0, s_y / len0)
 
-    def calculate_convex_hull(self):
+    def calculate_convex_hull(self, calculate_center: bool = False):
         ##print(f'{self.index}, {len(self.list_samples)}')
         ch = ConvexHull()
 
         ##list_points: list = ch.compute_hull(self.list_samples)
 
         self.convex_hull = ch.compute_hull(self.list_samples)
+
+        if isinstance(self.convex_hull, list) and len(self.convex_hull) > 0:
+            s_x: float = 0
+            s_y: float = 0
+
+            len0: int = len(self.convex_hull)
+
+            if calculate_center:
+                for point in self.convex_hull:
+                    s_x += point.x
+                    s_y += point.y
+
+                self.center = MyPoint(s_x / len0, s_y / len0)
 
     def get_new_centroids_by_standard_deviation(self):
         new_centroids: list = []
