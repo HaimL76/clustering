@@ -10,26 +10,6 @@ class MyPoint(object):
         self.y: float = c_y
 
 
-def calculate_standard_deviation(center: MyPoint, list_samples: list):
-    result_samples: list = []
-
-    s: float = 0
-
-    for sample in list_samples:
-        dx = sample.x - center.x
-        dy = sample.y - center.y
-
-        d = dx * dx + dy * dy
-
-        result_samples.append((sample, d))
-
-        s += d
-
-    s /= len(list_samples)
-
-    return result_samples, numpy.sqrt(s)
-
-
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
@@ -40,6 +20,23 @@ class Centroid(object):
         self.T: float = 0
         self.R: float = 0
         self.B: float = 0
+
+    def calculate_standard_deviation(self):
+        if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+            s: float = 0
+
+            for sample in self.list_samples:
+                dx = sample.x - self.center.x
+                dy = sample.y - self.center.y
+
+                d = dx * dx + dy * dy
+                sample.squared_distance_from_centroid = d
+
+                s += d
+
+            s /= len(self.list_samples)
+
+            return numpy.sqrt(s)
 
     def append_sample(self, point: MyPoint):
         self.list_samples.append(point)
@@ -81,10 +78,7 @@ class Centroid(object):
         new_centroids: list = []
 
         if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
-            std_tuple = calculate_standard_deviation(self.center, self.list_samples)
-
-            result_samples: Sample = std_tuple[0]
-            std: float = std_tuple[1]
+            std: float = self.calculate_standard_deviation()
 
             if std < 0.001:
                 return new_centroids
@@ -96,9 +90,8 @@ class Centroid(object):
 
             stds: dict = {}
 
-            for tuple_sample in result_samples:
-                sample = tuple_sample[0]
-                d = tuple_sample[1]
+            for sample in self.list_samples:
+                d = sample.squared_distance_from_centroid
 
                 num_var: float = float(d) / float(var)
 
@@ -151,4 +144,5 @@ class Sample(MyPoint):
         super().__init__(c_x, c_y)
 
         self.centroid = cent
+        self.squared_distance_from_centroid = None
         self.disabled = False

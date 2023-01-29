@@ -83,6 +83,7 @@ class KMeans:
                     associations_changed += 1
 
                 sample.centroid = cent
+                sample.squared_distance_from_centroid = min0
                 cent.append_sample(sample)
 
         return associations_changed
