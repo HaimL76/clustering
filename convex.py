@@ -24,8 +24,8 @@ class ConvexHull(object):
     _points = []
     _hull_points = []
 
-    def __init__(self):
-        pass
+    def __init__(self, calculate_diameter: bool = True):
+        self.calculate_convex_hull_diameter: bool = calculate_diameter
 
     def add(self, point):
         self._points.append(point)
@@ -37,6 +37,8 @@ class ConvexHull(object):
         '''
         if not isinstance(points, list) or len(points) < 1:
             return None
+
+        max_squared_distance: float = 0
 
         hull_points: list = []
 
@@ -75,11 +77,21 @@ class ConvexHull(object):
                     if direction > 0:
                         far_point = p2
 
+            if self.calculate_convex_hull_diameter and len(hull_points) > 0:
+                for point in hull_points:
+                    dx: float = point.x - far_point.x
+                    dy: float = point.y - far_point.y
+
+                    d: float = dx * dx + dy * dy
+
+                    if d > max_squared_distance:
+                        max_squared_distance = d
+
             hull_points.append(far_point)
 
             point = far_point
 
-        return hull_points
+        return hull_points, max_squared_distance
 
     def get_hull_points(self):
         if self._points and not self._hull_points:

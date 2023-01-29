@@ -79,15 +79,20 @@ class Centroid(object):
 
             self.center = MyPoint(s_x / len0, s_y / len0)
 
-    def calculate_convex_hull(self, calculate_center: bool = False):
+    def calculate_convex_hull(self, calculate_center: bool = False, calculate_diameter: bool = True):
         ##print(f'{self.index}, {len(self.list_samples)}')
-        ch = ConvexHull()
+        ch = ConvexHull(calculate_diameter=calculate_center)
 
         ##list_points: list = ch.compute_hull(self.list_samples)
 
-        self.convex_hull = ch.compute_hull(self.list_samples)
+        tup: tuple = ch.compute_hull(self.list_samples)
+
+        if isinstance(tup, tuple) and len(tup) > 0:
+            self.convex_hull = tup[0]
 
         if isinstance(self.convex_hull, list) and len(self.convex_hull) > 0:
+            #print(f'convex hull = {len(self.convex_hull)}')
+
             s_x: float = 0
             s_y: float = 0
 

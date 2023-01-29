@@ -22,7 +22,7 @@ class KMeans:
         ts: list = []
 
         for centroid in self.list_centroids:
-            ##centroid.calculate_convex_hull(calculate_center=True)
+            centroid.calculate_convex_hull(calculate_diameter=True)
             centroid.calculate_center()
 
         if False:
