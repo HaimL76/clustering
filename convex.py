@@ -31,6 +31,7 @@ class ConvexHull(object):
         self._points.append(point)
 
     def compute_hull(self, points: list):
+        diagonal_points: tuple = None
         '''
         Computes the points that make up the convex hull.
         :return:
@@ -86,12 +87,13 @@ class ConvexHull(object):
 
                     if d > max_squared_distance:
                         max_squared_distance = d
+                        diagonal_points = (point, far_point)
 
             hull_points.append(far_point)
 
             point = far_point
 
-        return hull_points, max_squared_distance
+        return hull_points, diagonal_points, max_squared_distance
 
     def get_hull_points(self):
         if self._points and not self._hull_points:

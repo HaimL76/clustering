@@ -69,6 +69,7 @@ def cluster_image(full_path: str, k: int):
 
         # Green color in BGR
         color = (r, g, b)
+        color0 = (b, g, r)
 
         # Line thickness of 9 px
         thickness = 3
@@ -107,12 +108,19 @@ def cluster_image(full_path: str, k: int):
                             org=(x, y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1,
                             color=color, thickness=1)
 
-        if isinstance(centroid.convex_hull, list) and len(centroid.convex_hull):
+        if isinstance(centroid.convex_hull, list) and len(centroid.convex_hull) > 2:
             for curr_point in centroid.convex_hull:
                 if curr_point and prev_point:
                     cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=1)
 
                 prev_point = curr_point
+
+        if isinstance(centroid.diagonal_points, tuple) and len(centroid.diagonal_points) == 2:
+            first_point: MyPoint = centroid.diagonal_points[0]
+            second_point: MyPoint = centroid.diagonal_points[1]
+
+            if curr_point and prev_point:
+                cv2.line(image, (first_point.x, first_point.y), (second_point.x, second_point.y), color=color0, thickness=1)
 
     ##print(f'list corners = {list_corners}')
 

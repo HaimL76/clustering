@@ -20,7 +20,8 @@ class Centroid(object):
         self.T: float = 0
         self.R: float = 0
         self.B: float = 0
-        self.intercluster_squared_distance: float = 0
+        self.intracluster_squared_distance: float = 0
+        self.diagonal_points: tuple = None
 
     def calculate_standard_deviation(self):
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
@@ -86,9 +87,10 @@ class Centroid(object):
 
         if isinstance(tup, tuple) and len(tup) > 0:
             self.convex_hull = tup[0]
-            self.intercluster_squared_distance = tup[1]
+            self.diagonal_points = tup[1]
+            self.intracluster_squared_distance = tup[2]
 
-        print(f'cluster index = {self.index}, cluster intercluster squared distance = {self.intercluster_squared_distance}')
+        #print(f'cluster index = {self.index}, cluster intra squared distance = {self.intracluster_squared_distance}')
 
         if isinstance(self.convex_hull, list) and len(self.convex_hull) > 0:
             s_x: float = 0
