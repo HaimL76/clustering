@@ -13,6 +13,7 @@ class KMeans:
     def __init__(self):
         self.highest_index: int = 0
         self.list_centroids: list = []
+        self.dunn_indices: dict = {}
 
     def clear_centroids(self):
         for centroid in self.list_centroids:
@@ -147,7 +148,7 @@ class KMeans:
 
         print(f'associations_changed = {associations_changed}')
         
-        number_centroids_changed: int = self.calculate_centroids_by_standard_deviations()
+        number_centroids_changed: int = 0#self.calculate_centroids_by_standard_deviations()
 
         print(f'number_centroids_changed = {number_centroids_changed}')
 
@@ -161,15 +162,30 @@ class KMeans:
 
         if associations_changed > 0:
             self.recalculate_centers()
-
-            dunn_index: float = self.calculate_dunn_index()
-
-            print(f'dunn index = {dunn_index}')
-
             self.clear_centroids()
             self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
 
     def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
         self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+
+        return self.list_centroids
+
+    def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
+        self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+
+        dunn_index: float = self.calculate_dunn_index()
+
+        self.dunn_indices[k] = dunn_index
+
+        print(f'dunn index = {dunn_index}')
+
+        with open("""c:\html\dunn_indices.txt""", 'w') as f:
+            for dunn_index in self.dunn_indices:
+                f.write(str(dunn_index))
+
+        self.list_centroids = []
+        self.highest_index = 0
+
+        self.get_centroids(list_samples, k + 1, num_rows, num_cols)
 
         return self.list_centroids
