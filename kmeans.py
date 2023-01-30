@@ -40,6 +40,30 @@ class KMeans:
 
         return index
 
+    def calculate_dunn_index(self):
+        if isinstance(self.list_centroids, list) and len(self.list_centroids) > 0:
+            max_diameter: float = None
+
+            for centroid in self.list_centroids:
+                if max_diameter is None or centroid.intracluster_squared_distance > max_diameter:
+                    max_diameter = centroid.intracluster_squared_distance
+
+            min_squared_distance: float = None
+
+            for centroid in self.list_centroids:
+                for centroid0 in self.list_centroids:
+                    if centroid != centroid0:
+                        dx: float = centroid.center.x - centroid0.center.x
+                        dy: float = centroid.center.y - centroid0.center.y
+
+                        d: float = dx * dx + dy * dy
+
+                        if min_squared_distance is None or d < min_squared_distance:
+                            min_squared_distance = d
+
+        return min_squared_distance / max_diameter
+
+
     def calculate_centroids_by_standard_deviations(self):
         number_centroids_changed: int = 0
 
@@ -137,6 +161,11 @@ class KMeans:
 
         if associations_changed > 0:
             self.recalculate_centers()
+
+            dunn_index: float = self.calculate_dunn_index()
+
+            print(f'dunn index = {dunn_index}')
+
             self.clear_centroids()
             self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
 
