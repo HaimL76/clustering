@@ -12,6 +12,8 @@ class Link(object):
         if my_next:
             my_next.prev = self.next
 
+        return self.next
+
     def insert_prev(self, data0):
         my_prev = self.prev
 
@@ -30,6 +32,16 @@ class LinkedList(object):
         return LinkedListIterator(self)
 
     def insert_not_sorted(self, data0):
+        if self.head is None:
+            self.head = self.tail = Link(data0)
+        else:
+            self.tail = self.tail.insert_next(data0)
+
+        self.count += 1
+
+        return self.tail
+
+    def insert_sorted(self, data0):
         if self.head is None:
             self.head = self.tail = Link(data0)
         else:
