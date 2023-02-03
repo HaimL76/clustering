@@ -2,6 +2,8 @@ from collections import namedtuple
 import matplotlib.pyplot as plt  
 import random
 
+from linked_list import LinkedList
+
 Point = namedtuple('Point', 'x y')
 
 
@@ -30,13 +32,13 @@ class ConvexHull(object):
     def add(self, point):
         self._points.append(point)
 
-    def compute_hull(self, points: list):
+    def compute_hull(self, points: LinkedList):
         diagonal_points: tuple = None
         '''
         Computes the points that make up the convex hull.
         :return:
         '''
-        if not isinstance(points, list) or len(points) < 1:
+        if not isinstance(points, LinkedList) or points.get_count() < 1:
             return None
 
         max_squared_distance: float = 0
@@ -44,12 +46,17 @@ class ConvexHull(object):
         hull_points: list = []
 
         # get leftmost point
-        start = points[0]
-        min_x = start.x
-        for p in points[1:]:
-            if p.x < min_x:
-                min_x = p.x
+        start = None# points[0]
+        min_x = None# start.x
+
+        for p in points:#[1:]:
+            if start is None and min_x is None:
                 start = p
+                min_x = p.x
+            else:
+                if p.x < min_x:
+                    min_x = p.x
+                    start = p
 
         point = start
 

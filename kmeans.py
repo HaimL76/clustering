@@ -187,7 +187,7 @@ class KMeans:
           ##  for dunn_index in self.dunn_indices:
             ##    f.write(str(dunn_index))
 
-        self.list_centroids = LinkedList()
+        self.list_centroids = []
         self.highest_index = 0
 
         self.get_centroids(list_samples, k + 1, num_rows, num_cols)
