@@ -2,6 +2,7 @@ import numpy
 from matplotlib import pyplot as plt
 
 from convex import ConvexHull, Point
+from linked_list import LinkedList, LinkedListIterator
 
 
 class MyPoint(object):
@@ -13,7 +14,7 @@ class MyPoint(object):
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
-        self.list_samples: list = []
+        self.list_samples: LinkedList = LinkedList()# list = []
         self.index: int = i
         self.convex_hull = []
         self.L: float = 0
@@ -41,7 +42,7 @@ class Centroid(object):
             return numpy.sqrt(s)
 
     def append_sample(self, point: MyPoint):
-        if False and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+        if False and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
             for sample in self.list_samples:
                 dx: float = sample.x - point.x
                 dy: float = sample.y - point.y
@@ -53,7 +54,10 @@ class Centroid(object):
                 if d > self.max_distance:
                     self.max_distance = d
 
-        self.list_samples.append(point)
+        if isinstance(self.list_samples, list):
+            _ = 0
+
+        self.list_samples.insert_not_sorted(point)
 
         if point.x < self.L:
             self.L = point.x
@@ -68,7 +72,7 @@ class Centroid(object):
             self.B = point.y
 
     def calculate_center(self):
-        if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+        if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
             s_x = 0
             s_y = 0
 
@@ -76,9 +80,13 @@ class Centroid(object):
                 s_x += sample.x
                 s_y += sample.y
 
-            len0 = len(self.list_samples)
+            len0 = self.list_samples.get_count()
 
             self.center = MyPoint(s_x / len0, s_y / len0)
+
+    def calculate_squared_distances(self):
+        if isinstance(self.list_samples) and len(self.list_samples) > 0:
+            pass
 
     def calculate_convex_hull(self, calculate_center: bool = False, calculate_diameter: bool = True):
         ch = ConvexHull(calculate_diameter=calculate_diameter)
