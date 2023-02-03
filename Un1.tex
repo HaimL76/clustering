@@ -187,4 +187,57 @@ yields \( c_{i,j}=a_{i,i} \cdot b_{i,j}+a_{i,j} \cdot b_{j,j}=1 \cdot -1+1 \cdot
 And, we can see that multiplying \( (a_{n,m})_{l} \cdot (b_{n,m})_{k} \)
 yields \( c_{l,k}=a_{l,l} \cdot b_{l,k}+a_{l,k} \cdot b_{k,k}=1 \cdot -1+1 \cdot 1=1-1=0 \)
 
+
+For example, \( n=4 \), \newline
+$$ E_{1,2} \cdot E_{3,4}=\begin{pmatrix} 
+	1 & 1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & 1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} $$
+$$  E_{1,2}^{-1} \cdot E_{3,4}^{-1}=\begin{pmatrix} 
+	1 & -1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & -1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & -1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & -1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \newline
+$$
+$$  [E_{1,2} \cdot E_{3,4}]=E_{1,2} \cdot E_{3,4} \cdot E_{1,2}^{-1} \cdot E_{3,4}^{-1}=$$
+$$=\begin{pmatrix} 
+	1 & 1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix} \cdot \begin{pmatrix} 
+	1 & -1 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & -1 \\
+	0 & 0 & 0 & 1 \\
+	\end{pmatrix}=\begin{pmatrix} 
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+\end{pmatrix}=I$$
+
 \end{document}
