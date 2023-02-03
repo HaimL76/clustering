@@ -240,4 +240,16 @@ $$=\begin{pmatrix}
 	0 & 0 & 0 & 1 \\
 \end{pmatrix}=I$$
 
+\textbf{Conclusion} \newline
+\( [E_{i,j},[E_{j,k},E_{k,l}]]=[E_{i,j},E_{j,l}]=E_{i,l} \) \newline
+\( [E_{i,j},[E_{j,k},E_{m,l}]], m \neq k=[E_{i,l},I]=I \) \newline
+\( [E_{i,m},[E_{j,k},E_{k,l}]], m \neq j=[E_{i,m},E_{j,l}]=I \) \newline
+
+\( \Rightarrow [E_{i_{1},i_{2}},[E_{i_{3},i_{4}},...[E_{i_{n-2},i_{n-1}},E_{i_{n-1},i_{n}}]]=
+\begin{cases}
+    E_{i_{1},i_{n}},& i_{2k}=i_{2k+1},\forall 1 \leq k \leq \frac{n}{2}-1\\
+    I,              & \text{otherwise}
+\end{cases}
+\)
+
 \end{document}
