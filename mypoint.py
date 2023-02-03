@@ -25,7 +25,7 @@ class Centroid(object):
         self.diagonal_points: tuple = None
 
     def calculate_standard_deviation(self):
-        if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+        if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
             s: float = 0
 
             for sample in self.list_samples:
@@ -37,7 +37,7 @@ class Centroid(object):
 
                 s += d
 
-            s /= len(self.list_samples)
+            s /= self.list_samples.get_count()
 
             return numpy.sqrt(s)
 
@@ -116,7 +116,7 @@ class Centroid(object):
     def get_new_centroids_by_standard_deviation(self):
         new_centroids: list = []
 
-        if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
+        if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
             std: float = self.calculate_standard_deviation()
 
             if std < 0.001:
@@ -146,8 +146,8 @@ class Centroid(object):
                 else:
                     centroid_out.append_sample(sample)
 
-            len_in = len(centroid_in.list_samples)
-            len_out = len(centroid_out.list_samples)
+            len_in = centroid_in.list_samples.get_count()
+            len_out = centroid_out.list_samples.get_count()
 
             if len_out < 1:
                 return new_centroids

@@ -77,7 +77,7 @@ def cluster_image(full_path: str, k: int):
         prev_point = None
 
         if centroid.convex_hull:
-            print(f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
+            print(f'{centroid.index}, {centroid.list_samples.get_count()}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
 
         center_point = (int(centroid.center.x), int(centroid.center.y))
 

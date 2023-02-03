@@ -38,7 +38,7 @@ class ConvexHull(object):
         Computes the points that make up the convex hull.
         :return:
         '''
-        if not isinstance(points, LinkedList) or points.get_count() < 1:
+        if not isinstance(points, LinkedList) or not points.any():
             return None
 
         max_squared_distance: float = 0

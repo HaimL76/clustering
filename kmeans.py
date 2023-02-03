@@ -149,7 +149,7 @@ class KMeans:
 
         print(f'associations_changed = {associations_changed}')
         
-        number_centroids_changed: int = 0#self.calculate_centroids_by_standard_deviations()
+        number_centroids_changed: int = self.calculate_centroids_by_standard_deviations()
 
         #print(f'number_centroids_changed = {number_centroids_changed}')
 
@@ -187,9 +187,9 @@ class KMeans:
           ##  for dunn_index in self.dunn_indices:
             ##    f.write(str(dunn_index))
 
-        self.list_centroids = []
-        self.highest_index = 0
+        ##self.list_centroids = []
+        ##self.highest_index = 0
 
-        self.get_centroids(list_samples, k + 1, num_rows, num_cols)
+        ##self.get_centroids(list_samples, k + 1, num_rows, num_cols)
 
         return self.list_centroids
