@@ -14,7 +14,7 @@ class MyPoint(object):
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
-        self.list_samples: LinkedList = LinkedList()# list = []
+        self.list_samples: list = []# LinkedList = LinkedList()# list = []
         self.index: int = i
         self.convex_hull = []
         self.L: float = 0
@@ -25,7 +25,8 @@ class Centroid(object):
         self.diagonal_points: tuple = None
 
     def calculate_standard_deviation(self):
-        if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        #if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             s: float = 0
 
             for sample in self.list_samples:
@@ -37,7 +38,8 @@ class Centroid(object):
 
                 s += d
 
-            s /= self.list_samples.get_count()
+            ##s /= self.list_samples.get_count()
+            s /= len(self.list_samples)
 
             return numpy.sqrt(s)
 
@@ -54,10 +56,11 @@ class Centroid(object):
                 if d > self.max_distance:
                     self.max_distance = d
 
-        if isinstance(self.list_samples, list):
-            _ = 0
+        #self.list_samples.insert_sorted(point)
 
-        self.list_samples.insert_not_sorted(point)
+        self.list_samples.append(point)
+
+        #self.list_samples.print()
 
         if point.x < self.L:
             self.L = point.x
@@ -72,7 +75,8 @@ class Centroid(object):
             self.B = point.y
 
     def calculate_center(self):
-        if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        #if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             s_x = 0
             s_y = 0
 
@@ -80,7 +84,8 @@ class Centroid(object):
                 s_x += sample.x
                 s_y += sample.y
 
-            len0 = self.list_samples.get_count()
+            #len0 = self.list_samples.get_count()
+            len0 = len(self.list_samples)
 
             self.center = MyPoint(s_x / len0, s_y / len0)
 

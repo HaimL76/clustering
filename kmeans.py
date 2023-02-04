@@ -18,7 +18,7 @@ class KMeans:
 
     def clear_centroids(self):
         for centroid in self.list_centroids:
-            centroid.list_samples = LinkedList()
+            centroid.list_samples = []# LinkedList()
 
     def recalculate_centers(self):
         ts: list = []
