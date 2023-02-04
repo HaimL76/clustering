@@ -121,7 +121,8 @@ class Centroid(object):
     def get_new_centroids_by_standard_deviation(self):
         new_centroids: list = []
 
-        if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        #if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             std: float = self.calculate_standard_deviation()
 
             if std < 0.001:
@@ -151,8 +152,12 @@ class Centroid(object):
                 else:
                     centroid_out.append_sample(sample)
 
-            len_in = centroid_in.list_samples.get_count()
-            len_out = centroid_out.list_samples.get_count()
+            ##len_in = centroid_in.list_samples.get_count()
+            ##len_out = centroid_out.list_samples.get_count()
+
+            len_in = len(centroid_in.list_samples)
+            len_out = len(centroid_out.list_samples)
+
 
             if len_out < 1:
                 return new_centroids
