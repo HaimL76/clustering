@@ -14,7 +14,7 @@ class MyPoint(object):
 class Centroid(object):
     def __init__(self, i: int, c_x: float, c_y: float):
         self.center: MyPoint = MyPoint(c_x, c_y)
-        self.list_samples: list = []# LinkedList = LinkedList()# list = []
+        self.list_samples: list = []  # LinkedList = LinkedList()# list = []
         self.index: int = i
         self.convex_hull = []
         self.L: float = 0
@@ -23,9 +23,10 @@ class Centroid(object):
         self.B: float = 0
         self.intracluster_squared_distance: float = 0
         self.diagonal_points: tuple = None
+        self.average_gap: float = None
 
     def calculate_standard_deviation(self):
-        #if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        # if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             s: float = 0
 
@@ -51,16 +52,16 @@ class Centroid(object):
 
                 d = dx * dx + dy * dy
 
-                #print(f'd = {d}')
+                # print(f'd = {d}')
 
                 if d > self.max_distance:
                     self.max_distance = d
 
-        #self.list_samples.insert_sorted(point)
+        # self.list_samples.insert_sorted(point)
 
         self.list_samples.append(point)
 
-        #self.list_samples.print()
+        # self.list_samples.print()
 
         if point.x < self.L:
             self.L = point.x
@@ -74,8 +75,8 @@ class Centroid(object):
         if point.y > self.B:
             self.B = point.y
 
-    def calculate_center(self):
-        #if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+    def calculate_center(self, calculate_gaps: bool = True):
+        # if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
         if isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             s_x = 0
             s_y = 0
@@ -84,14 +85,38 @@ class Centroid(object):
                 s_x += sample.x
                 s_y += sample.y
 
-            #len0 = self.list_samples.get_count()
+            # len0 = self.list_samples.get_count()
             len0 = len(self.list_samples)
 
             self.center = MyPoint(s_x / len0, s_y / len0)
 
-    def calculate_squared_distances(self):
-        if isinstance(self.list_samples) and len(self.list_samples) > 0:
-            pass
+            if calculate_gaps:
+                for sample in self.list_samples:
+                    dx: float = self.center.x - sample.x
+                    dy: float = self.center.y - sample.y
+
+                    sample.squared_distance_from_centroid = dx * dx + dy * dy
+
+                self.list_samples.sort(key=lambda sample0: sample0.squared_distance_from_centroid)
+
+                sum_gaps: float = 0
+
+                prev: Sample = None
+
+                counter: int = 0
+
+                for sample in self.list_samples:
+                    if prev is not None:
+                        gap: float = sample.squared_distance_from_centroid - prev.squared_distance_from_centroid
+
+                        sum_gaps += gap
+
+                        counter += 1
+
+                    prev = sample
+
+                if counter > 0:
+                    self.average_gap = sum_gaps / counter
 
     def calculate_convex_hull(self, calculate_center: bool = False, calculate_diameter: bool = True):
         ch = ConvexHull(calculate_diameter=calculate_diameter)
@@ -103,7 +128,7 @@ class Centroid(object):
             self.diagonal_points = tup[1]
             self.intracluster_squared_distance = tup[2]
 
-        #print(f'cluster index = {self.index}, cluster intra squared distance = {self.intracluster_squared_distance}')
+        # print(f'cluster index = {self.index}, cluster intra squared distance = {self.intracluster_squared_distance}')
 
         if isinstance(self.convex_hull, list) and len(self.convex_hull) > 0:
             s_x: float = 0
@@ -121,7 +146,7 @@ class Centroid(object):
     def get_new_centroids_by_standard_deviation(self):
         new_centroids: list = []
 
-        #if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
+        # if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
         if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
             std: float = self.calculate_standard_deviation()
 
@@ -157,7 +182,6 @@ class Centroid(object):
 
             len_in = len(centroid_in.list_samples)
             len_out = len(centroid_out.list_samples)
-
 
             if len_out < 1:
                 return new_centroids

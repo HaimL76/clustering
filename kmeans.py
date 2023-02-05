@@ -15,6 +15,7 @@ class KMeans:
         self.highest_index: int = 0
         self.list_centroids: list = []
         self.dunn_indices: dict = {}
+        self.average_gap = None
 
     def clear_centroids(self):
         for centroid in self.list_centroids:
@@ -23,9 +24,19 @@ class KMeans:
     def recalculate_centers(self):
         ts: list = []
 
+        sum_average_gap: float = 0
+
+        counter: int = 0
+
         for centroid in self.list_centroids:
             centroid.calculate_convex_hull(calculate_diameter=True)
             centroid.calculate_center()
+            sum_average_gap += centroid.average_gap
+
+            counter += 1
+
+        if counter > 0:
+            self.average_gap = sum_average_gap / counter
 
         if False:
             for centroid in self.list_centroids:
