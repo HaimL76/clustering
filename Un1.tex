@@ -109,11 +109,11 @@ must give \( a_{i,j}+b_{i,j}=c_{i,j}=0 \Rightarrow b_{i,j}=-a_{i,j}=-1 \) \newli
 \( [E_{i,j},E_{j,k}]=E_{i,k} \) \newline
 \textbf{Proof}
 \( E_{i,j} \) is operating from left on \( E_{j,k} \) by addition of row \( j \) to row \( i \),
-so, the product matrix, \( (a_{l,m}=E_{i,j} \cdot E_{j,k} \) has \( 1 \) on the main diagonal and in \( a_{j,k},a_{i,j},a_{i,k} \) \newline
+so, the product matrix, \( (a_{l,m})=E_{i,j} \cdot E_{j,k} \) has \( 1 \) on the main diagonal and in \( a_{j,k},a_{i,j},a_{i,k} \) \newline
 \( E_{i,j}^{-1} \) is operating from left on \( E_{j,k}^{-1} \) by subtraction of row \( j \) from row \( i \),
-so, the product matrix, \( (b_{l,m}=E_{i,j}^{-1} \cdot E_{j,k}^{-1} \) has \( 1 \) on the main diagonal and in \( b_{i,k} \), \newline
+so, the product matrix, \( (b_{l,m})=E_{i,j}^{-1} \cdot E_{j,k}^{-1} \) has \( 1 \) on the main diagonal and in \( b_{i,k} \), \newline
 and \( -1 \) in \( b_{j,k},b_{i,j} \) \newline
-Multiplying \( (a_{l,m} \cdot (b_{l,m}) \) yields a product matrix, \( (c_{l,m} \) with \( 1 \) on the main diagonal, and, \newline
+Multiplying \( (a_{l,m}) \cdot (b_{l,m}) \) yields a product matrix, \( (c_{l,m}) \) with \( 1 \) on the main diagonal, and, \newline
 since \( a_{i,i}=a_{i,j}=a_{i,k}=1 \), with all other cells in row \( j \) being \(0 \),
 and since  \( b_{i,k}=b_{k,k}=1 \), and \( b_{j,k}=-1 \), multiplying row \( (a_{l,m})_{i} \) by column \( (b_{l,m})_{k} \) yields
 the value \( c_{i,k}=b_{i,k}+b_{j,k}+b_{k,k}=1-1+1=1 \) \newline
@@ -257,4 +257,40 @@ $$=\begin{pmatrix}
 \end{cases}
 \)
 
+\textbf{Exercise} \newline
+\( \#\{ E_{i,j} \in M_{n}(\mathbb{Z}) \}_{i<j}={n \choose 2} \) \newline
+
+\textbf{Proof} \newline
+\( (a_{i,j}=E_{i,j}) \). We need to count the options for \( 1 \) above the main diagonal. \newline
+\( a_{l,l}=1, \forall 1 \leq l \leq n \), so, if \( i=l \), we have \( n-l=n-i \) options to choose the column index \( j \). \newline
+So, the total number of options for \( i,j \) is \( \sum_{k=1}^{n-1}=\frac{(1 + n-1) \cdot (n-1)}{2}=\frac{n \cdot (n-1)}{2}={n \choose 2} \) \newline
+
+This means that we have \( {n \choose 2}^2 \) commutators of the form \( [E_{i,j},E_{l,k}] \).
+
+\textbf{Exercise} \newline
+\( \#\{ [E_{i,j},E_{l,k}] \neq I \in M_{n}(\mathbb{Z}) \}_{i<j}=2 \cdot {n \choose 3} \) \newline
+
+\textbf{Proof} \newline
+As shown above, \( [E_{i,j},E_{l,k}] \neq I \Leftrightarrow j = l \) \newline
+Which means we're counting all the commutators of the form \( [E_{i,j},E_{j,k}] \). \newline
+So, the count of such commutators is based on the number of options to choose \newline
+ordered triples \( \{i,j,k\} \) out of the ordered set \( [n]=\{1,2,...,n\} \), which is \( {n \choose 3} \) \newline
+But, as already shown above, \( [E_{l,k},E_{i,j}]=[E_{i,j},E_{l,k}]^{-1} \), so, for each triple \( \{i,j,k\} \), we have
+two commutators, \( [E_{i,j},E_{j,k}] \) and its inverse, which sum up to \( {n \choose 3} \) pairs of commutators. \newline
+
+For example, \( n=5 \), \newline
+$$ (a_{l,k})=E_{i,j}=\begin{pmatrix} 
+	1 & a_{1,2} & a_{1,3} & a_{1,4} & a_{1,5} \\
+	0 & 1 & a_{2,3} & a_{2,4} & a_{2,5} \\
+	0 & 0 & 1 & a_{3,4} & a_{3,5} \\
+	0 & 0 & 0 & 1 & a_{4,5} \\
+	0 & 0 & 0 & 0 & 1 \\
+\end{pmatrix} 
+$$
+Where \( a_{i,j}=1\), and all other \( a_{l,k}=0 \) \newline
+The number of options for choosing \( i,j \), in this case, are \( 1+2+3+4=10={5 \choose 2} \), \newline
+so, we have \( 10^2=100 \) commutators. 
+The number of triples we can choose from \( [5]=\{1,2,3,4,5\} \) is \newline
+\( \#\{\{1,2,3\},\{1,2,4\},\{1,2,5\},\{1,3,4\},\{1,3,5\},\{1,4,5\},\{2,3,4\},\{2,3,5\},\{2,4,5\},\{3,4,5\}\}=10={5 \choose 3} \), \newline
+so we have 10 commutators that are not the unit matrix, and their inverse, total \( 20 = 2 \cdot 10=2 \cdot {5 \choose 3} \). \newline
 \end{document}
