@@ -53,6 +53,10 @@ class KMeans:
 
         return index
 
+    def calculate_k_plus_plus(self, k: int, list_samples: list) -> list:
+        
+
+
     def calculate_dunn_index(self):
         if isinstance(self.list_centroids, list) and len(self.list_centroids) > 0:
             max_diameter: float = None
