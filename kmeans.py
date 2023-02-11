@@ -1,7 +1,7 @@
 from threading import Thread
 
 from linked_list import LinkedList
-from mypoint import Centroid, Sample
+from mypoint import Centroid, Sample, MyPoint
 
 
 def centroid_calculate_center(centroid: Centroid):
@@ -19,7 +19,7 @@ class KMeans:
 
     def clear_centroids(self):
         for centroid in self.list_centroids:
-            centroid.list_samples = []# LinkedList()
+            centroid.list_samples = []  # LinkedList()
 
     def recalculate_centers(self):
         ts: list = []
@@ -55,7 +55,27 @@ class KMeans:
 
     def calculate_k_plus_plus(self, k: int, list_samples: list) -> list:
         if isinstance(list_samples, list) and len(list_samples) > k:
-            list_centers: list = [list_samples[0]]
+            sample: MyPoint = list_samples[0]
+
+            self.list_centroids: list = [Centroid(self.set_highest_index(), sample.x, sample.y)]
+
+            while len(self.list_centroids) < k:
+                max_squared_distance: float = None
+                max_sample: MyPoint = None
+
+                for sample in list_samples:
+                    for centroid in self.list_centroids:
+                        dx: float = centroid.center.x - sample.x
+                        dy: float = centroid.center.y - sample.y
+
+                        d: float = dx * dx + dy * dy
+
+                        if max_squared_distance is None or d > max_squared_distance:
+                            max_squared_distance = d
+                            max_sample = sample
+
+                if max_sample is not None:
+                    self.list_centroids.append(Centroid(self.set_highest_index(), max_sample.x, max_sample.y))
 
     def calculate_dunn_index(self):
         if isinstance(self.list_centroids, list) and len(self.list_centroids) > 0:
@@ -79,7 +99,6 @@ class KMeans:
                             min_squared_distance = d
 
         return min_squared_distance / max_diameter
-
 
     def calculate_centroids_by_standard_deviations(self):
         number_centroids_changed: int = 0
@@ -148,33 +167,34 @@ class KMeans:
                 else:
                     center = list_samples[int(i * quant)]
 
-                #print(f'{i}, {center.x}, {center.y}')
+                # print(f'{i}, {center.x}, {center.y}')
 
                 self.list_centroids.append(Centroid(self.set_highest_index(), center.x, center.y))
 
     def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
-        #print("enter calculate centroids")
+        # print("enter calculate centroids")
 
         if not isinstance(list_samples, list) or len(list_samples) < 1:
             return
 
         self.initialize_centroids(num_rows=num_rows, num_cols=num_cols, list_samples=list_samples, k=k)
+        #self.calculate_k_plus_plus(k, list_samples)
 
         associations_changed: int = self.associate_samples_to_centroids(list_samples=list_samples)
 
         print(f'associations_changed = {associations_changed}')
-        
+
         number_centroids_changed: int = self.calculate_centroids_by_standard_deviations()
 
-        #print(f'number_centroids_changed = {number_centroids_changed}')
+        # print(f'number_centroids_changed = {number_centroids_changed}')
 
         if associations_changed < 1 and number_centroids_changed < 1:
             return
 
         ##if number_centroids_changed > 0:
-          ##  self.recalculate_centers()
-           ## self.clear_centroids()
-            ##self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
+        ##  self.recalculate_centers()
+        ## self.clear_centroids()
+        ##self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
 
         if associations_changed > 0:
             self.recalculate_centers()
@@ -199,8 +219,8 @@ class KMeans:
                     print(f'dunn index = {k}, {self.dunn_indices[k]}')
 
         ##with open("""c:\html\dunn_indices.txt""", 'w') as f:
-          ##  for dunn_index in self.dunn_indices:
-            ##    f.write(str(dunn_index))
+        ##  for dunn_index in self.dunn_indices:
+        ##    f.write(str(dunn_index))
 
         ##self.list_centroids = []
         ##self.highest_index = 0
