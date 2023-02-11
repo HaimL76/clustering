@@ -54,8 +54,8 @@ class KMeans:
         return index
 
     def calculate_k_plus_plus(self, k: int, list_samples: list) -> list:
-        
-
+        if isinstance(list_samples, list) and len(list_samples) > k:
+            list_centers: list = [list_samples[0]]
 
     def calculate_dunn_index(self):
         if isinstance(self.list_centroids, list) and len(self.list_centroids) > 0:
