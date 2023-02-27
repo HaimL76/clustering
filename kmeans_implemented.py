@@ -10,7 +10,7 @@ def centroid_calculate_center(centroid: Centroid):
     return centroid.index
 
 
-class KMeans:
+class KMeansImplemented:
     def __init__(self):
         self.highest_index: int = 0
         self.list_centroids: list = []
@@ -145,6 +145,7 @@ class KMeans:
                 sample.centroid = cent
                 sample.squared_distance_from_centroid = min0
                 cent.append_sample(sample)
+                sample.squared_distance_from_centroid = d
 
         return associations_changed
 

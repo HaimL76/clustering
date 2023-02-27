@@ -1,11 +1,16 @@
 import cv2
 import numpy as np
 
-from kmeans import KMeans
-from mypoint import Sample
+import pandas as pd
+from matplotlib import pyplot as plt
+#from sklearn.datasets.samples_generator import make_blobs
+from sklearn.cluster import KMeans
+
+from kmeans_implemented import KMeansImplemented
+from mypoint import Sample, Centroid
 
 
-def cluster_image(full_path: str, k: int):
+def get_corners(full_path: str) -> list:
     print(full_path)
     import multiprocessing as mp
     print("Number of processors: ", mp.cpu_count())
@@ -42,10 +47,10 @@ def cluster_image(full_path: str, k: int):
             if corners[i, j] > thresh:
                 list_samples.append(Sample(j, i))
 
-    kmeans: KMeans = KMeans()
+    return image, list_samples
 
-    centroids = kmeans.get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
 
+def display_clusters(image, centroids: list, k: int):
     print(len(centroids))
 
     colors = 255 * 255 * 255
@@ -77,8 +82,9 @@ def cluster_image(full_path: str, k: int):
         prev_point = None
 
         if centroid.convex_hull:
-            #print(f'{centroid.index}, {centroid.list_samples.get_count()}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
-            print(f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
+            # print(f'{centroid.index}, {centroid.list_samples.get_count()}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
+            print(
+                f'{centroid.index}, {len(centroid.list_samples)}, {len(centroid.convex_hull)}, {centroid.center.x}, {centroid.center.y}')
 
         center_point = (int(centroid.center.x), int(centroid.center.y))
 
@@ -112,7 +118,8 @@ def cluster_image(full_path: str, k: int):
         if isinstance(centroid.convex_hull, list) and len(centroid.convex_hull) > 2:
             for curr_point in centroid.convex_hull:
                 if curr_point and prev_point:
-                    cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color, thickness=1)
+                    cv2.line(image, (prev_point.x, prev_point.y), (curr_point.x, curr_point.y), color=color,
+                             thickness=1)
 
                 prev_point = curr_point
 
@@ -121,7 +128,8 @@ def cluster_image(full_path: str, k: int):
             second_point: MyPoint = centroid.diagonal_points[1]
 
             if curr_point and prev_point:
-                cv2.line(image, (first_point.x, first_point.y), (second_point.x, second_point.y), color=color0, thickness=1)
+                cv2.line(image, (first_point.x, first_point.y), (second_point.x, second_point.y), color=color0,
+                         thickness=1)
 
     ##print(f'list corners = {list_corners}')
 
@@ -134,3 +142,73 @@ def cluster_image(full_path: str, k: int):
     cv2.imshow('Image with Corners', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
+def cluster_image_with_lib(full_path: str, k: int):
+    tup: tuple = get_corners(full_path)
+
+    image = tup[0]
+    list_samples: list = tup[1]
+
+    if isinstance(list_samples, list) and len(list_samples) > 0:
+        list0: list = list(map(lambda sample: [sample.x, sample.y], list_samples))
+
+        X = np.array(list0)
+
+        centroids: list = []
+
+        for i in range(3, k):
+            print(f'k: {k}')
+
+            kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+
+            kmeans.fit(X)
+
+            num_clusters: int = kmeans.n_clusters
+
+            centroids = [None for j in range(num_clusters)]
+
+            labels: list = list(kmeans.labels_)
+
+            centers: list = list(kmeans.cluster_centers_)
+
+            for index in range(len(labels)):
+                sample: Sample = list_samples[index]
+
+                label: int = labels[index]
+
+                #print(f'label: {label}')
+
+                centroid: Centroid = centroids[label]
+
+                if centroid is None:
+                    center = centers[label]
+                    centroids[label] = Centroid(label, center[0], center[1])
+                    centroid: Centroid = centroids[label]
+
+                centroid.append_sample(sample)
+
+
+
+        display_clusters(image, centroids, k + 1)
+
+
+def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
+    tup: tuple = get_corners(full_path)
+
+    image = tup[0]
+    list_samples: list = tup[1]
+
+    if isinstance(list_samples, list) and len(list_samples) > 0:
+        kmeans: KMeansImplemented = KMeansImplemented()
+
+        centroids = kmeans.get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+
+        if isinstance(centroids, list) and len(centroids) > 0:
+            index: int = 0
+
+            for centroid in centroids:
+                centroid.index = index
+                index += 1
+
+            display_clusters(image, centroids, k)

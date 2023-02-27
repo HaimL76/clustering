@@ -35,14 +35,14 @@ class Centroid(object):
                 dy = sample.y - self.center.y
 
                 d = dx * dx + dy * dy
-                sample.squared_distance_from_centroid = d
+                sample.squared_distance_from_centroid = d#TODO: we have it already
 
                 s += d
 
             ##s /= self.list_samples.get_count()
             s /= len(self.list_samples)
 
-            return numpy.sqrt(s)
+            return s## numpy.sqrt(s)
 
     def append_sample(self, point: MyPoint):
         if False and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
@@ -148,12 +148,12 @@ class Centroid(object):
 
         # if isinstance(self.center, MyPoint) and isinstance(self.list_samples, LinkedList) and self.list_samples.any():
         if isinstance(self.center, MyPoint) and isinstance(self.list_samples, list) and len(self.list_samples) > 0:
-            std: float = self.calculate_standard_deviation()
+            var: float = self.calculate_standard_deviation()
 
-            if std < 0.001:
+            if var < 0.001:
                 return new_centroids
 
-            var: float = std * std
+            ##var: float = std * std
 
             centroid_in: Centroid = Centroid(0, 0, 0)
             centroid_out: Centroid = Centroid(0, 0, 0)
