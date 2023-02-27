@@ -157,12 +157,24 @@ def cluster_image_with_lib(full_path: str, k: int):
 
         centroids: list = []
 
+        prev_inertia_ = None
+
+        wcss = []
+
         for i in range(3, k):
-            print(f'k: {k}')
+            print(f'k: {i}')
 
             kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
 
             kmeans.fit(X)
+
+            wcss.append(kmeans.inertia_)
+
+            #if prev_inertia_ is not None:
+             #   diff_inertia_ = prev_inertia_ - kmeans.inertia_
+              #  ##print(f'inertia_: {kmeans.inertia_}, k: {i}, elbow = {prev_inertia_ - kmeans.inertia_}')
+
+            #prev_inertia_ = kmeans.inertia_
 
             num_clusters: int = kmeans.n_clusters
 
@@ -188,7 +200,11 @@ def cluster_image_with_lib(full_path: str, k: int):
 
                 centroid.append_sample(sample)
 
-
+        plt.plot(range(3, k), wcss)
+        plt.title('Elbow Method')
+        plt.xlabel('Number of clusters')
+        plt.ylabel('WCSS')
+        plt.show()
 
         display_clusters(image, centroids, k + 1)
 

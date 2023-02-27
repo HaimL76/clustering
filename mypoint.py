@@ -207,7 +207,11 @@ class Centroid(object):
                 new_centroids.append(centroid_out)
             else:
                 for sample in centroid_out.list_samples:
-                    sample.disabled = True
+                    centroid_in.list_samples.append(sample)
+                    sample.centroid = centroid_in
+
+                #TODO: for sample in centroid_out.list_samples:
+                    #TODO: sample.disabled = True
 
         return new_centroids
 
