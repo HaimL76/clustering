@@ -144,7 +144,7 @@ def display_clusters(image, centroids: list, k: int):
     cv2.destroyAllWindows()
 
 
-def cluster_image_with_lib(full_path: str, k: int):
+def cluster_image_with_lib(full_path: str, k_max: int):
     tup: tuple = get_corners(full_path)
 
     image = tup[0]
@@ -159,54 +159,123 @@ def cluster_image_with_lib(full_path: str, k: int):
 
         prev_inertia_ = None
 
-        wcss = []
+        k_iteration_index_quant: int = 5
 
-        for i in range(3, k):
-            print(f'k: {i}')
+        k_start: int = 3
 
-            kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+        max_distances: list = []
+
+        max_num_of_clusters: float = k_max - k_start
+
+        arr: list = [None for i in range(max_num_of_clusters)]
+
+        j: int = 0
+
+        for index_of_k in range(max_num_of_clusters):
+            j += 1
+
+            k = k_start + index_of_k
+
+            print(f'k: {k}, index of k: {index_of_k}')
+
+            kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=300, n_init=10, random_state=0)
 
             kmeans.fit(X)
 
-            wcss.append(kmeans.inertia_)
+            inertia: float = kmeans.inertia_
 
-            #if prev_inertia_ is not None:
-             #   diff_inertia_ = prev_inertia_ - kmeans.inertia_
-              #  ##print(f'inertia_: {kmeans.inertia_}, k: {i}, elbow = {prev_inertia_ - kmeans.inertia_}')
+            arr[index_of_k] = (k, inertia, None)
 
-            #prev_inertia_ = kmeans.inertia_
+            if j >= k_iteration_index_quant:
+                j = 0
 
-            num_clusters: int = kmeans.n_clusters
+                tup_start: tuple = arr[0]
+                tup_end: tuple = arr[index_of_k]
 
-            centroids = [None for j in range(num_clusters)]
+                x_start: float = tup_start[0]
+                x_end: float = tup_end[0]
 
-            labels: list = list(kmeans.labels_)
+                y_start = tup_start[1]
+                y_end = tup_end[1]
 
-            centers: list = list(kmeans.cluster_centers_)
+                if x_end > x_start:
+                    # This is the slope of the line between the first and last points
+                    a: float = (y_end - y_start) / (x_end - x_start)
 
-            for index in range(len(labels)):
-                sample: Sample = list_samples[index]
+                    # This is the "b" of the line formula
+                    b: float = y_start - a * x_start
 
-                label: int = labels[index]
+                    # This is the perpendicular slope (of the perpendicular line, which goes through the curve)
+                    p_a: float = 1
+                    p_a /= a
+                    p_a *= -1
 
-                #print(f'label: {label}')
+                    max_squared_distance: float = None
 
-                centroid: Centroid = centroids[label]
+                    for l in range(index_of_k):
+                        tup: tuple = arr[l]
 
-                if centroid is None:
-                    center = centers[label]
-                    centroids[label] = Centroid(label, center[0], center[1])
-                    centroid: Centroid = centroids[label]
+                        k = tup[0]
 
-                centroid.append_sample(sample)
+                        # This is the point on the curve
+                        x1: float = k
+                        y1: float = tup[1]
 
-        plt.plot(range(3, k), wcss)
-        plt.title('Elbow Method')
-        plt.xlabel('Number of clusters')
-        plt.ylabel('WCSS')
-        plt.show()
+                        plt.text(x1, y1, str(k))
 
-        display_clusters(image, centroids, k + 1)
+                        # This is the "b" of the perpendicular line
+                        p_b: float = y1 - p_a * x1
+
+                        # Compare the y's: y2 = p_a * x2 + p_b = a * x2 + b
+                        # This gives: x2 (p_a - a) = b - p_b
+                        # This gives: x2 = (b - p_b) / (pa - a)
+                        x2: float = (p_b - b) / (a - p_a)
+                        y2: float = p_a * x2 + p_b
+
+                        dx: float = x2 - x1
+                        dy: float = y2 - y1
+
+                        d: float = dx * dx + dy * dy
+
+                        if max_squared_distance is None or max_squared_distance < d:
+                            max_squared_distance = d
+
+                    max_distances.append((x_end, max_squared_distance))
+
+            # num_clusters: int = kmeans.n_clusters
+            #
+            # centroids = [None for j in range(num_clusters)]
+            #
+            # labels: list = list(kmeans.labels_)
+            #
+            # centers: list = list(kmeans.cluster_centers_)
+            #
+            # for index in range(len(labels)):
+            #     sample: Sample = list_samples[index]
+            #
+            #     label: int = labels[index]
+            #
+            #     centroid: Centroid = centroids[label]
+            #
+            #     if centroid is None:
+            #         center = centers[label]
+            #         centroids[label] = Centroid(label, center[0], center[1])
+            #         centroid: Centroid = centroids[label]
+            #
+            #     centroid.append_sample(sample)
+
+        for max_distance in max_distances:
+            print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}')
+
+        # plt.plot(range(k_start, k_max), wcss)
+        # plt.title('Elbow Method')
+        # plt.xlabel('Number of clusters')
+        # plt.ylabel('WCSS')
+        # plt.plot([x_start, x_end], [y_start, y_end])
+        #
+        # plt.show()
+        #
+        # display_clusters(image, centroids, k + 1)
 
 
 def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
