@@ -211,6 +211,7 @@ def cluster_image_with_lib(full_path: str, k_max: int):
                     p_a *= -1
 
                     max_squared_distance: float = None
+                    optim_k: int = None
 
                     for l in range(index_of_k):
                         tup: tuple = arr[l]
@@ -239,8 +240,9 @@ def cluster_image_with_lib(full_path: str, k_max: int):
 
                         if max_squared_distance is None or max_squared_distance < d:
                             max_squared_distance = d
+                            optim_k = k
 
-                    max_distances.append((x_end, max_squared_distance))
+                    max_distances.append((x_end, max_squared_distance, optim_k))
 
             # num_clusters: int = kmeans.n_clusters
             #
@@ -265,7 +267,7 @@ def cluster_image_with_lib(full_path: str, k_max: int):
             #     centroid.append_sample(sample)
 
         for max_distance in max_distances:
-            print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}')
+            print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}, optim k: {max_distance[2]}')
 
         # plt.plot(range(k_start, k_max), wcss)
         # plt.title('Elbow Method')
