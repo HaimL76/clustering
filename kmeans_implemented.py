@@ -211,7 +211,7 @@ class KMeansImplemented:
 
         print(f'associations_changed = {associations_changed}')
 
-        number_centroids_changed: int = 0## self.calculate_centroids_by_standard_deviations()
+        number_centroids_changed: int = self.calculate_centroids_by_standard_deviations()
 
         # print(f'number_centroids_changed = {number_centroids_changed}')
 
