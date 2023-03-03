@@ -50,12 +50,18 @@ def get_corners(full_path: str) -> list:
     return image, list_samples
 
 
-def display_clusters(image, centroids: list, k: int):
+def display_clusters(image, centroids: list):
+    if not isinstance(centroids, list):
+        raise ValueError("centroids")
+
+    if len(centroids) < 1:
+        raise ValueError("centroids")
+
     print(len(centroids))
 
     colors = 255 * 255 * 255
 
-    quant_colors = colors / k
+    quant_colors = colors / len(centroids)
 
     size = 4
 
@@ -292,7 +298,7 @@ def cluster_image_with_lib(full_path: str, k_max: int):
         #
         # plt.show()
         #
-        display_clusters(image, centroids, k + 1)
+        display_clusters(image, centroids)
 
 
 def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
@@ -313,4 +319,4 @@ def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols:
                 centroid.index = index
                 index += 1
 
-            display_clusters(image, centroids, k)
+            display_clusters(image, centroids)
