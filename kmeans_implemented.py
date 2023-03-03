@@ -172,6 +172,28 @@ class KMeansImplemented:
 
                 self.list_centroids.append(Centroid(self.set_highest_index(), center.x, center.y))
 
+    def calculate_wcss(self) -> float:
+        wcss: float = 0
+
+        for centroid in self.list_centroids:
+            if isinstance(centroid, Centroid) and isinstance(centroid.list_samples, list) and len(centroid.list_samples) > 0:
+                centroid_wcss: float = 0
+
+                for sample in centroid.list_samples:
+                    dx: float = sample.x - centroid.center.x
+                    dy: float = sample.y - centroid.center.y
+
+                    d: float = dx * dx + dy * dy
+
+                    centroid_wcss += d
+
+                wcss += centroid_wcss
+
+        return wcss
+
+
+
+
     def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
         # print("enter calculate centroids")
 
@@ -182,6 +204,10 @@ class KMeansImplemented:
         #self.calculate_k_plus_plus(k, list_samples)
 
         associations_changed: int = self.associate_samples_to_centroids(list_samples=list_samples)
+
+        wcss: float = self.calculate_wcss()
+
+        print(f'wcss = {wcss}')
 
         print(f'associations_changed = {associations_changed}')
 

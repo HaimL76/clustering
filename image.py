@@ -242,32 +242,47 @@ def cluster_image_with_lib(full_path: str, k_max: int):
                             max_squared_distance = d
                             optim_k = k
 
-                    max_distances.append((x_end, max_squared_distance, optim_k))
+                    print(f'optim k: {optim_k}, wcss: {y_end}')
 
-            # num_clusters: int = kmeans.n_clusters
-            #
-            # centroids = [None for j in range(num_clusters)]
-            #
-            # labels: list = list(kmeans.labels_)
-            #
-            # centers: list = list(kmeans.cluster_centers_)
-            #
-            # for index in range(len(labels)):
-            #     sample: Sample = list_samples[index]
-            #
-            #     label: int = labels[index]
-            #
-            #     centroid: Centroid = centroids[label]
-            #
-            #     if centroid is None:
-            #         center = centers[label]
-            #         centroids[label] = Centroid(label, center[0], center[1])
-            #         centroid: Centroid = centroids[label]
-            #
-            #     centroid.append_sample(sample)
+                    max_distances.append((x_end, max_squared_distance, optim_k))
 
         for max_distance in max_distances:
             print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}, optim k: {max_distance[2]}')
+
+        num_clusters: int = kmeans.n_clusters
+
+        print(f'num clusters: {num_clusters}')
+
+        centroids = [None for j in range(num_clusters)]
+
+        labels: list = list(kmeans.labels_)
+
+        centers: list = list(kmeans.cluster_centers_)
+
+        wcss: float = 0
+
+        for index in range(len(labels)):
+            sample: Sample = list_samples[index]
+
+            label: int = labels[index]
+
+            centroid: Centroid = centroids[label]
+
+            if centroid is None:
+                center = centers[label]
+                centroids[label] = Centroid(label, center[0], center[1])
+                centroid: Centroid = centroids[label]
+
+            centroid.append_sample(sample)
+
+            dx: float = sample.x - centroid.center.x
+            dy: float = sample.y - centroid.center.y
+
+            d: float = dx * dx + dy * dy
+
+            wcss += d
+
+        print(f'wcss: {wcss}')
 
         # plt.plot(range(k_start, k_max), wcss)
         # plt.title('Elbow Method')
@@ -277,7 +292,7 @@ def cluster_image_with_lib(full_path: str, k_max: int):
         #
         # plt.show()
         #
-        # display_clusters(image, centroids, k + 1)
+        display_clusters(image, centroids, k + 1)
 
 
 def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
