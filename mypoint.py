@@ -24,6 +24,7 @@ class Centroid(object):
         self.intracluster_squared_distance: float = 0
         self.diagonal_points: tuple = None
         self.average_gap: float = None
+        self.neglect_distant = False
 
     def calculate_standard_deviation(self):
         # if isinstance(self.list_samples, LinkedList) and self.list_samples.any():
@@ -186,7 +187,7 @@ class Centroid(object):
             if len_out < 1:
                 return new_centroids
 
-            critical_number: float = 38  ## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
+            critical_number: float = 40  ## len(result_samples) * 0.26  ##38##35# 100  ## len(result_samples) / 20
 
             part: float = float(len_out) / float(len_in)
 
@@ -206,12 +207,13 @@ class Centroid(object):
 
                 new_centroids.append(centroid_out)
             else:
-                for sample in centroid_out.list_samples:
-                    centroid_in.list_samples.append(sample)
-                    sample.centroid = centroid_in
-
-                #TODO: for sample in centroid_out.list_samples:
-                    #TODO: sample.disabled = True
+                if self.neglect_distant:
+                    for sample in centroid_out.list_samples:
+                        sample.disabled = True
+                else:
+                    for sample in centroid_out.list_samples:
+                        centroid_in.list_samples.append(sample)
+                        sample.centroid = centroid_in
 
         return new_centroids
 

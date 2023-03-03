@@ -150,7 +150,7 @@ def display_clusters(image, centroids: list):
     cv2.destroyAllWindows()
 
 
-def cluster_image_with_lib(full_path: str, k_max: int):
+def cluster_image_with_lib(full_path: str, k_max: int, display_optimal_k: bool = False):
     tup: tuple = get_corners(full_path)
 
     image = tup[0]
@@ -176,6 +176,9 @@ def cluster_image_with_lib(full_path: str, k_max: int):
         arr: list = [None for i in range(max_num_of_clusters)]
 
         j: int = 0
+
+        optim_k: int = None
+        optim_index_of_k: int = None
 
         for index_of_k in range(max_num_of_clusters):
             j += 1
@@ -217,7 +220,8 @@ def cluster_image_with_lib(full_path: str, k_max: int):
                     p_a *= -1
 
                     max_squared_distance: float = None
-                    optim_k: int = None
+                    optim_k = None
+                    optim_index_of_k = None
 
                     for l in range(index_of_k):
                         tup: tuple = arr[l]
@@ -247,13 +251,21 @@ def cluster_image_with_lib(full_path: str, k_max: int):
                         if max_squared_distance is None or max_squared_distance < d:
                             max_squared_distance = d
                             optim_k = k
+                            optim_index_of_k = l
 
-                    print(f'optim k: {optim_k}, wcss: {y_end}')
+                    ratio: float = optim_index_of_k / index_of_k
+
+                    print(f'optim index of k: {optim_index_of_k}, wcss: {y_end}, ratio: {ratio}')
 
                     max_distances.append((x_end, max_squared_distance, optim_k))
 
         for max_distance in max_distances:
             print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}, optim k: {max_distance[2]}')
+
+        if display_optimal_k:
+            # Calculate again, for the optimal k
+            kmeans = KMeans(n_clusters=optim_k, init='k-means++', max_iter=300, n_init=10, random_state=0)
+            kmeans.fit(X)
 
         num_clusters: int = kmeans.n_clusters
 
