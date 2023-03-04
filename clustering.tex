@@ -1,0 +1,85 @@
+\documentclass[12pt]{article}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{tikz-cd}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\begin{document}
+\textbf{Clustering Optimization using k-means}
+
+\textbf{Preface}
+In this paper, we shall demonstrate two approaches for the optimizing the k-means algorithm for clustering. \newline
+
+There are two kinds of clustering that we would like to consider, \newline
+\underline{which may affect the algorithm that we run}, \newline \newline
+\textbf{1. Clustering of scattered details} \newline
+In this kind of clustering, we try to identify clusters from details that are scattered along the image.
+This can have various applications, such as \newline \textbf{Military Intelligence} (clusters of troops, aircraft, armored vehicles), \newline
+\textbf{Nature Science} (clustered structures of birds, insects, fish) and many more. \newline \newline
+\textbf{2. Identification of natural clusters} \newline
+In this kind of clustering, we try to identify large objects, from samples found in the imagery. A major example for this
+kind of clustering would be face recognition, where we have many features in some photo, and we try to isolate and
+identify the face of a person, or of several people. \newline
+
+\textbf{The basic k-means algorithm}
+One of the classic algorithms for clustering is the k-means algorithm. This algorithm is based on a very simple concept
+of acquiring initial data, then adjusting this data until the algorithm stables. \newline
+This algorithm is called k-means, because we are trying to find \( k \in \mathbb{N} \) clusters, which are supposed to
+give the optimal clustering, because each cluster has a center point, which is the mean of all the points that are grouped
+together in this cluster. We call this cluster, or the center point of this cluster, a \textbf{centroid}. \newline
+
+The basic description of this algorithm, for a given k, is,
+
+\begin{algorithm}
+\caption{Calculate k-means}
+\begin{algorithmic} 
+\REQUIRE 
+\ENSURE 
+\STATE $L \leftarrow size(samples)$
+\STATE $i \leftarrow 1$
+\WHILE{$i \neq L$}
+\STATE $s \leftarrow samples[i]$
+
+\STATE $j \leftarrow 1$
+\WHILE{$j \neq k$}
+\STATE $c \leftarrow centroids[j]$
+\STATE $dx \leftarrow s.x - c.x$
+\STATE $dy \leftarrow s.y - c.y$
+
+\STATE $d2 \leftarrow dx^2+dy^2$
+\ENDWHILE
+\ENDWHILE
+\IF{$n < 0$}
+\STATE $X \leftarrow 1 / x$
+\STATE $N \leftarrow -n$
+\ELSE
+\STATE $X \leftarrow x$
+\STATE $N \leftarrow n$
+\ENDIF
+\WHILE{$N \neq 0$}
+\IF{$N$ is even}
+\STATE $X \leftarrow X \times X$
+\STATE $N \leftarrow N / 2$
+\ELSE[$N$ is odd]
+\STATE $y \leftarrow y \times X$
+\STATE $N \leftarrow N - 1$
+\ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
+
+\end{document}
