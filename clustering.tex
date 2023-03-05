@@ -106,7 +106,7 @@ A full proof can be found at [1] \newline
 \textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given \( k \)\newline
 \textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local optimum} only, because, if we start from a different setting, we may converge to another local optimum, possibly to the best existing solution, which we shall refer to as the \underline{global optimum}. \newline
 
-\textbf{The Elbow method}
+\textbf{The Elbow method} \newline
 Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each \( k \), thus significantly larger. \newline
 
 To automatically choose the optimal number of \( k \), we need a way to compare the scores of different values of \( k \), running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each \( k \), and then present this score as a function of \( k \). \newline
@@ -115,6 +115,16 @@ Taking a range of \( k \) values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we sh
 This means that for less than the optimum \( k \) value, our clusters are too large, and for more than the optimum, the more \( k \) clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
 
 In other words, the optimal number of \( k \) is the turning point of the graph, from the high slope to the asymptote. This is why it is called “elbow” because it resembles a folded arm and the elbow that is the outmost point in the arm. So, if we can compute different ranges of numbers, for different maximal \( k \) values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of \( k \)), for each \( m_i \), then we have the optimal number of \( k \), for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average \( k \), with or without some weight or probability considerations. \newline
+
+\textbf{WCSS} \newline
+The score we are calculating, for the elbow method, is \underline{WCSS} (Within-Cluster Sum of Square), \newline
+which means, we calculate the squared distances of all the elements from their associated centroids, \newline
+That is, \newline
+\( WCSS(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} (x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \) \newline
+Where \newline
+$m_j$ - the number of elements associated to centroid \( j \) \newline
+$c_j=(x_j,y_j)$ - the center point of centroid \( j \) \newline
+$p_{j_i}=(x_{j_i},y_{j_i})$ - the point $i$ of centroid \( j \) \newline
 
 
 
