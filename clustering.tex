@@ -10,68 +10,120 @@
 \usepackage{algorithmic}
 
 \begin{document}
-\textbf{Clustering Optimization using k-means}
+\textbf{Clustering Optimization using k-means} \newline
 
-\textbf{Preface}
-In this paper, we shall demonstrate two approaches for the optimizing the k-means algorithm for clustering. \newline
+\textbf{Preface} \newline
+In this paper, we shall demonstrate two approaches for optimizing the \newline
+k-means algorithm for clustering. \newline
+
+The problem of clustering is a good example of an optimization problem. \newline 
+The problem is, first, how to divide a set of n elements into a given number of \( k \) groups. We have many ways to do this, and we need to find the optimal grouping, assigning to each group its best matching elements. \newline
+
+Moreover, in real-life problems, \( k \) itself is unknown and needs to be optimized by the machine itself. We can theoretically declare the whole set of elements as one cluster, or consider each element as its own cluster, but that would be pointless. Thus, we need to find a way to optimize the choice of the number \( k \), assuming the first problem itself (finding the optimal grouping, for a given \( k \)) has an optimal solution. \newline
 
 There are two kinds of clustering that we would like to consider, \newline
 \underline{which may affect the algorithm that we run}, \newline \newline
 \textbf{1. Clustering of scattered details} \newline
 In this kind of clustering, we try to identify clusters from details that are scattered along the image.
 This can have various applications, such as \newline \textbf{Military Intelligence} (clusters of troops, aircraft, armored vehicles), \newline
-\textbf{Nature Science} (clustered structures of birds, insects, fish) and many more. \newline \newline
-\textbf{2. Identification of natural clusters} \newline
-In this kind of clustering, we try to identify large objects, from samples found in the imagery. A major example for this
-kind of clustering would be face recognition, where we have many features in some photo, and we try to isolate and
+\textbf{Nature Science} (clustered structures of birds, insects, fish), and many more. \newline \newline
+\textbf{2. Identification of objects as clusters} \newline
+In this kind of clustering, we try to identify large objects, from samples found in the image. A major example of this kind of clustering would be face recognition, 
+where we have many features in some image, and we try to isolate and
 identify the face of a person, or of several people. \newline
-
-\textbf{The basic k-means algorithm}
-One of the classic algorithms for clustering is the k-means algorithm. This algorithm is based on a very simple concept
-of acquiring initial data, then adjusting this data until the algorithm stables. \newline
-This algorithm is called k-means, because we are trying to find \( k \in \mathbb{N} \) clusters, which are supposed to
-give the optimal clustering, because each cluster has a center point, which is the mean of all the points that are grouped
+\newpage
+\textbf{The basic k-means algorithm} \newline
+One of the classic algorithms for clustering is the k-means algorithm. \newline
+This algorithm is based on a very simple concept of acquiring initial data, 
+then adjusting this data until the algorithm stables. This algorithm is called k-means, 
+because we are trying to find \( k \in \mathbb{N} \) clusters, out of \( n \in \mathbb{N} \) elements,
+which are supposed to give the optimal clustering because each cluster has a center point, which is the mean of all the points that are grouped
 together in this cluster. We call this cluster, or the center point of this cluster, a \textbf{centroid}. \newline
 
-The basic description of this algorithm, for a given k, is,
+The basic description of this algorithm, for a given \( k \), is, \newline
+\textbf{1. Initializing} Initialize a set of \( k \) centroids within the pixels of the image. \newline
+\textbf{2. Association} For each element, calculate its distance from the center of each cluster, find the centroid with the minimal distance from this element, and associate the element to this centroid. \newline
+\textbf{3. Recalculation} Using the association of the elements, calculate the center point of each centroid again, by taking the mean point of all its associated elements. \newline
+\textbf{4. Iteration} Iterate steps 2 and 3 until the algorithm turns stable, that is, there are no more moves of associated elements between centroids. \newline
 
 \begin{algorithm}
 \caption{Calculate k-means}
 \begin{algorithmic} 
 \REQUIRE 
 \ENSURE 
+\STATE $r \leftarrow true$
+\newline
 \STATE $L \leftarrow size(samples)$
-\STATE $i \leftarrow 1$
-\WHILE{$i \neq L$}
+\newline
+\WHILE{$r$ is $true$}
+\STATE $a \leftarrow 0$
+\newline
+\STATE $i \leftarrow 0$
+\WHILE{$i < L$}
 \STATE $s \leftarrow samples[i]$
-
-\STATE $j \leftarrow 1$
-\WHILE{$j \neq k$}
+\newline
+\STATE $f \leftarrow null$
+\STATE $m \leftarrow null$
+\newline
+\STATE $j \leftarrow 0$
+\WHILE{$j < k$}
 \STATE $c \leftarrow centroids[j]$
+\newline
 \STATE $dx \leftarrow s.x - c.x$
 \STATE $dy \leftarrow s.y - c.y$
-
 \STATE $d2 \leftarrow dx^2+dy^2$
-\ENDWHILE
-\ENDWHILE
-\IF{$n < 0$}
-\STATE $X \leftarrow 1 / x$
-\STATE $N \leftarrow -n$
-\ELSE
-\STATE $X \leftarrow x$
-\STATE $N \leftarrow n$
+\newline
+\IF{$m$ is null \OR $d2 < m$}
+\STATE $m \leftarrow d2$
+\STATE $f \leftarrow c$
 \ENDIF
-\WHILE{$N \neq 0$}
-\IF{$N$ is even}
-\STATE $X \leftarrow X \times X$
-\STATE $N \leftarrow N / 2$
-\ELSE[$N$ is odd]
-\STATE $y \leftarrow y \times X$
-\STATE $N \leftarrow N - 1$
+\newline
+\IF{$s.c \neq f$}
+\STATE $a \leftarrow a+1$
 \ENDIF
+\newline
+\STATE $j \leftarrow j+1$
+\ENDWHILE
+\newline
+\STATE $i \leftarrow i+1$
+\ENDWHILE
+\newline
+\IF{$a < 1$}
+\STATE $r \leftarrow false$
+\ENDIF
+\newline
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
+
+\newpage
+
+This algorithm, as described, is promised to converge, that is, to achieve a stable state, where the stopping condition (no more moves between centroids) is satisfied.
+
+The proof of convergence is given by the basic observation that the number of grouping options, for a given number of \( k \) clusters, out of \(n \) elements, is obviously finite, and that on each step, we get a better score on the clustering.
+A full proof can be found at [1] \newline
+
+\textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given \( k \)\newline
+\textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local optimum} only, because, if we start from a different setting, we may converge to another local optimum, possibly to the best existing solution, which we shall refer to as the \underline{global optimum}. \newline
+
+\textbf{The Elbow method}
+Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each \( k \), thus significantly larger. \newline
+
+To automatically choose the optimal number of \( k \), we need a way to compare the scores of different values of \( k \), running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each \( k \), and then present this score as a function of \( k \). \newline
+
+Taking a range of \( k \) values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we shall observe that for the lower values of \( k \), the function is decreasing rapidly, while after a certain value of \( k \), the function is taking a significant turn, from a high (negative) slope, into a nearly asymptotic graph. 
+This means that for less than the optimum \( k \) value, our clusters are too large, and for more than the optimum, the more \( k \) clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
+
+In other words, the optimal number of \( k \) is the turning point of the graph, from the high slope to the asymptote. This is why it is called “elbow” because it resembles a folded arm and the elbow that is the outmost point in the arm. So, if we can compute different ranges of numbers, for different maximal \( k \) values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of \( k \)), for each \( m_i \), then we have the optimal number of \( k \), for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average \( k \), with or without some weight or probability considerations. \newline
+
+
+
+
+
+
+
+
+
 
 
 
