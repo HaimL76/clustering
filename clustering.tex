@@ -126,6 +126,34 @@ $m_j$ - the number of elements associated to centroid \( j \) \newline
 $c_j=(x_j,y_j)$ - the center point of centroid \( j \) \newline
 $p_{j_i}=(x_{j_i},y_{j_i})$ - the point $i$ of centroid \( j \) \newline
 
+So, at first glance, we are looking for a \( k \) value that will yield the minimal WCSS. \newline
+However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
+for the optimal value. Indeed, if we continue to calculate the k-means for higher values of \( k \), \newline
+The WCSS will decrease to the minimum, without giving us any benefit, but actually ruining the clustering. \newline
+It is a trivial observation since we can always take \( k=n \), that is, declare each element as a separate cluster, thus obtaining  \( WCSS(k=n):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} 0=\sum_{j=1}^{k} 0=0 \),
+\newline
+which is clearly the minimal WCSS possible, while it is obvious that this clustering result is absolutely wrong. \newline
+Going back to the elbow method from above, we need to construct an algorithm that will automatically determine the optimal \( k \) values, by finding the elbow. So, basically, our algorithm outline will look like this, \newline
+\textbf{1.} set $k$, an initial number of desired clusters \newline
+\textbf{2.} calculate $k$ centroids, using the k-means algorithm from above \newline
+\textbf{3.} calculate $WCSS(k)$, if it is the optimal value, return $k$ \newline
+\textbf{4.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 3. \newline
+
+So, this algorithm can run, theoretically, until \( k=n \). \newline
+However, we can observe that this is not exactly the desired algorithm, because, \newline
+how do we know that we have achieved the elbow, that is, the optimal value? \newline
+
+So, we edit this algorithm in a slightly different manner,\newline
+\textbf{1.} set $s$, the number of successful optimal $k$ calculations \newline
+\textbf{2.} set $t$, the tolerance for optimal $k$ values. \newline
+\textbf{3.} set $q$, a number representing a quant of $k$ values to calculate \newline
+\textbf{4.} set $k$, an initial number of desired clusters} \newline
+\textbf{5.} calculate $k$ centroids, using the k-means algorithm from above} \newline
+\textbf{6.} calculate $WCSS(k)$, and store it in an array \newline
+\textbf{7.} if $k$=0 mod $q$, calculate the optimal $k$ using all the stored WCSS values and store it in an array \newline
+\textbf{8.} if the array of optimal $k$ values has $s$ identical values of $k$, or if their difference is in the range of $t$, we take their value (in case they are identical), or some average between them, and return this value as the final $k$ value. \newline
+\textbf{9.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 5. \newline
+
 
 
 
