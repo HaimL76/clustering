@@ -8,6 +8,7 @@
 \usepackage{xcolor}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{xfrac}
 
 \begin{document}
 \textbf{Clustering Optimization using k-means} \newline
@@ -41,7 +42,7 @@ which are supposed to give the optimal clustering because each cluster has a cen
 together in this cluster. We call this cluster, or the center point of this cluster, a \textbf{centroid}. \newline
 
 The basic description of this algorithm, for a given \( k \), is, \newline
-\textbf{1. Initializing} Initialize a set of \( k \) centroids within the pixels of the image. \newline
+\textbf{1. Initialization} Initialize a set of \( k \) centroids within the pixels of the image. \newline
 \textbf{2. Association} For each element, calculate its distance from the center of each cluster, find the centroid with the minimal distance from this element, and associate the element to this centroid. \newline
 \textbf{3. Recalculation} Using the association of the elements, calculate the center point of each centroid again, by taking the mean point of all its associated elements. \newline
 \textbf{4. Iteration} Iterate steps 2 and 3 until the algorithm turns stable, that is, there are no more moves of associated elements between centroids. \newline
@@ -147,13 +148,99 @@ So, we edit this algorithm in a slightly different manner,\newline
 \textbf{1.} set $s$, the number of successful optimal $k$ calculations \newline
 \textbf{2.} set $t$, the tolerance for optimal $k$ values. \newline
 \textbf{3.} set $q$, a number representing a quant of $k$ values to calculate \newline
-\textbf{4.} set $k$, an initial number of desired clusters} \newline
-\textbf{5.} calculate $k$ centroids, using the k-means algorithm from above} \newline
+\textbf{4.} set $k$, an initial number of desired clusters \newline
+\textbf{5.} calculate $k$ centroids, using the k-means algorithm from above \newline
 \textbf{6.} calculate $WCSS(k)$, and store it in an array \newline
 \textbf{7.} if $k$=0 mod $q$, calculate the optimal $k$ using all the stored WCSS values and store it in an array \newline
 \textbf{8.} if the array of optimal $k$ values has $s$ identical values of $k$, or if their difference is in the range of $t$, we take their value (in case they are identical), or some average between them, and return this value as the final $k$ value. \newline
 \textbf{9.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 5. \newline
 
+\begin{algorithm}
+\caption{Calculate elbow for k-means}
+\begin{algorithmic} 
+\REQUIRE
+\STATE $q$: quant of $k$ for optimum calculations
+\STATE $s$: number of successful elbow calculations
+\STATE $t$: tolerance of $k$ value
+\ENSURE 
+\STATE $L \leftarrow size(samples)$
+\newline
+\STATE $a \leftarrow $ float[]
+\STATE $b \leftarrow $ integer[]
+\newline
+\STATE $r \leftarrow true$
+\newline
+\WHILE{$r$ is $true$}
+\STATE $a \leftarrow 0$
+\newline
+\STATE $i \leftarrow 0$
+\WHILE{$i < L$}
+\STATE $s \leftarrow samples[i]$
+\newline
+\STATE $f \leftarrow null$
+\STATE $m \leftarrow null$
+\newline
+\STATE $j \leftarrow 0$
+\WHILE{$j < k$}
+\STATE $c \leftarrow centroids[j]$
+\newline
+\STATE $dx \leftarrow s.x - c.x$
+\STATE $dy \leftarrow s.y - c.y$
+\STATE $d2 \leftarrow dx^2+dy^2$
+\newline
+\IF{$m$ is null \OR $d2 < m$}
+\STATE $m \leftarrow d2$
+\STATE $f \leftarrow c$
+\ENDIF
+\newline
+\IF{$s.c \neq f$}
+\STATE $a \leftarrow a+1$
+\ENDIF
+\newline
+\STATE $j \leftarrow j+1$
+\ENDWHILE
+\newline
+\STATE $i \leftarrow i+1$
+\ENDWHILE
+\newline
+\IF{$a < 1$}
+\STATE $r \leftarrow false$
+\ENDIF
+\newline
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\textbf{A statistical k-means hybrid algorithm} \newline
+Our approach is a hybrid method, which is using the basic k-means algorithm, together with \newline statistical considerations. \newline
+
+The basic concept of our method is making practical use of the \textbf{CLT} – the Central Limit Theorem. \newline
+CLT is a well-known fundamental theorem in probability and statistics, which says that given a sequence of $n$ random variables, \( \{X_i\}_{i=1}^n \), with mean $\mu$ and variance $\sigma^2$, we mark the average 
+\( \bar{X_n}:=\frac{\sum_{i=1}^n X_i}{n} \), then,\newline
+the sequence \( \frac{\bar{X_n}-\mu}{\sfrac{\sigma}{\sqrt{n}}} \) converges in distribution 
+to the normal (Gaussian) distribution, with $\mu$ and $\sigma^2$ as parameters.
+
+This theorem, although appearing abstract, since we are referring to the convergence of the sequence 
+as $n$ tends to infinity, is actually very useful in applications, since we practically do not need a significantly large $n$, but it works also on small values of $n$.
+
+This allows us to utilize CLT for our purposes. We can run the basic k-means algorithm on the elements, but then we can automatically split clusters by a very basic statistical observation.
+
+The normal distribution, in statistics, is used for calculating, for each random variable a score, which is called a \textbf{Z-score} or a \textbf{standard score}. This means that we have a linear scale, for measuring the distance of each random variable from the mean, in units of standard deviation, and there exists a formula, which gives us the probability for each Z-score.
+For each sample, $X_i$, its Z-score is $Z_i:=\frac{X_i-\mu}{\sigma}$. The probability, $\mathbb{P}(Z_i < z)$, can be found in a standard table of already calculated values. \newline
+Also, we will be interested in calculating the absolute value of the Z-score, since, for our specific problem, there is no meaning to the question is the sample is location "before" or "after" the center point of the centroid, so there is no difference between $Z_i=\frac{X_i-\mu}{\sigma}$ and -$Z_i=\frac{\mu-X_i}{\sigma}$ \newline
+And so, if we say that a specific Z-score is higher or lower, we shall refer to its absolute value. \newline
+
+Thus, the algorithm, after combining this statistical calculation, is,
+
+1. set an initial value of k, which can be quite small.
+2. associate all the elements to their closest centroid.
+3. for each centroid, calculate its mean, std, and the Z-score of each associated element.
+4. for each centroid, count the number of elements that have a Z-score higher than X. If the count is higher than Y, create a new centroid, and associate all these elements to this centroid.
+If the count is lower than Y, then check the “ignore” flag. If it is true, then remove the association of these elements to the current centroid. If it is false, then keep these elements associated to the current centroid.
+5. for each centroid, calculate its center point again, as the mean of all the associated elements.
+6. while the number of cluster is increasing, or associated elements are still moving from one cluster to another, repeat from step 2.
+7. (after the algorithm turned stable) return the current list of centroids.
 
 
 
