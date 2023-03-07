@@ -9,8 +9,11 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{xfrac}
+\usepackage{setspace}
+\DeclareRobustCommand{\stirling2}{\genfrac\{\}{0pt}{}}
 
 \begin{document}
+\onehalfspacing
 \textbf{Clustering Optimization using k-means} \newline
 
 \textbf{Preface} \newline
@@ -33,8 +36,27 @@ In this kind of clustering, we try to identify large objects, from samples found
 where we have many features in some image, and we try to isolate and
 identify the face of a person, or of several people. \newline
 \newpage
+
+\textbf{Definition of the problem} \newline
+First, we shall observe the obvious fact that there is a finite number of choosing $k$ clusters out of $n$ elements. \newline
+In fact, this number is known as a \textbf{Stirling number of the second kind}, it is marked as $\stirling2{n}{k}$ and is given by the formula \newline
+$S(n,k)=\stirling2{n}{k}:=\frac{1}{k!} \sum_{i=0}^k (-1)^i \binom{k}{i}(k-i)^n$ \newline
+Moreover, if we are not given the value of $k$, then the total number of options, to choose any \( 1 \leq k \leq n \) from $n$,
+is known as \textbf{Bell number}, and is given by \( B_n:=\sum_{k=0}^n \stirling2{n}{k}\) \newline
+
+In addition, we shall be able to attach a score to each partition of $k$ from $n$, which measures the match between the center point and the locations of the associated elements \newline
+This score is known as \textbf{WCSS} (Within-Cluster Sum of Square), \newline
+which means, we calculate the squared distances of all the elements from their associated clusters, \newline
+That is, \newline
+\( WCSS(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
+Where \newline
+$m_j$ - the number of elements associated to cluster \( j \) \newline
+$c_j=(x_j,y_j)$ - the center point of cluster \( j \) \newline
+$p_{j_i}=(x_{j_i},y_{j_i})$ - the point $i$ of cluster \( j \) \newline
+So, for a given $k$, our goal is to find arg min(WCSS($k$)), which is a classical optimization problem. \newline
+\newpage
 \textbf{The basic k-means algorithm} \newline
-One of the classic algorithms for clustering is the k-means algorithm. \newline
+One of the very well-known algorithms for clustering is the k-means algorithm. \newline
 This algorithm is based on a very simple concept of acquiring initial data, 
 then adjusting this data until the algorithm stables. This algorithm is called k-means, 
 because we are trying to find \( k \in \mathbb{N} \) clusters, out of \( n \in \mathbb{N} \) elements,
@@ -105,7 +127,7 @@ The proof of convergence is given by the basic observation that the number of gr
 A full proof can be found at [1] \newline
 
 \textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given \( k \)\newline
-\textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local optimum} only, because, if we start from a different setting, we may converge to another local optimum, possibly to the best existing solution, which we shall refer to as the \underline{global optimum}. \newline
+\textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local minimum} only, because, if we start from a different setting, we may converge to another local minimum, possibly to the best existing solution, which we shall refer to as the \underline{global minimum}. \newline
 
 \textbf{The Elbow method} \newline
 Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each \( k \), thus significantly larger. \newline
@@ -118,14 +140,7 @@ This means that for less than the optimum \( k \) value, our clusters are too la
 In other words, the optimal number of \( k \) is the turning point of the graph, from the high slope to the asymptote. This is why it is called “elbow” because it resembles a folded arm and the elbow that is the outmost point in the arm. So, if we can compute different ranges of numbers, for different maximal \( k \) values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of \( k \)), for each \( m_i \), then we have the optimal number of \( k \), for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average \( k \), with or without some weight or probability considerations. \newline
 
 \textbf{WCSS} \newline
-The score we are calculating, for the elbow method, is \underline{WCSS} (Within-Cluster Sum of Square), \newline
-which means, we calculate the squared distances of all the elements from their associated centroids, \newline
-That is, \newline
-\( WCSS(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} (x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \) \newline
-Where \newline
-$m_j$ - the number of elements associated to centroid \( j \) \newline
-$c_j=(x_j,y_j)$ - the center point of centroid \( j \) \newline
-$p_{j_i}=(x_{j_i},y_{j_i})$ - the point $i$ of centroid \( j \) \newline
+The score we are calculating, for the elbow method, is 
 
 So, at first glance, we are looking for a \( k \) value that will yield the minimal WCSS. \newline
 However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
@@ -228,21 +243,23 @@ This allows us to utilize CLT for our purposes. We can run the basic k-means alg
 
 The normal distribution, in statistics, is used for calculating, for each random variable a score, which is called a \textbf{Z-score} or a \textbf{standard score}. This means that we have a linear scale, for measuring the distance of each random variable from the mean, in units of standard deviation, and there exists a formula, which gives us the probability for each Z-score.
 For each sample, $X_i$, its Z-score is $Z_i:=\frac{X_i-\mu}{\sigma}$. The probability, $\mathbb{P}(Z_i < z)$, can be found in a standard table of already calculated values. \newline
-Also, we will be interested in calculating the absolute value of the Z-score, since, for our specific problem, there is no meaning to the question is the sample is location "before" or "after" the center point of the centroid, so there is no difference between $Z_i=\frac{X_i-\mu}{\sigma}$ and -$Z_i=\frac{\mu-X_i}{\sigma}$ \newline
+Also, we will be interested in calculating the absolute value of the Z-score, since, for our specific problem, there is no meaning to the question is the sample is located "before" or "after" the center point of the centroid, so there is no difference between $Z_i=\frac{X_i-\mu}{\sigma}$ and -$Z_i=\frac{\mu-X_i}{\sigma}$ \newline
 And so, if we say that a specific Z-score is higher or lower, we shall refer to its absolute value. \newline
 
 Thus, the algorithm, after combining this statistical calculation, is,
 
-1. set an initial value of k, which can be quite small.
-2. associate all the elements to their closest centroid.
-3. for each centroid, calculate its mean, std, and the Z-score of each associated element.
-4. for each centroid, count the number of elements that have a Z-score higher than X. If the count is higher than Y, create a new centroid, and associate all these elements to this centroid.
-If the count is lower than Y, then check the “ignore” flag. If it is true, then remove the association of these elements to the current centroid. If it is false, then keep these elements associated to the current centroid.
-5. for each centroid, calculate its center point again, as the mean of all the associated elements.
-6. while the number of cluster is increasing, or associated elements are still moving from one cluster to another, repeat from step 2.
-7. (after the algorithm turned stable) return the current list of centroids.
+\textbf{1.} set an initial value of k, which can be quite small. \newline
+\textbf{2.} associate all the elements to their closest centroid. \newline
+\textbf{3.} for each centroid, calculate its mean, std, and the Z-score of each associated element. \newline
+\textbf{4.} for each centroid, count the number of elements that have a Z-score higher than X. If the count is higher than Y, create a new centroid, and associate all these elements to this centroid.
+If the count is lower than Y, then check the “ignore” flag. If it is true, then remove the association of these elements to the current centroid. If it is false, then keep these elements associated with the current centroid. \newline
+\textbf{5.} for each centroid, calculate its center point again, as the mean of all the associated elements. \newline
+\textbf{6.} while the number of clusters is increasing, or associated elements are still moving from one cluster to another, repeat step 2. \newline
+\textbf{7.} (after the algorithm turned stable) return the current list of centroids. \newline
 
-
+\textbf{Proposition} The algorithm above is converging to a local minimum.\newline
+\textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
+The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering is a reasonable one. \newline
 
 
 
