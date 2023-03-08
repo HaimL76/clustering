@@ -150,7 +150,10 @@ def display_clusters(image, centroids: list):
     cv2.destroyAllWindows()
 
 
-def cluster_image_with_lib(full_path: str, k_max: int, display_optimal_k: bool = False):
+def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: int = 0, display_optimal_k: bool = False):
+    if k_iteration_index_quant < 1:
+        k_iteration_index_quant = k_max
+
     tup: tuple = get_corners(full_path)
 
     image = tup[0]
@@ -164,8 +167,6 @@ def cluster_image_with_lib(full_path: str, k_max: int, display_optimal_k: bool =
         centroids: list = []
 
         prev_inertia_ = None
-
-        k_iteration_index_quant: int = 5
 
         k_start: int = 3
 
@@ -262,7 +263,7 @@ def cluster_image_with_lib(full_path: str, k_max: int, display_optimal_k: bool =
         for max_distance in max_distances:
             print(f'max k: {max_distance[0]}, max distance: {max_distance[1]}, optim k: {max_distance[2]}')
 
-        if display_optimal_k:
+        if display_optimal_k and isinstance(optim_k, int):
             # Calculate again, for the optimal k
             kmeans = KMeans(n_clusters=optim_k, init='k-means++', max_iter=300, n_init=10, random_state=0)
             kmeans.fit(X)
@@ -302,14 +303,14 @@ def cluster_image_with_lib(full_path: str, k_max: int, display_optimal_k: bool =
 
         print(f'wcss: {wcss}')
 
-        # plt.plot(range(k_start, k_max), wcss)
-        # plt.title('Elbow Method')
-        # plt.xlabel('Number of clusters')
-        # plt.ylabel('WCSS')
-        # plt.plot([x_start, x_end], [y_start, y_end])
-        #
-        # plt.show()
-        #
+        plt.plot(list(map(lambda tup: tup[0], arr)), list(map(lambda tup: tup[1], arr)))
+        plt.title('Elbow Method')
+        plt.xlabel('Number of clusters')
+        plt.ylabel('WCSS')
+        #plt.plot([x_start, x_end], [y_start, y_end])
+
+        plt.show()
+
         display_clusters(image, centroids)
 
 
