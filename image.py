@@ -307,7 +307,8 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
             wcss += d
 
         print(f'wcss: {wcss}')
-
+        points_rotated = rotate_graph(x_start, y_start, x_end, y_end, arr[:max_num_of_clusters], max_num_of_clusters)
+        plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
         plt.plot(list(map(lambda tup: tup[0], arr)), list(map(lambda tup: tup[1], arr)))
         plt.title('Elbow Method')
         plt.xlabel('Number of clusters')
@@ -319,18 +320,33 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
         display_clusters(image, centroids)
 
 
+def plot_rotated_graph(points_rotated):
+        plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
+        plt.title('Elbow Method Rotated Graph')
+        plt.xlabel('Number of clusters(after rotation)')
+        plt.ylabel('WCSS(after rotation)')
+        #plt.plot([x_start, x_end], [y_start, y_end])
+
+        plt.show()
+
 def calculate_k_with_graph_rotation(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters):
     points_rotated = rotate_graph(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters)
     min_tuple = None
     min_tuple = min(points_rotated, key=lambda x: x[1])
     print("the k after the rotation is: ", min_tuple[2])
+    # plot_rotated_graph(points_rotated)
+
+
+
+
+
 
 def calculate_alpha(x1, y1, x2, y2):
     dx = x2 - x1
     dy = y2 - y1
 
     alpha = np.arctan(dy/dx)
-
+    print("alpha: ", alpha)
     return -alpha
 
 
