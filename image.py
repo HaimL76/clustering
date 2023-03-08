@@ -208,6 +208,11 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
                 y_start = tup_start[1]
                 y_end = tup_end[1]
 
+
+
+                calculate_k_with_graph_rotation(x_start, y_start, x_end, y_end, arr, max_num_of_clusters)
+
+
                 if x_end > x_start:
                     # This is the slope of the line between the first and last points
                     a: float = (y_end - y_start) / (x_end - x_start)
@@ -312,6 +317,43 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
         plt.show()
 
         display_clusters(image, centroids)
+
+
+def calculate_k_with_graph_rotation(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters):
+    points_totated = rotate_graph(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters)
+
+    min_tuple = min(points_totated, key=lambda x: x[1])
+    print("the k after the rotation is: ", min_tuple[2])
+
+def calculate_alpha(x1, y1, x2, y2):
+    dx = x2 - x1
+    dy = y2 - y1
+
+    alpha = np.arctan(dy/dx)
+
+    return alpha
+
+
+def move_point1_to_center(x1, y1, arr_k_wcss, max_num_of_clusters):
+    new_arr_k_wcss = [(k_wcss[0] - x1, k_wcss[1] - y1, k_wcss[0]) for k_wcss in arr_k_wcss]
+    return new_arr_k_wcss
+    
+
+def rotate_points(arr_k_wcss,alpha):
+    return [rotate_by_alpha(point[0],point[1],point[2], alpha) for point in arr_k_wcss]
+
+
+def rotate_by_alpha(x, y, k, alpha):
+
+    new_x = x*np.cos(alpha) - y*np.sin(alpha)
+    new_y = x*np.sin(alpha) + y*np.cos(alpha)
+    return (new_x, new_y, k)
+
+def rotate_graph(x1, y1,x2,y2, arr_k_wcss, max_num_of_clusters):
+    alpha = calculate_alpha(x1, y1,x2,y2)
+    points_centered = move_point1_to_center(x1, y1, arr_k_wcss, max_num_of_clusters)
+    return rotate_points(points_centered,alpha)
+
 
 
 def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
