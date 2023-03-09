@@ -47,13 +47,13 @@ is known as \textbf{Bell number}, and is given by \( B_n:=\sum_{k=0}^n \stirling
 In addition, we shall be able to attach a score to each partition of $k$ from $n$, which measures the match between the center point and the locations of the associated elements \newline
 This score is known as \textbf{WCSS} (Within-Cluster Sum of Square), \newline
 which means, we calculate the squared distances of all the elements from their associated clusters, \newline
-That is, \newline
-\( WCSS(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
+That is (using $w(k)$ instead of WCSS($k$)), \newline
+\( w(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
 Where \newline
 $m_j$ - the number of elements associated to cluster \( j \) \newline
 $c_j=(x_j,y_j)$ - the center point of cluster \( j \) \newline
 $p_{j_i}=(x_{j_i},y_{j_i})$ - the point $i$ of cluster \( j \) \newline
-So, for a given $k$, our goal is to find arg min(WCSS($k$)), which is a classical optimization problem. \newline
+So, for a given $k$, our goal is to find arg min(w($k$)), which is a classical optimization problem. \newline
 \newpage
 \textbf{The basic k-means algorithm} \newline
 One of the very well-known algorithms for clustering is the k-means algorithm. \newline
@@ -134,6 +134,14 @@ Recall from above, one major problem that we have, with the k-means algorithm, i
 
 To automatically choose the optimal number of \( k \), we need a way to compare the scores of different values of \( k \), running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each \( k \), and then present this score as a function of \( k \). \newline
 
+At first glance, we are looking for a \( k \) value that will yield the minimal WCSS. \newline
+However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
+for the optimal value. Indeed, if we continue to calculate the k-means for higher values of \( k \), \newline
+The WCSS will decrease to the minimum, without giving us any benefit, but actually ruining the clustering. \newline
+It is a trivial observation since we can always take \( k=n \), that is, declare each element as a separate cluster, thus obtaining  \( w(k=n):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} 0=\sum_{j=1}^{k} 0=0 \),
+\newline
+which is clearly the minimal WCSS possible, while it is obvious that this clustering result is absolutely wrong. \newline
+
 Taking a range of \( k \) values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we shall observe that for the lower values of \( k \), the function is decreasing rapidly, while after a certain value of \( k \), the function is taking a significant turn, from a high (negative) slope, into a nearly asymptotic graph. 
 This means that for less than the optimum \( k \) value, our clusters are too large, and for more than the optimum, the more \( k \) clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
 
@@ -143,20 +151,51 @@ In other words, the optimal number of \( k \) is the turning point of the graph,
 
 So, if we can compute different ranges of numbers, for different maximal \( k \) values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of \( k \)), for each \( m_i \), then we have the optimal number of \( k \), for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average \( k \), with or without some weight or probability considerations. \newline
 
+We would like to have a clear elbow point, for each image, so we can have a simple algorithm to calculate it, \newline
+but in reality, this is hardly the case. For example, we compare two computations of the elbow method, on the same image, \newline
+one is computing a range of $\{3,4,5,6\}$ clusters, while the other is computing a range of $\{3,4,...,60\}$. \newline
+\includegraphics[width=0.50\columnwidth]{Figure_6.png}
+\includegraphics[width=0.50\columnwidth]{Figure_60.png} \newline
+While the 6 clusters computation has a clear elbow point (at $k=4$), \newline
+the 60 clusters graph is schematically looking like exponential decay, \newline
+which clearly does not have a minimum. \newline
 
-The score we are calculating, for the elbow method, is 
+So, we need to find a way to compute the optimal elbow point. \newline
+Our approach, for this problem, is based on the following observation, \newline
+If we draw a straight line, $A$, between the first $k$ and last $k$ points $(k_0,w_0),(k_m,w_m)$, 
+where $w_i=w(k_i)$ \newline
+We can see that the elbow is the most distant point from this line (when the distance from a point $(k_i,w_i)$ to $A$ is given by 
+min$\{\lVert(k_i,w_i)-a\rVert : a \in A\}$  \newline
 
-So, at first glance, we are looking for a \( k \) value that will yield the minimal WCSS. \newline
-However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
-for the optimal value. Indeed, if we continue to calculate the k-means for higher values of \( k \), \newline
-The WCSS will decrease to the minimum, without giving us any benefit, but actually ruining the clustering. \newline
-It is a trivial observation since we can always take \( k=n \), that is, declare each element as a separate cluster, thus obtaining  \( WCSS(k=n):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} 0=\sum_{j=1}^{k} 0=0 \),
-\newline
-which is clearly the minimal WCSS possible, while it is obvious that this clustering result is absolutely wrong. \newline
+So, a simple way for us to calculate the most distant point, would be to rotate the set of points, \newline
+so the first and last $k$ have the same value of $y$, and calculate the lowest $y$ of all the $k$ clusters
+that we have computed. \newline
+This can be achieved by rotating all the $(k_i,w(k_i))$ around $(k_0,w(k_0))$ \newline
+This can be done simply by using a rotation matrix, of the form,
+$$
+\begin{bmatrix}
+\cos\theta & -\sin\theta \\
+\sin\theta & \cos\theta \\
+\end{bmatrix}
+$$
+where $\theta=tan^{-1}(\frac{w_m-w_0}{k_m-k_0})$ \newline
+So, for $1 \leq i \leq m$, mark $(x'_i,y'_i)$ as $(x_i,y_i)$ rotated by $\theta$, \newline
+$$
+\begin{bmatrix}
+x'_i \\
+y'_i \\
+\end{bmatrix}=\begin{bmatrix}
+\cos\theta & -\sin\theta \\
+\sin\theta & \cos\theta \\
+\end{bmatrix} \cdot \begin{bmatrix}
+x_i \\
+y_i \\
+\end{bmatrix}
+$$
 Going back to the elbow method from above, we need to construct an algorithm that will automatically determine the optimal \( k \) values, by finding the elbow. So, basically, our algorithm outline will look like this, \newline
 \textbf{1.} set $k$, an initial number of desired clusters \newline
 \textbf{2.} calculate $k$ centroids, using the k-means algorithm from above \newline
-\textbf{3.} calculate $WCSS(k)$, if it is the optimal value, return $k$ \newline
+\textbf{3.} calculate $w(k)$, if it is the optimal value, return $k$ \newline
 \textbf{4.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 3. \newline
 
 So, this algorithm can run, theoretically, until \( k=n \). \newline
@@ -169,7 +208,7 @@ So, we edit this algorithm in a slightly different manner,\newline
 \textbf{3.} set $q$, a number representing a quant of $k$ values to calculate \newline
 \textbf{4.} set $k$, an initial number of desired clusters \newline
 \textbf{5.} calculate $k$ centroids, using the k-means algorithm from above \newline
-\textbf{6.} calculate $WCSS(k)$, and store it in an array \newline
+\textbf{6.} calculate $w(k)$, and store it in an array \newline
 \textbf{7.} if $k$=0 mod $q$, calculate the optimal $k$ using all the stored WCSS values and store it in an array \newline
 \textbf{8.} if the array of optimal $k$ values has $s$ identical values of $k$, or if their difference is in the range of $t$, we take their value (in case they are identical), or some average between them, and return this value as the final $k$ value. \newline
 \textbf{9.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 5. \newline
@@ -264,6 +303,11 @@ If the count is lower than Y, then check the “ignore” flag. If it is true, t
 \textbf{Proposition} The algorithm above is converging to a local minimum.\newline
 \textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
 The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering is a reasonable one. \newline
+
+\textbf{Bibliography}
+\newpage
+[1]
+[2] \verb|https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d#:~:text=The%20elbow%20method%20is%20a,cluster%20and%20the%20cluster%20centroid.|
 
 
 
