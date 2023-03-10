@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+import os
 import pandas as pd
 from matplotlib import pyplot as plt
 #from sklearn.datasets.samples_generator import make_blobs
@@ -314,11 +314,14 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
         plt.xlabel('Number of clusters')
         plt.ylabel('WCSS')
         #plt.plot([x_start, x_end], [y_start, y_end])
+        
 
-        plt.show()
+        # plt.savefig(f'{full_path}../')
+        # plt.show()
 
         display_clusters(image, centroids)
-
+        result = {'Algorithem':'kmeans by sklearn','Image':os.path.splitext(os.path.basename(full_path))[0],'wcss':wcss,'Optimal k':optim_k,'Initial Centroids':'kmeans++'}
+        return result
 
 def plot_rotated_graph(points_rotated):
         plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
@@ -327,7 +330,7 @@ def plot_rotated_graph(points_rotated):
         plt.ylabel('WCSS(after rotation)')
         #plt.plot([x_start, x_end], [y_start, y_end])
 
-        plt.show()
+        # plt.show()
 
 def calculate_k_with_graph_rotation(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters):
     points_rotated = rotate_graph(x1, y1, x2, y2, arr_k_wcss, max_num_of_clusters)
@@ -392,3 +395,8 @@ def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols:
                 index += 1
 
             display_clusters(image, centroids)
+
+            wcss: float = kmeans.calculate_wcss()
+
+            result = {'Algorithem':'KMeansImplemented','Image':os.path.splitext(os.path.basename(full_path))[0],'wcss':wcss,'Optimal k':len(centroids),'Initial Centroids':'random' if random_mode else 'fixed'}
+            return result

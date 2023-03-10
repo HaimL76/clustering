@@ -121,7 +121,7 @@ class ConvexHull(object):
         plt.plot(hx, hy)
 
         plt.title('Convex Hull')
-        plt.show()
+        # plt.show()
 
 
 def main():  
