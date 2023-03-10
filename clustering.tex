@@ -269,19 +269,21 @@ So, we edit this algorithm in a slightly different manner,\newline
 \STATE $ArrOpt \leftarrow $ append($ArrOpt,m$)
 \ENDIF
 \IF{size($ArrOpt$) = $s$}
-return average($ArrOpt$)
+\STATE $r \leftarrow false$
+\ELSE
+\STATE $k \leftarrow k+1$
 \ENDIF
 \newline
-\STATE $k \leftarrow k+1$
 \ENDWHILE
+\STATE return average($ArrOpt$)
 \end{algorithmic}
 \end{algorithm}
 
 \newpage
 \textbf{A statistical k-means hybrid algorithm} \newline
-Our approach is a hybrid method, which is using the basic k-means algorithm, together with \newline statistical considerations. \newline
+Our approach is a hybrid method, which is using the basic k-means algorithm, together with statistical considerations. \newline
 
-The basic concept of our method is making practical use of the \textbf{CLT} – the Central Limit Theorem. \newline
+The basic concept of our method is making practical use of the \textbf{Central Limit Theorem (CLT)}. \newline
 CLT is a well-known fundamental theorem in probability and statistics, which says that given a sequence of $n$ random variables, \( \{X_i\}_{i=1}^n \), with mean $\mu$ and variance $\sigma^2$, we mark the average 
 \( \bar{X_n}:=\frac{\sum_{i=1}^n X_i}{n} \), then,\newline
 the sequence \( \frac{\bar{X_n}-\mu}{\sfrac{\sigma}{\sqrt{n}}} \) converges in distribution 
@@ -306,14 +308,60 @@ Thus, the algorithm, after combining this statistical calculation, is,
 If the count is lower than Y, then check the “ignore” flag. If it is true, then remove the association of these elements to the current centroid. If it is false, then keep these elements associated with the current centroid. \newline
 \textbf{5.} for each centroid, calculate its center point again, as the mean of all the associated elements. \newline
 \textbf{6.} while the number of clusters is increasing, or associated elements are still moving from one cluster to another, repeat step 2. \newline
-\textbf{7.} (after the algorithm turned stable) return the current list of centroids. \newline
+\textbf{7.} (after the algorithm turned stable) returns the current list of centroids. \newline
+\newpage
+\begin{algorithm}
+\caption{Calculate k-means with Z-score}
+\begin{algorithmic} 
+\REQUIRE
+\STATE $s0$: the minimal count of samples in a cluster (the default is 30)
+\STATE $z0$: the maximal allowed Z-score for a cluster
+\STATE $k0$: the $k$ to start from
+\STATE $samples$: the list of samples
+\ENSURE
+\STATE $r \leftarrow true$
+\newline
+\STATE $centroids \leftarrow null$
+\WHILE{$r = true$}
+\STATE $m \leftarrow 0$
+\STATE $centroids \leftarrow $ k-means($samples, k$)
+\STATE $m \leftarrow $ (number of moves between clusters)
+\newline
+\STATE $i \leftarrow 0$
+\WHILE{$i<k$}
+\STATE $c \leftarrow centroids[i]$
 
+\STATE $j \leftarrow 0$
+\STATE $c0 \leftarrow sample[]$
+\WHILE{$j<size(c.samples)$}
+\STATE $s \leftarrow c.samples[j]$
+\STATE $z \leftarrow $ Z-score($c,s$)
+\STATE $j \leftarrow j+1$
+\IF{$z<z0$}
+\STATE remove($c.samples,s$)
+\STATE append($c0,s$)
+\ENDIF
+\STATE $i \leftarrow i+1$
+\ENDWHILE
+\IF{size($c0) > s0$}
+\STATE append($centroids,centroid(c0)$)
+\newline
+\STATE $m \leftarrow m+1$
+\ENDIF
+\ENDWHILE
+\IF{$m$ < 1}
+\STATE $r \leftarrow false$
+\ENDIF
+\ENDWHILE
+\STATE return $centroids$
+\end{algorithmic}
+\end{algorithm}
+\newpage
 \textbf{Proposition} The algorithm above is converging to a local minimum.\newline
 \textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
-The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering is a reasonable one. \newline
-
-\textbf{Bibliography}
+The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum). \newline
 \newpage
+\textbf{Bibliography} \newline
 [1] \verb|https://khoury.northeastern.edu/home/hand/teaching/cs6140-fall-2021/Day-18-K-Means-Clustering.pdf|
 [2] \verb|https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d#:~:text=The%20elbow%20method%20is%20a,cluster%20and%20the%20cluster%20centroid.|
 
