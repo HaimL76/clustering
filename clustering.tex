@@ -87,16 +87,16 @@ The basic description of this algorithm, for a given $k$, is, \newline
 \caption{Calculate k-means}
 \begin{algorithmic} 
 \REQUIRE 
+\STATE $samples$: the list of samples
 \ENSURE 
 \STATE $r \leftarrow true$
-\newline
-\STATE $L \leftarrow size(samples)$
+\STATE $n \leftarrow size(samples)$
 \newline
 \WHILE{$r$ is $true$}
 \STATE $a \leftarrow 0$
 \newline
 \STATE $i \leftarrow 0$
-\WHILE{$i < L$}
+\WHILE{$i < n$}
 \STATE $s \leftarrow samples[i]$
 \newline
 \STATE $f \leftarrow null$
@@ -192,7 +192,7 @@ where $\theta=tan^{-1}(\frac{w_m-w_0}{k_m-k_0})$ \newline
 So, for $1 \leq i \leq m$, mark $(x'_i,y'_i)$ as $(x_i,y_i)$ rotated by $\theta$, \newline
 To be more accurate, since we want to rotate the whole graph around the first point \newline
 (so, after the rotation, both the first and the last point will have the same $y'$ coordinate), \newline
-we need to bring $(k_0,w(k_0))$, to the origin, and the whole graph slong with it. \newline
+we need to bring $(k_0,w(k_0))$, to the origin, and the whole graph along with it. \newline
 So, the calculation will be, \newline
 $$
 \begin{bmatrix}
@@ -206,7 +206,7 @@ x_i-x_0 \\
 y_i-y_0 \\
 \end{bmatrix}
 $$
-
+\newpage
 \textbf{The enveloping algorithm}
 Now, we need to construct an algorithm that will automatically determine the optimal $k$ values, by finding the elbow. So, basically, our algorithm outline will look like this, \newline
 \textbf{1.} set $k$, an initial number of desired clusters \newline
@@ -236,51 +236,43 @@ So, we edit this algorithm in a slightly different manner,\newline
 \STATE $q$: quant of $k$ for optimum calculations
 \STATE $s$: number of successful elbow calculations
 \STATE $t$: tolerance of $k$ value
+\STATE $k0$: the $k$ to start from
+\STATE $samples$: the list of samples
 \ENSURE 
-\STATE $L \leftarrow size(samples)$
+\STATE $centroids \leftarrow null$
 \newline
-\STATE $a \leftarrow $ float[]
-\STATE $b \leftarrow $ integer[]
+\STATE $k \leftarrow k0$
+\newline
+\STATE $ArrCent \leftarrow $ float[]
+\STATE $ArrOpt \leftarrow $ integer[]
 \newline
 \STATE $r \leftarrow true$
 \newline
-\WHILE{$r$ is $true$}
-\STATE $a \leftarrow 0$
+\WHILE{$r$ is $true$ and $k<n$}
+\STATE $centroids \leftarrow $ k-means($samples, k$)
 \newline
-\STATE $i \leftarrow 0$
-\WHILE{$i < L$}
-\STATE $s \leftarrow samples[i]$
+\STATE $ArrCent[k] \leftarrow $ wcss($centroids$)
 \newline
-\STATE $f \leftarrow null$
+\IF{$k$ mod $q$ = 0}
 \STATE $m \leftarrow null$
 \newline
-\STATE $j \leftarrow 0$
-\WHILE{$j < k$}
-\STATE $c \leftarrow centroids[j]$
+\STATE $i \leftarrow 0$
+\WHILE{$i < k$}
+\STATE $w \leftarrow ArrCent[i]$
 \newline
-\STATE $dx \leftarrow s.x - c.x$
-\STATE $dy \leftarrow s.y - c.y$
-\STATE $d2 \leftarrow dx^2+dy^2$
-\newline
-\IF{$m$ is null \OR $d2 < m$}
-\STATE $m \leftarrow d2$
-\STATE $f \leftarrow c$
+\IF{$m = null$ or $m > w$}
+\STATE $m \leftarrow w$
 \ENDIF
-\newline
-\IF{$s.c \neq f$}
-\STATE $a \leftarrow a+1$
-\ENDIF
-\newline
-\STATE $j \leftarrow j+1$
-\ENDWHILE
 \newline
 \STATE $i \leftarrow i+1$
 \ENDWHILE
-\newline
-\IF{$a < 1$}
-\STATE $r \leftarrow false$
+\STATE $ArrOpt \leftarrow $ append($ArrOpt,m$)
+\ENDIF
+\IF{size($ArrOpt$) = $s$}
+return average($ArrOpt$)
 \ENDIF
 \newline
+\STATE $k \leftarrow k+1$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
