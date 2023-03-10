@@ -373,7 +373,7 @@ def rotate_graph(x1, y1,x2,y2, arr_k_wcss, max_num_of_clusters):
 
 
 
-def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0):
+def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols: int=0,random_mode=False):
     tup: tuple = get_corners(full_path)
 
     image = tup[0]
@@ -382,7 +382,7 @@ def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols:
     if isinstance(list_samples, list) and len(list_samples) > 0:
         kmeans: KMeansImplemented = KMeansImplemented()
 
-        centroids = kmeans.get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+        centroids = kmeans.get_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols,random_mode=random_mode)
 
         if isinstance(centroids, list) and len(centroids) > 0:
             index: int = 0

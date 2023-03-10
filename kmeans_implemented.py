@@ -2,7 +2,7 @@ from threading import Thread
 
 from linked_list import LinkedList
 from mypoint import Centroid, Sample, MyPoint
-
+import random
 
 def centroid_calculate_center(centroid: Centroid):
     centroid.calculate_center()
@@ -149,7 +149,20 @@ class KMeansImplemented:
 
         return associations_changed
 
-    def initialize_centroids(self, num_rows: int, num_cols: int, list_samples: list, k: int):
+    def initialize_centroids(self, num_rows: int, num_cols: int, list_samples: list, k: int,random_mode=False):
+    
+        if random_mode:
+            self.initialize_centroids_by_random( num_rows, num_cols, list_samples, k)
+        else:
+            self.initialize_centroids_by_quat( num_rows, num_cols, list_samples, k)
+
+    def initialize_centroids_by_random(self, num_rows: int, num_cols: int, list_samples: list, k: int):
+        if self.list_centroids is None or len(self.list_centroids) < 1:
+            for i in range(k):
+                center = random.choice(list_samples)
+                self.list_centroids.append(Centroid(self.set_highest_index(), center.x, center.y))
+
+    def initialize_centroids_by_quat(self, num_rows: int, num_cols: int, list_samples: list, k: int):
         if self.list_centroids is None or len(self.list_centroids) < 1:
             quant_rows = 0
             quant_cols = 0
@@ -194,13 +207,13 @@ class KMeansImplemented:
 
 
 
-    def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0):
+    def calculate_centroids(self, list_samples: list, k: int, radius: float = 0, num_rows: int = 0, num_cols: int = 0,random_mode=False):
         # print("enter calculate centroids")
 
         if not isinstance(list_samples, list) or len(list_samples) < 1:
             return
 
-        self.initialize_centroids(num_rows=num_rows, num_cols=num_cols, list_samples=list_samples, k=k)
+        self.initialize_centroids(num_rows=num_rows, num_cols=num_cols, list_samples=list_samples, k=k,random_mode=random_mode)
         #self.calculate_k_plus_plus(k, list_samples)
 
         associations_changed: int = self.associate_samples_to_centroids(list_samples=list_samples)
@@ -226,15 +239,15 @@ class KMeansImplemented:
         if associations_changed > 0:
             self.recalculate_centers()
             self.clear_centroids()
-            self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols)
+            self.calculate_centroids(list_samples, k, radius=radius, num_rows=num_rows, num_cols=num_cols,random_mode=random_mode)
 
-    def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
-        self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+    def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int,random_mode:False):
+        self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols,random_mode=random_mode)
 
         return self.list_centroids
 
-    def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int):
-        self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols)
+    def get_centroids(self, list_samples: list, k: int, num_rows: int, num_cols: int,random_mode:False):
+        self.calculate_centroids(list_samples, k, num_rows=num_rows, num_cols=num_cols,random_mode=random_mode)
 
         dunn_index: float = self.calculate_dunn_index()
 
