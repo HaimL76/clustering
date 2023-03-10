@@ -4,6 +4,7 @@
 \makeatother
 \usepackage{amsfonts}
 \usepackage{amsmath}
+\usepackage{amssymb} 
 \usepackage{tikz-cd}
 \usepackage{xcolor}
 \usepackage{algorithm}
@@ -21,21 +22,21 @@ In this paper, we shall demonstrate two approaches for optimizing the \newline
 k-means algorithm for clustering. \newline
 
 The problem of clustering is a good example of an optimization problem. \newline 
-The problem is, first, how to divide a set of n elements into a given number of \( k \) groups. We have many ways to do this, and we need to find the optimal grouping, assigning to each group its best matching elements. \newline
+The problem is, first, how to divide a set of $n$ elements into a \underline{given number} of $k$ groups ($k << n$). We have many ways to do this, and we need to find an optimal grouping, assigning to each group its best matching elements. \newline
 
-Moreover, in real-life problems, \( k \) itself is unknown and needs to be optimized by the machine itself. We can theoretically declare the whole set of elements as one cluster, or consider each element as its own cluster, but that would be pointless. Thus, we need to find a way to optimize the choice of the number \( k \), assuming the first problem itself (finding the optimal grouping, for a given \( k \)) has an optimal solution. \newline
+Moreover, in real-life problems, $k$ itself is unknown and needs to be \underline{found} by the machine itself. We can theoretically declare the whole set of elements as one cluster, or consider each element as its own cluster, but that would be pointless. Thus, we need to find a way to optimize the choice of the number $k$, assuming the first problem itself (finding the optimal grouping, for a given $k$) has an optimal solution. \newline
 
 There are two kinds of clustering that we would like to consider, \newline
 \underline{which may affect the algorithm that we run}, \newline \newline
 \textbf{1. Clustering of scattered details} \newline
 In this kind of clustering, we try to identify clusters from details that are scattered along the image.
 This can have various applications, such as \newline \textbf{Military Intelligence} (clusters of troops, aircraft, armored vehicles), \newline
-\textbf{Nature Science} (clustered structures of birds, insects, fish), and many more. \newline \newline
+\textbf{Nature Science} (clustered structures of birds, insects, fish), and more.
+\newpage
 \textbf{2. Identification of objects as clusters} \newline
 In this kind of clustering, we try to identify large objects, from samples found in the image. A major example of this kind of clustering would be face recognition, 
 where we have many features in some image, and we try to isolate and
 identify the face of a person, or of several people. \newline
-\newpage
 
 \textbf{Definition of the problem} \newline
 First, we shall observe the obvious fact that there is a finite number of choosing $k$ clusters out of $n$ elements. \newline
@@ -44,11 +45,15 @@ $S(n,k)=\stirling2{n}{k}:=\frac{1}{k!} \sum_{i=0}^k (-1)^i \binom{k}{i}(k-i)^n$ 
 Moreover, if we are not given the value of $k$, then the total number of options, to choose any \( 1 \leq k \leq n \) from $n$,
 is known as \textbf{Bell number}, and is given by \( B_n:=\sum_{k=0}^n \stirling2{n}{k}\) \newline
 
+Obviously, we need to find the optimal partition of the set of $n$ elements, and, if we cannot find the absolute optimum, we would have to find a local optimum partition, which will give us a reasonable clustering. \newline
+
+So, given a set, $S$, of $n$ elements, and looking from the view of topology, we always have the trivial topology $\{\varnothing, S\}$, as well as the discrete topology, where each element is an open set. The same goes for clustering, obviously, we always have trivial partitions, meaning either the whole set of elements is considered as one single cluster, or every single element is considered a cluster on its own, both, clearly, being useless. \newline
+
 In addition, we shall be able to attach a score to each partition of $k$ from $n$, which measures the match between the center point and the locations of the associated elements \newline
 This score is known as \textbf{WCSS} (Within-Cluster Sum of Square), \newline
 which means, we calculate the squared distances of all the elements from their associated clusters, \newline
 That is (using $w(k)$ instead of WCSS($k$)), \newline
-\( w(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} (c_j - p_{j_i})^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
+\( w(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} \lVert c_j - p_{j_i} \rVert^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
 Where \newline
 $m_j$ - the number of elements associated to cluster \( j \) \newline
 $c_j=(x_j,y_j)$ - the center point of cluster \( j \) \newline
@@ -63,8 +68,8 @@ because we are trying to find \( k \in \mathbb{N} \) clusters, out of \( n \in \
 which are supposed to give the optimal clustering because each cluster has a center point, which is the mean of all the points that are grouped
 together in this cluster. We call this cluster, or the center point of this cluster, a \textbf{centroid}. \newline
 
-The basic description of this algorithm, for a given \( k \), is, \newline
-\textbf{1. Initialization} Initialize a set of \( k \) centroids within the pixels of the image. \newline
+The basic description of this algorithm, for a given $k$, is, \newline
+\textbf{1. Initialization} Initialize a set of $k$ centroids within the pixels of the image. \newline
 \textbf{2. Association} For each element, calculate its distance from the center of each cluster, find the centroid with the minimal distance from this element, and associate the element to this centroid. \newline
 \textbf{3. Recalculation} Using the association of the elements, calculate the center point of each centroid again, by taking the mean point of all its associated elements. \newline
 \textbf{4. Iteration} Iterate steps 2 and 3 until the algorithm turns stable, that is, there are no more moves of associated elements between centroids. \newline
@@ -123,33 +128,33 @@ The basic description of this algorithm, for a given \( k \), is, \newline
 
 This algorithm, as described, is promised to converge, that is, to achieve a stable state, where the stopping condition (no more moves between centroids) is satisfied.
 
-The proof of convergence is given by the basic observation that the number of grouping options, for a given number of \( k \) clusters, out of \(n \) elements, is obviously finite, and that on each step, we get a better score on the clustering.
+The proof of convergence is given by the basic observation that the number of grouping options, for a given number of $k$ clusters, out of \(n \) elements, is obviously finite, and that on each step, we get a better score on the clustering.
 A full proof can be found at [1] \newline
 
-\textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given \( k \)\newline
+\textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given $k$\newline
 \textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local minimum} only, because, if we start from a different setting, we may converge to another local minimum, possibly to the best existing solution, which we shall refer to as the \underline{global minimum}. \newline
 
 \textbf{The Elbow method} \newline
-Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each \( k \), thus significantly larger. \newline
+Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each $k$, thus significantly larger. \newline
 
-To automatically choose the optimal number of \( k \), we need a way to compare the scores of different values of \( k \), running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each \( k \), and then present this score as a function of \( k \). \newline
+To automatically choose the optimal number of $k$, we need a way to compare the scores of different values of $k$, running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each $k$, and then present this score as a function of $k$. \newline
 
-At first glance, we are looking for a \( k \) value that will yield the minimal WCSS. \newline
+At first glance, we are looking for a $k$ value that will yield the minimal WCSS. \newline
 However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
-for the optimal value. Indeed, if we continue to calculate the k-means for higher values of \( k \), \newline
+for the optimal value. Indeed, if we continue to calculate the k-means for higher values of $k$, \newline
 The WCSS will decrease to the minimum, without giving us any benefit, but actually ruining the clustering. \newline
 It is a trivial observation since we can always take \( k=n \), that is, declare each element as a separate cluster, thus obtaining  \( w(k=n):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} 0=\sum_{j=1}^{k} 0=0 \),
 \newline
 which is clearly the minimal WCSS possible, while it is obvious that this clustering result is absolutely wrong. \newline
 
-Taking a range of \( k \) values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we shall observe that for the lower values of \( k \), the function is decreasing rapidly, while after a certain value of \( k \), the function is taking a significant turn, from a high (negative) slope, into a nearly asymptotic graph. 
-This means that for less than the optimum \( k \) value, our clusters are too large, and for more than the optimum, the more \( k \) clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
+Taking a range of $k$ values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we shall observe that for the lower values of $k$, the function is decreasing rapidly, while after a certain value of $k$, the function is taking a significant turn, from a high (negative) slope, into a nearly asymptotic graph. 
+This means that for less than the optimum $k$ value, our clusters are too large, and for more than the optimum, the more $k$ clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
 
-In other words, the optimal number of \( k \) is the turning point of the graph, from the high slope to the asymptote. This is why it is called “elbow” because it resembles a folded arm and the elbow that is the outmost point in the arm. \newline
+In other words, the optimal number of $k$ is the turning point of the graph, from the high slope to the asymptote. This is why it is called “elbow” because it resembles a folded arm and the elbow that is the outmost point in the arm. \newline
 
 \includegraphics[width=0.38\columnwidth]{elbow-oa---final.png} \newline
 
-So, if we can compute different ranges of numbers, for different maximal \( k \) values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of \( k \)), for each \( m_i \), then we have the optimal number of \( k \), for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average \( k \), with or without some weight or probability considerations. \newline
+So, if we can compute different ranges of numbers, for different maximal $k$ values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of $k$), for each \( m_i \), then we have the optimal number of $k$, for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average $k$, with or without some weight or probability considerations. \newline
 
 We would like to have a clear elbow point, for each image, so we can have a simple algorithm to calculate it, \newline
 but in reality, this is hardly the case. For example, we compare two computations of the elbow method, on the same image, \newline
@@ -180,6 +185,10 @@ $$
 $$
 where $\theta=tan^{-1}(\frac{w_m-w_0}{k_m-k_0})$ \newline
 So, for $1 \leq i \leq m$, mark $(x'_i,y'_i)$ as $(x_i,y_i)$ rotated by $\theta$, \newline
+To be more accurate, since we want to rotate the whole graph around the first point \newline
+(so, after the rotation, both the first and the last point will have the same $y'$ coordinate), \newline
+we need to bring $(k_0,w(k_0))$, to the origin, and the whole graph slong with it. \newline
+So, the calculation will be, \newline
 $$
 \begin{bmatrix}
 x'_i \\
@@ -188,11 +197,13 @@ y'_i \\
 \cos\theta & -\sin\theta \\
 \sin\theta & \cos\theta \\
 \end{bmatrix} \cdot \begin{bmatrix}
-x_i \\
-y_i \\
+x_i-x_0 \\
+y_i-y_0 \\
 \end{bmatrix}
 $$
-Going back to the elbow method from above, we need to construct an algorithm that will automatically determine the optimal \( k \) values, by finding the elbow. So, basically, our algorithm outline will look like this, \newline
+
+\textbf{The enveloping algorithm}
+Now, we need to construct an algorithm that will automatically determine the optimal $k$ values, by finding the elbow. So, basically, our algorithm outline will look like this, \newline
 \textbf{1.} set $k$, an initial number of desired clusters \newline
 \textbf{2.} calculate $k$ centroids, using the k-means algorithm from above \newline
 \textbf{3.} calculate $w(k)$, if it is the optimal value, return $k$ \newline
