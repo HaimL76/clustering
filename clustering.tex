@@ -74,7 +74,7 @@ One of the very well-known algorithms for clustering is the k-means algorithm. \
 This algorithm is based on a very simple concept of acquiring initial data, 
 then adjusting this data until the algorithm stables. This algorithm is called k-means 
 because we are trying to find well-scattered clusters, whose center points are the means of their associated elements, calculated, for each $k_i=(x_i,y_i)=(\{{{x_i}_j}\}_{j=1}^{m_i},\{{{y_i}_j}\}_{j=1}^{m_i})$ as 
-$\mu($k_i)=\mu(x_i,y_i):=(\sum_{j=1}^{m_i}{{x_i}_j},\sum_{j=1}^{m_i}{{y_i}_j})$
+$\mu(k_i)=\mu(x_i,y_i):=(\sum_{j=1}^{m_i}{{x_i}_j},\sum_{j=1}^{m_i}{{y_i}_j})$ \newline
 We call each k-mean, a \textbf{centroid}. \newline
 
 The basic description of this algorithm, for a given $k$, is, \newline
@@ -144,18 +144,11 @@ A full proof can be found at [1] \newline
 \textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local minimum} only, because, if we start from a different setting, we may converge to another local minimum, possibly to the best existing solution, which we shall refer to as the \underline{global minimum}. \newline
 
 \textbf{The Elbow method} \newline
-Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of k, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each $k$, thus significantly larger. \newline
+Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of $k$, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each $k$, thus significantly large. \newline
 
 To automatically choose the optimal number of $k$, we need a way to compare the scores of different values of $k$, running under the same conditions. This brings us to an optimization method, called the \textbf{Elbow Method}. The basic concept of this method is that we can compute some score on each $k$, and then present this score as a function of $k$. \newline
-
-At first glance, we are looking for a $k$ value that will yield the minimal WCSS. \newline
-However, we can observe, as mentioned before, that we are not looking for a minimal value, but rather 
-for the optimal value. Indeed, if we continue to calculate the k-means for higher values of $k$, \newline
-The WCSS will decrease to the minimum, without giving us any benefit, but actually ruining the clustering. \newline
-It is a trivial observation since we can always take \( k=n \), that is, declare each element as a separate cluster, thus obtaining  \( w(k=n):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} 0=\sum_{j=1}^{k} 0=0 \),
-\newline
-which is clearly the minimal WCSS possible, while it is obvious that this clustering result is absolutely wrong. \newline
-
+So, our natural choice, for this score function, would be the WCSS, described above. \newline 
+However, as mentioned before, we cannot look for a minimal value of the WCSS, rather we look for an optimal value.
 Taking a range of $k$ values, that is, \( \{k_1,k_2,k_3,…,k_m \} \), we shall observe that for the lower values of $k$, the function is decreasing rapidly, while after a certain value of $k$, the function is taking a significant turn, from a high (negative) slope, into a nearly asymptotic graph. 
 This means that for less than the optimum $k$ value, our clusters are too large, and for more than the optimum, the more $k$ clusters we calculate, in the k-means algorithm running, we do not add any improvement for the clustering, but exactly the opposite, meaning the output clusters will split the real clusters in the image, and not give us any beneficial clustering information. \newline
 
@@ -163,19 +156,22 @@ In other words, the optimal number of $k$ is the turning point of the graph, fro
 
 \includegraphics[width=0.38\columnwidth]{elbow-oa---final.png} \newline
 
-So, if we can compute different ranges of numbers, for different maximal $k$ values, \( \{m_1,m_2,m_3,…,m_l \} \), and we get the same elbow (that is, a specific value of $k$), for each \( m_i \), then we have the optimal number of $k$, for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average $k$, with or without some weight or probability considerations. \newline
+So, if we can compute different ranges of numbers, for different maximal $k$ values, \( \{k{m_1},k{m_2},k{m_3},…,k{m_l} \} \), and we get the same elbow (that is, a specific value of $k$), for each \( m_i \), then we have the optimal number of $k$, for this image. We can even assume that the optimum will move up and down, but will maintain some boundaries, from which we can take the average $k$, with or without some weight or probability considerations. \newline
 
 We would like to have a clear elbow point, for each image, so we can have a simple algorithm to calculate it, \newline
 but in reality, this is hardly the case. For example, we compare two computations of the elbow method, on the same image, \newline
 one is computing a range of $\{3,4,5,6\}$ clusters, while the other is computing a range of $\{3,4,...,60\}$. \newline
 \includegraphics[width=0.50\columnwidth]{Figure_6.png}
 \includegraphics[width=0.50\columnwidth]{Figure_60.png} \newline
-While the 6 clusters computation has a clear elbow point (at $k=4$), \newline
-the 60 clusters graph is schematically looking like exponential decay, \newline
-which clearly does not have a minimum. \newline
+Both graphs do not have a minimal point, in the classic sense,
+but while the 6 clusters computation has a clear elbow point (at $k=4$), \newline
+which can be computed by calculating, for instance, \newline
+arg min $\angle k_{i-1}k_{i}k_{i+1},0 \leq i \leq m$ (the angle between every two segments in the graph),
+the 60 clusters graph (schematically looking like exponential decay), \newline
+is approximating a smooth function, and does not have a clear elbow point. \newline
 
-So, we need to find a way to compute the optimal elbow point. \newline
-Our approach, for this problem, is based on the following observation, \newline
+So, we need to find a way to compute the optimal elbow point, when the $k$ is not given, obviously, and thus can theoretically get to $k=n$\newline
+Our approach, to this problem, is based on the following observation, \newline
 If we draw a straight line, $A$, between the first $k$ and last $k$ points $(k_0,w_0),(k_m,w_m)$, 
 where $w_i=w(k_i)$ \newline
 We can see that the elbow is the most distant point from this line (when the distance from a point $(k_i,w_i)$ to $A$ is given by 
@@ -326,7 +322,7 @@ The splitting of the clusters, using the statistical criteria, must obviously st
 
 \textbf{Bibliography}
 \newpage
-[1]
+[1] \verb|https://khoury.northeastern.edu/home/hand/teaching/cs6140-fall-2021/Day-18-K-Means-Clustering.pdf|
 [2] \verb|https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d#:~:text=The%20elbow%20method%20is%20a,cluster%20and%20the%20cluster%20centroid.|
 
 
