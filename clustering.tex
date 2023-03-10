@@ -72,10 +72,10 @@ We will see this computation in the classic approach that we are showing next. T
 \textbf{The basic k-means algorithm} \newline
 One of the very well-known algorithms for clustering is the k-means algorithm. \newline
 This algorithm is based on a very simple concept of acquiring initial data, 
-then adjusting this data until the algorithm stables. This algorithm is called k-means, 
-because we are trying to find \( k \in \mathbb{N} \) clusters, out of \( n \in \mathbb{N} \) elements,
-which are supposed to give the optimal clustering because each cluster has a center point, which is the mean of all the points that are grouped
-together in this cluster. We call this cluster, or the center point of this cluster, a \textbf{centroid}. \newline
+then adjusting this data until the algorithm stables. This algorithm is called k-means 
+because we are trying to find well-scattered clusters, whose center points are the means of their associated elements, calculated, for each $k_i=(x_i,y_i)=(\{{{x_i}_j}\}_{j=1}^{m_i},\{{{y_i}_j}\}_{j=1}^{m_i})$ as 
+$\mu($k_i)=\mu(x_i,y_i):=(\sum_{j=1}^{m_i}{{x_i}_j},\sum_{j=1}^{m_i}{{y_i}_j})$
+We call each k-mean, a \textbf{centroid}. \newline
 
 The basic description of this algorithm, for a given $k$, is, \newline
 \textbf{1. Initialization} Initialize a set of $k$ centroids within the pixels of the image. \newline
