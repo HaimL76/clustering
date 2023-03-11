@@ -16,7 +16,7 @@ filename = r'''.\clustering\results.csv'''
 for file in files:
     print(f'{file}')
     image_name = os.path.splitext(os.path.basename(file))[0]
-    results.append(cluster_image_with_lib(f'{file}',k_iteration_index_quant=5, k_max=50, display_optimal_k=True))
+    results.append(cluster_image_with_lib(f'{file}',k_iteration_index_quant=10, k_max=50, display_optimal_k=True))
     results.append(cluster_image_implemented(f'{file}', 3,random_mode=False))
     results.append(cluster_image_implemented(f'{file}', 3,random_mode=True))
     
@@ -33,5 +33,5 @@ with open(filename, 'a', newline='') as csvfile:
     writer.writeheader()
 
     # Write each row of data to the CSV file
-    for row in data:
+    for row in results:
         writer.writerow(row)

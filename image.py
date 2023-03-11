@@ -50,7 +50,7 @@ def get_corners(full_path: str) -> list:
     return image, list_samples
 
 
-def display_clusters(image, centroids: list):
+def display_clusters(image, centroids: list,image_name,algorithem):
     if not isinstance(centroids, list):
         raise ValueError("centroids")
 
@@ -145,9 +145,12 @@ def display_clusters(image, centroids: list):
     ##print(f'corners = {corners}, {type(corners)}')
 
     # the window showing output image with corners
-    cv2.imshow('Image with Corners', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow('Image with Corners', image)
+    type_of_image = "cluster"
+    path = fr".\clustering\results\{image_name}_{algorithem}_{type_of_image}.png"
+    cv2.imwrite(path,image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 
 def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: int = 0, display_optimal_k: bool = False):
@@ -305,21 +308,26 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
             d: float = dx * dx + dy * dy
 
             wcss += d
-
+        image_name=os.path.splitext(os.path.basename(full_path))[0]
+        algorithem='kmeans_by_sklearn'
         print(f'wcss: {wcss}')
         points_rotated = rotate_graph(x_start, y_start, x_end, y_end, arr[:max_num_of_clusters], max_num_of_clusters)
-        plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
+        # plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
         plt.plot(list(map(lambda tup: tup[0], arr)), list(map(lambda tup: tup[1], arr)))
         plt.title('Elbow Method')
         plt.xlabel('Number of clusters')
         plt.ylabel('WCSS')
         #plt.plot([x_start, x_end], [y_start, y_end])
-        
 
-        # plt.savefig(f'{full_path}../')
+        type_of_image = "elbow_method"
+        image_kind = f"{image_name}_{algorithem}_{type_of_image}"
+        base_path = "./clustering/results/"
+        # path = ".\\results\\" + image_name + "_" + algorithem + "_" + type_of_image + ".png"
+        plt.savefig(base_path + image_kind + ".png")
+        plt.clf()
         # plt.show()
 
-        display_clusters(image, centroids)
+        display_clusters(image, centroids, image_name=image_name, algorithem = algorithem )
         result = {'Algorithem':'kmeans by sklearn','Image':os.path.splitext(os.path.basename(full_path))[0],'wcss':wcss,'Optimal k':optim_k,'Initial Centroids':'kmeans++'}
         return result
 
@@ -394,7 +402,10 @@ def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols:
                 centroid.index = index
                 index += 1
 
-            display_clusters(image, centroids)
+            image_name=os.path.splitext(os.path.basename(full_path))[0]
+            algorithem='KMeansImplemented'
+
+            display_clusters(image, centroids,image_name=image_name,algorithem=algorithem)
 
             wcss: float = kmeans.calculate_wcss()
 
