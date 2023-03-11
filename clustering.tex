@@ -143,6 +143,26 @@ A full proof can be found at [1] \newline
 \textbf{Proposition} The k-means algorithm does not necessarily give an optimal solution, for a given $k$\newline
 \textbf{Explanation} The given proof only proves that if we start from some initial setting of the system, we are sure to converge, at some point. However, this convergence is to a \underline{local minimum} only, because, if we start from a different setting, we may converge to another local minimum, possibly to the best existing solution, which we shall refer to as the \underline{global minimum}. \newline
 
+\textbf{Seeding methods} \newline
+As proved, the k-means algorithm is promised to converge to some local minimum, but it's not guaranteed to converge to the global minimum, \newline
+meaning, we do not necessarily obtain the best clustering for the input image. \newline
+One way to manipulate the algorithm to a better convergence is by using a more sophisticated way for the algorithm initialization, which means, the seeding of the initial centroids. \newline
+The first dilemma, regarding centroid seeding, is whether we should take as centroids only points from the list of elements, on which we perform the clustering or points from the whole range of the image pixels. \newline
+We shall review three different seeding methods, and relate them to these two general categories.
+\newpage
+\textbf{1. Unified Scattering} \newline
+In this method, we simply seed our initial centroids at equal distances, along the image pixels. This method does not consider the list of elements for the scattering, therefore, it is most efficient for images that have the elements scattered all over the image pixels, and not just densely concentrated in several specific locations. \newline
+We have successfully tried this method, in our algorithm, taking the initial centroids from the top left corner, in equal distances, to the bottom right corner. \newline \newline
+\textbf{2. Random Scattering} \newline
+This method simply scatters the initial centroids randomly across the image.  This could be randomly choosing $k$ points from the list of elements, or from the image pixels. If we use the first, then we can simply take the $k$ centroids in equal spaces, from the list of elements. So, if the list size is $n$, we take $\{i \cdot \frac{n}{k}\}_{i=1}^k$ elements from the list, which can be considered random enough. \newline \newline
+\textbf{3. k-means++} \newline
+This method is actually doing pre-processing on the list of elements, in order to achieve an optimal initial scattering, which will result in obtaining an optimal clustering. \newline
+The algorithm description is, \newline
+1. Choose a random point from the list of elements, and add it to the list of centroids. \newline
+2. Go over the list of elements, choose the element whose distance from the first point is the maximal, and add it to the list of centroids. \newline
+3. Go over the list of elements, choose the element whose distance from all the points in the list of centroids is the maximal, and add it to the list of centroids. \newline
+4. Repeat step 3, until the list of centroids have $k$ centroids. \newline
+
 \textbf{The Elbow method} \newline
 Recall from above, one major problem that we have, with the k-means algorithm, is that the native algorithm requires an input number of $k$, for running. We also recall that the total number of ways to group \( n \) points to \( 1 \leq k \leq n \) clustering is given by the Bell number, which is a sum of the Stirling number, for each $k$, thus significantly large. \newline
 
