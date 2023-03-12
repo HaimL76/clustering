@@ -403,7 +403,7 @@ def cluster_image_implemented(full_path: str, k: int, num_rows: int=0, num_cols:
                 index += 1
 
             image_name=os.path.splitext(os.path.basename(full_path))[0]
-            algorithem='KMeansImplemented'
+            algorithem='KMeansImplemented_random' if random_mode else 'KMeansImplemented_fixed'
 
             display_clusters(image, centroids,image_name=image_name,algorithem=algorithem)
 
