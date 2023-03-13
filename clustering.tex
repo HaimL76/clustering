@@ -381,7 +381,7 @@ If the count is lower than $n_0$, then check the “ignore” flag. If it is tru
 \newpage
 \textbf{Proposition} The algorithm above is converging to a local minimum.\newline
 \textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
-The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum). \newline
+The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum), coming from the constraint on the minimal cluster size, and from the convergence of the k-means algorithm. \newline
 \newpage
 \textbf{Results}
 We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
