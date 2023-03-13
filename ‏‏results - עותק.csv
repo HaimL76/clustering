@@ -1,0 +1,14 @@
+Algorithem,Image,wcss,Optimal k,Initial Centroids
+Algorithem,Image,wcss,Optimal k,Initial Centroids
+kmeans by sklearn,birds1,219583984.2551131,10,kmeans++
+KMeansImplemented,birds1,40763761.18883403,58,fixed
+KMeansImplemented,birds1,40834406.072526984,57,random
+kmeans by sklearn,birds2,65030699.35956236,11,kmeans++
+KMeansImplemented,birds2,28446229.36740349,25,fixed
+KMeansImplemented,birds2,27865801.142052658,25,random
+kmeans by sklearn,kitniot0,108825664.94339865,9,kmeans++
+KMeansImplemented,kitniot0,22050247.255451865,32,fixed
+KMeansImplemented,kitniot0,20741308.896095935,36,random
+kmeans by sklearn,kitniot1,9721398.55520592,7,kmeans++
+KMeansImplemented,kitniot1,14033275.294708293,5,fixed
+KMeansImplemented,kitniot1,10842565.902701821,9,random
