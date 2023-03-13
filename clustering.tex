@@ -383,6 +383,24 @@ If the count is lower than $n_0$, then check the “ignore” flag. If it is tru
 \textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
 The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum), coming from the constraint on the minimal cluster size, and from the convergence of the k-means algorithm. \newline
 \newpage
+
+\textbf{\large Our work summary} \newline
+So far, we have described two approaches for the clustering problem, using the k-means algorithm, in its pure form, or in a wider, more hybrid solution. \newline
+We shall now summarize exactly what we did in the code, and then show the results of running both algorithms, and compare them. \newline
+
+\textbf{native k-means and the elbow method} \newline
+In this function, we used the well-known implementation of the k-means algorithm, in the sklearn library, and added a wrapper code, in order to run the k-means in a loop (over a range of $k$ values), and calculate the optimal elbow. \newline
+As we will display in the results, our calculation of the optimal $k$ (elbow) shows that for larger and larger ranges of $k$ values, the elbow keeps increasing. This means, allegedly, that we cannot use this computation for a real-life automatic clustering solution, because the code cannot determine the elbow just by computing it. \newline
+However, the elbow is increasing relatively slowly, in relation to the size of the range of $k$, thus, we have considered trying to use some threshold on the rate of elbow increase, in order to declare the optimal elbow value, once the increase rate goes lower than  this given threshold. \newline
+Another way we have considered is using a library, for computing the elbow, the same way we use the sklean k-means implementation. \newline
+As a demonstration (not appearing in the final code), we have used the yellowbrick library elbow visualizer, in order to display their computed elbow for different ranges of $k$. We actually got similar results to our computation (which is described above), meaning this library implementation also computes elbow values that are increasingly higher and higher. \newline
+At this point, we have designed and implemented our own solution, as described above. \newline
+
+\textbf{hybrid k-means with standard deviation} \newline
+In this function, we have implemented everything ourselves, including the k-means algorithm itself. \newline
+The reason, obviously, is that we wanted to try different ways to combine the standard deviation computation in the k-means algorithm itself, for example, by splitting the clusters, using the Z-score, after each centroid calculation, and not only after the stabilization of the k-means algorithm,
+for each value of $k$\newline 
+
 \textbf{Results}
 We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
 
