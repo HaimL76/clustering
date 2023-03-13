@@ -401,6 +401,12 @@ In this function, we have implemented everything ourselves, including the k-mean
 The reason, obviously, is that we wanted to try different ways to combine the standard deviation computation in the k-means algorithm itself, for example, by splitting the clusters, using the Z-score, after each centroid calculation, and not only after the stabilization of the k-means algorithm,
 for each value of $k$\newline 
 
+\textbf{The main function} \newline
+The program itself is running the two functions above, on the same set of images. \newline
+For all the operations on the images, such as reading them, displaying them, and calculating the image elements, we are using the well-known OpenCv library,
+where the heart of the image processing, for our program, is the \textbf{Harris corners detection} function. \newline
+Although the image processing and computer vision aspects of this program are not directly related to the scope of this work, it would be very suitable to mention here that the benefit of a good clustering algorithm can result also in the ability to cluster image elements also for noisy images (where not all the corners are very accurate), and still yield reasonable clustering.
+
 \textbf{Results}
 We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
 
