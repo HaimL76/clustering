@@ -15,9 +15,9 @@
 
 \begin{document}
 \onehalfspacing
-\textbf{Clustering Optimization using k-means} \newline
+\textbf{\huge Clustering Optimization using k-means} \newline
 
-\textbf{Preface} \newline
+\textbf{\large Preface} \newline
 In this paper, we shall demonstrate two approaches for optimizing the \newline
 k-means algorithm for clustering. \newline
 
@@ -38,9 +38,9 @@ In this kind of clustering, we try to identify large objects, from samples found
 where we have many features in some image, and we try to isolate and
 identify the face of a person, or of several people. \newline
 
-\textbf{Definition of the problem} \newline
+\textbf{\large Definition of the problem} \newline
 First, we shall observe the obvious fact that there is a finite number of choosing $k$ clusters out of $n$ elements. \newline
-In fact, this number is known as a \textbf{Stirling number of the second kind}, it is marked as $\stirling2{n}{k}$ and is given by the formula \newline
+In fact, this number is known as a \textbf{Stirling number of the second kind} [3], it is marked as $\stirling2{n}{k}$ and is given by the formula \newline
 $S(n,k)=\stirling2{n}{k}:=\frac{1}{k!} \sum_{i=0}^k (-1)^i \binom{k}{i}(k-i)^n$ \newline
 Moreover, if we are not given the value of $k$, then the total number of options, to choose any \( 1 \leq k \leq n \) from $n$,
 is known as \textbf{Bell number}, and is given by \( B_n:=\sum_{k=0}^n \stirling2{n}{k}\) \newline
@@ -52,8 +52,8 @@ So, we need some quantitative indicator, for each $k$ clustering, to measure the
 In addition, we want to set this score for each possible $k$,
 so we can find the optimal $k$, for a given set of $n$ elements. The basic concept is to run from some starting number, $k_0 \leq k \leq n$, until we find an optimal $k$ (if we have reached $k=n$, then clearly the algorithm is wrong). \newline
 
-\textbf{Within-Cluster Sum of Square} \newline
-One of the well-known clustering quality indicators is the \textbf{Within-Cluster Sum of Square (WCSS)} \newline
+\textbf{\large Within-Cluster Sum of Square} \newline
+One of the well-known clustering quality indicators is the \textbf{Within-Cluster Sum of Square (WCSS)} [4] \newline
 which means, we calculate the squared distances of all the elements from their associated clusters, \newline
 That is (using $w(k)$ instead of WCSS($k$)), \newline
 \( w(k):= \sum_{j=1}^{k} \sum_{i=1}^{m_j} \lVert c_j - p_{j_i} \rVert^2=\sum_{j=1}^{k} \sum_{i=1}^{m_j} ((x_j - x_{j_i})^2+(y_j - y_{j_i})^2 \)) \newline
@@ -69,12 +69,12 @@ which is clearly the minimal $w(k)$, but obviously a useless clustering result. 
 We will see this computation in the classic approach that we are showing next. The other approach we are presenting will make use of a different calculation of the clustering score. 
 
 \newpage
-\textbf{The basic k-means algorithm} \newline
+\textbf{\large The basic k-means algorithm} \newline
 One of the very well-known algorithms for clustering is the k-means algorithm. \newline
 This algorithm is based on a very simple concept of acquiring initial data, 
 then adjusting this data until the algorithm stables. This algorithm is called k-means 
-because we are trying to find well-scattered clusters, whose center points are the means of their associated elements, calculated, for each $k_i=(x_i,y_i)=(\{{{x_i}_j}\}_{j=1}^{m_i},\{{{y_i}_j}\}_{j=1}^{m_i})$ as 
-$\mu(k_i)=\mu(x_i,y_i):=(\sum_{j=1}^{m_i}{{x_i}_j},\sum_{j=1}^{m_i}{{y_i}_j})$ \newline
+because we are trying to find well-scattered clusters, whose center points are the means of their associated elements, calculated, for each $c_j=(x_j,y_j)=(\{{{x_j}_i}\}_{i=1}^{m_j},\{{{y_j}_i}\}_{i=1}^{m_j})$ as 
+$\mu(c_j)=\mu(x_j,y_j):=(\frac{\sum_{i=1}^{m_j}{{x_j}_i}}{m_j},\frac{\sum_{i=1}^{m_j}{{y_j}_i}}{m_j})$ \newline
 We call each k-mean, a \textbf{centroid}. \newline
 
 The basic description of this algorithm, for a given $k$, is, \newline
@@ -381,11 +381,15 @@ If the count is lower than Y, then check the “ignore” flag. If it is true, t
 \textbf{Explanation} This is trivial since each iteration is computing the k-means algorithm, for a given $k$, and this algorithm is promised to converge to a local minimum, as stated above. \newline
 The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum). \newline
 \newpage
+\textbf{Results}
+We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
+
+\newpage
 \textbf{Bibliography} \newline
 [1] \verb|https://khoury.northeastern.edu/home/hand/teaching/cs6140-fall-2021/Day-18-K-Means-Clustering.pdf|
 [2] \verb|https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d#:~:text=The%20elbow%20method%20is%20a,cluster%20and%20the%20cluster%20centroid.|
-
-
+[3] \verb|https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind|
+[4]\verb|https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203|
 
 
 
