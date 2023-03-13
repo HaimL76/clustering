@@ -147,7 +147,7 @@ def display_clusters(image, centroids: list,image_name,algorithem):
     # the window showing output image with corners
     # cv2.imshow('Image with Corners', image)
     type_of_image = "cluster"
-    path = fr".\clustering\results\{image_name}_{algorithem}_{type_of_image}.png"
+    path = fr".\results\{image_name}_{algorithem}_{type_of_image}.png"
     cv2.imwrite(path,image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -161,7 +161,8 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
 
     image = tup[0]
     list_samples: list = tup[1]
-
+    optimal_k_shifting = []
+    list_index_of_k = []
     if isinstance(list_samples, list) and len(list_samples) > 0:
         list0: list = list(map(lambda sample: [sample.x, sample.y], list_samples))
 
@@ -213,8 +214,9 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
 
 
 
-                calculate_k_with_graph_rotation(x_start, y_start, x_end, y_end, arr[:index_of_k], index_of_k)
-
+                optimal_k_after_rotation = calculate_k_with_graph_rotation(x_start, y_start, x_end, y_end, arr[:index_of_k], index_of_k)
+                optimal_k_shifting.append(optimal_k_after_rotation)
+                list_index_of_k.append(k+j)
 
                 if x_end > x_start:
                     # This is the slope of the line between the first and last points
@@ -265,6 +267,8 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
                     ratio: float = optim_index_of_k / index_of_k
 
                     print(f'optim index of k: {optim_index_of_k}, wcss: {y_end}, ratio: {ratio}')
+
+
 
                     max_distances.append((x_end, max_squared_distance, optim_k))
 
@@ -321,15 +325,27 @@ def cluster_image_with_lib(full_path: str, k_max: int, k_iteration_index_quant: 
 
         type_of_image = "elbow_method"
         image_kind = f"{image_name}_{algorithem}_{type_of_image}"
-        base_path = "./clustering/results/"
+        base_path = "./results/"
         # path = ".\\results\\" + image_name + "_" + algorithem + "_" + type_of_image + ".png"
         plt.savefig(base_path + image_kind + ".png")
         plt.clf()
         # plt.show()
 
+        plot_shifting_k(optimal_k_shifting, list_index_of_k, base_path + image_kind + "_shifting")
+
+
         display_clusters(image, centroids, image_name=image_name, algorithem = algorithem )
         result = {'Algorithem':'kmeans by sklearn','Image':os.path.splitext(os.path.basename(full_path))[0],'wcss':wcss,'Optimal k':optim_k,'Initial Centroids':'kmeans++'}
         return result
+
+
+def plot_shifting_k(optimal_ks, range_list,saving_path):
+    plt.plot(list(range_list), list(optimal_ks))
+    plt.title('K Shifting using Elbow Method')
+    plt.xlabel('Range')
+    plt.ylabel('Optimal K')
+    plt.savefig(saving_path + ".png")
+    plt.clf()
 
 def plot_rotated_graph(points_rotated):
         plt.plot(list(map(lambda tup: tup[0], points_rotated)), list(map(lambda tup: tup[1], points_rotated)))
@@ -345,6 +361,7 @@ def calculate_k_with_graph_rotation(x1, y1, x2, y2, arr_k_wcss, max_num_of_clust
     min_tuple = None
     min_tuple = min(points_rotated, key=lambda x: x[1])
     print("the k after the rotation is: ", min_tuple[2])
+    return min_tuple[2]
     # plot_rotated_graph(points_rotated)
 
 

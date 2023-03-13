@@ -4,21 +4,21 @@ import glob
 import csv
 
 # Set the directory where your files are stored
-image_directory_path = '.\clustering\images'
+image_directory_path = '.\images'
 
 # Use glob to find all files in the directory
 files = glob.glob(os.path.join(image_directory_path, '*.jpg'))
 print(files)
 results = []
 # Define the path and filename for your CSV file
-filename = r'''.\clustering\results.csv'''
+filename = r'''.\results.csv'''
 
 for file in files:
     print(f'{file}')
     image_name = os.path.splitext(os.path.basename(file))[0]
-    results.append(cluster_image_with_lib(f'{file}',k_iteration_index_quant=10, k_max=50, display_optimal_k=True))
-    results.append(cluster_image_implemented(f'{file}', 3,random_mode=False))
-    results.append(cluster_image_implemented(f'{file}', 3,random_mode=True))
+    results.append(cluster_image_with_lib(f'{file}',k_iteration_index_quant=5, k_max=100, display_optimal_k=True))
+    # results.append(cluster_image_implemented(f'{file}', 3,random_mode=False))
+    # results.append(cluster_image_implemented(f'{file}', 3,random_mode=True))
     
 # Open the CSV file for writing
 with open(filename, 'a', newline='') as csvfile:
