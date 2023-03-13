@@ -11,6 +11,17 @@
 \usepackage{algorithmic}
 \usepackage{xfrac}
 \usepackage{setspace}
+
+\documentclass{article}
+
+\usepackage[demo]{graphicx}
+\usepackage{blindtext}
+\usepackage{subfig}
+\usepackage{subfigure}
+
+\renewcommand{\thesubfigure}{Figure \arabic{subfigure}}
+\captionsetup[subfigure]{labelformat=simple, labelsep=colon}
+
 \DeclareRobustCommand{\stirling2}{\genfrac\{\}{0pt}{}}
 
 \begin{document}
@@ -409,6 +420,64 @@ Although the image processing and computer vision aspects of this program are no
 
 \textbf{Results}
 We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
+\newline
+First, let's look at some of the Images that we tested the two approaches:
+
+\newline
+
+\begin{figure}[ht]
+    \centering
+    \subfloat[Birds 1]{%
+        \includegraphics[width=0.45\linewidth]{birds1.jpg}%
+        }%
+        \xspace
+    \subfloat[Birds 2]{%
+        \includegraphics[width=0.45\linewidth]{birds2.jpg}%
+        }%
+        \xspace
+    \subfloat[Beans 1]{%
+        \includegraphics[width=0.45\linewidth]{kitniot0.jpg}%
+        }%
+        \xspace
+    \subfloat[Beans 2]{%
+        \includegraphics[width=0.45\linewidth]{kitniot1.jpg}%
+        }%
+\end{figure}
+\newpage
+
+\newline
+Here  we tried to cluster 25 bowls of beans with Our Implementation and with Sklearn k-mean Implementation in Our Implementation we get 32 clusters where the clusters are isolating each bowel from another.\newline
+With the k-means implemented by Sklearn and with the selection of k using the elbow method we get 16 clusters where the clusters cluster a lot of different bowls together. 
+\newline
+
+\begin{figure}[ht]
+    \centering
+    \subfloat[25 bowls Our Implementation 32 clusters]{%
+        \includegraphics[width=0.45\linewidth]{kitniot0_KMeansImplemented_fixed_cluster.png}%
+        }%
+        \xspace
+    \subfloat[25 bowls k-means by Sklearn 16 clusters]{%
+        \includegraphics[width=0.45\linewidth]{kitniot0_kmeans_by_sklearn_cluster.png}%
+        }%
+\end{figure}
+\newpage
+
+Here we show that the elbow when we use the elbow method for finding the optimal k for Sklearn k-means algorithm we get that the k is changing if we change the range.
+
+\newline
+\begin{figure}[ht]
+    \centering
+    \subfloat[K Shifting - birds Image]{%
+        \includegraphics[width=0.45\linewidth]{birds1_kmeans_by_sklearn_elbow_method_shifting.png}%
+        }%
+    \xspace
+    \subfloat[K Shifting - beans Image]{%
+        \includegraphics[width=0.45\linewidth]{kitniot1_kmeans_by_sklearn_elbow_method_shifting.png}%
+        }%
+\end{figure}
+\newpage
+
+
 
 \newpage
 \textbf{Bibliography} \newline
@@ -418,16 +487,6 @@ We shall now display some results that we got, from running the two algorithms, 
 [4]\verb|https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203|
 [5]\verb|https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf| \newline
 [6]\verb|https://www.investopedia.com/terms/c/central_limit_theorem.asp#:~:text=Key%20Takeaways-,The%20central%20limit%20theorem%20(CLT)%20states%20that%20the%20distribution%20of,for%20the%20CLT%20to%20hold.|
-
-
-
-
-
-
-
-
-
-
 
 
 
