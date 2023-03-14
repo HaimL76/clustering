@@ -1,4 +1,4 @@
-### Clustering Optimization using k-means
+# Clustering Optimization using k-means
 
 In this Project we use two approaches for the clustering problem.
 The program takes images and automatycly cluster the samples in the image to k clusters
