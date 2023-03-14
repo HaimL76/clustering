@@ -1,4 +1,4 @@
-### Clustering Optimization using k-means
+# Clustering Optimization using k-means
 
 In this Project we use two approaches for the clustering problem.
 The program takes images and automatycly cluster the samples in the image to k clusters
@@ -62,16 +62,14 @@ For the k-means algorithem we show how the k is shifting and the optimal k that 
 
 ## Sources of information
 
-- [towardsdatascience](https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d)
-- [towardsdatascience](https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203)
+- [towardsdatascience](https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d) - Stop Using Elbow Method in K-means Clustering, Instead, Use this!
+- [towardsdatascience](https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203) - K-means Clustering Python Example
 - [wikipedia](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind)
-- [Article](https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf) - A comparative study of efficient initialization methods for the k-means
+- [UCA](https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf) - A comparative study of efficient initialization methods for the k-means
 clustering algorithm
-
-- [Google](https://www.google.com/)
 - [GoodREADME](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) - how to write a good README
 
 ## Authors
 
-- **Shoham Yamin** - [shohamyamin](https://github.com/shohamyamin)
 - **Hiam Lavi** - [HaimL76](https://github.com/HaimL76)
+- **Shoham Yamin** - [shohamyamin](https://github.com/shohamyamin)
