@@ -263,7 +263,7 @@ So, we edit this algorithm in a slightly different manner,\newline
 \textbf{7.} if $k$=0 mod $q$, calculate the optimal $k$ using all the stored WCSS values and store it in an array \newline
 \textbf{8.} if the array of optimal $k$ values has $s$ identical values of $k$, or if their difference is in the range of $t$, we take their value (in case they are identical), or some average between them, and return this value as the final value of $k$ (the elbow). \newline
 \textbf{9.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 5. \newline
-
+\newpage
 The time and memory complexity of this algorithm depends, obviously, on the complexity of the specific k-means algorithm we are using. Although we have described above the basic concept of the k-means algorithm, there are several practical ways to implement it, with different bounds on the complexity [8]. \newline
 So, if the time complexity of the implementation is $\mathcal{O}(t)$, then iterating through $m$ values of $k$, to find the optimal elbow $k$ value, will be $\mathcal{O}(m \cdot t)$. In addition, we have the computation of the wcss, for each $k$, which is performed in $\mathcal{O}(n)$ (recall the computation is for each cluster, on its associated sampled, so $n$, in total). So far, we have $\mathcal{O}(m \cdot (n+t))$ \newline
 In addition, we also have the computation of the optimal elbow, every $l$ values of $k$, which is going over all the values of the wcss computed so far, finding the most distant point of them all, so this is $\mathcal{O}(m \cdot (n+t)) + \frac{n}{l} \cdot m=
@@ -353,6 +353,7 @@ If the count is lower than $n_0$, then check the “ignore” flag. If it is tru
 \textbf{5.} for each centroid, calculate its center point again, as the mean of all the associated elements. \newline
 \textbf{6.} while the number of clusters is increasing, or associated elements are still moving from one cluster to another, repeat step 2. \newline
 \textbf{7.} (after the algorithm turned stable) returns the current list of centroids. \newline
+Regarding the time complexity, we add to the regular k-means algorithm complexity the computation of the Z-score, for each centroid and its associated samples, so a total of $n$ Z-score computations, for each $k$ value. So, we can see that our approach is quite similar to the regular k-means with the elbow method computation (recall that we also iterate on a range of $m$ values of $k$). Here we do not have a fixed range of $k$ values, but we are bound by the minimal size of the clusters, and the allowed Z-score, from which we cannot split the clusters more. And in both functions, there is a computation of scores of the samples, in relation to their associated centroids, which is a total of $n$, for either of those two implementations.
 \newpage
 \begin{algorithm}
 \caption{Calculate k-means with Z-score}
