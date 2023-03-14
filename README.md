@@ -64,7 +64,7 @@ For the k-means algorithem we show how the k is shifting and the optimal k that 
 
 - [towardsdatascience](https://towardsdatascience.com/elbow-method-is-not-sufficient-to-find-best-k-in-k-means-clustering-fc820da0631d) - Stop Using Elbow Method in K-means Clustering, Instead, Use this!
 - [towardsdatascience](https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203) - K-means Clustering Python Example
-- [wikipedia](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind)
+- [wikipedia](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind) - Stirling numbers of the second kind
 - [UCA](https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf) - A comparative study of efficient initialization methods for the k-means
 clustering algorithm
 - [GoodREADME](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) - how to write a good README
