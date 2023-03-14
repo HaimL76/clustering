@@ -17,8 +17,8 @@ for file in files:
     print(f'{file}')
     image_name = os.path.splitext(os.path.basename(file))[0]
     results.append(cluster_image_with_lib(f'{file}',k_iteration_index_quant=5, k_max=100, display_optimal_k=True))
-    # results.append(cluster_image_implemented(f'{file}', 3,random_mode=False))
-    # results.append(cluster_image_implemented(f'{file}', 3,random_mode=True))
+    results.append(cluster_image_implemented(f'{file}', 3,random_mode=False))
+    results.append(cluster_image_implemented(f'{file}', 3,random_mode=True))
     
 # Open the CSV file for writing
 with open(filename, 'a', newline='') as csvfile:
