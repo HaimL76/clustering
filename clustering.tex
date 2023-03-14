@@ -397,28 +397,36 @@ If the count is lower than $n_0$, then check the “ignore” flag. If it is tru
 The splitting of the clusters, using the statistical criteria, must obviously stop, at some point, because, theoretically, we can split the clusters until each element is declared a separate cluster (in this case, we will get a convergence, but the whole clustering will be, of course, useless). However, using the minimal size of a cluster we are setting for the algorithm, the splitting is expected to stop when the resulting clustering cannot be split anymore, thus, yielding a local minimum (optimum), coming from the constraint on the minimal cluster size, and from the convergence of the k-means algorithm. \newline
 \newpage
 
-\textbf{\large Our work summary} \newline
+\textbf{\large Summary of our work} \newline
 So far, we have described two approaches for the clustering problem, using the k-means algorithm, in its pure form, or in a wider, more hybrid solution. \newline
 We shall now summarize exactly what we did in the code, and then show the results of running both algorithms, and compare them. \newline
 
 \textbf{native k-means and the elbow method} \newline
 In this function, we used the well-known implementation of the k-means algorithm, in the sklearn library, and added a wrapper code, in order to run the k-means in a loop (over a range of $k$ values), and calculate the optimal elbow. \newline
 As we will display in the results, our calculation of the optimal $k$ (elbow) shows that for larger and larger ranges of $k$ values, the elbow keeps increasing. This means, allegedly, that we cannot use this computation for a real-life automatic clustering solution, because the code cannot determine the elbow just by computing it. \newline
-However, the elbow is increasing relatively slowly, in relation to the size of the range of $k$, thus, we have considered trying to use some threshold on the rate of elbow increase, in order to declare the optimal elbow value, once the increase rate goes lower than  this given threshold. \newline
-Another way we have considered is using a library, for computing the elbow, the same way we use the sklean k-means implementation. \newline
+However, the elbow is increasing relatively slowly, in relation to the size of the range of $k$, thus, we have considered trying to use some threshold on the rate of growth in the elbow values, in order to declare the optimal elbow value, once the rate of growth goes lower than  this given threshold. \newline
+Another way we have considered is using a library, for computing the elbow, the same way we use the sklearn implementation of k-means. \newline
 As a demonstration (not appearing in the final code), we have used the yellowbrick library elbow visualizer, in order to display their computed elbow for different ranges of $k$. We actually got similar results to our computation (which is described above), meaning this library implementation also computes elbow values that are increasingly higher and higher. \newline
-At this point, we have designed and implemented our own solution, as described above. \newline
+At this point, we have decided to design and implement our own solution, as described above. \newline
 
 \textbf{hybrid k-means with standard deviation} \newline
 In this function, we have implemented everything ourselves, including the k-means algorithm itself. \newline
 The reason, obviously, is that we wanted to try different ways to combine the standard deviation computation in the k-means algorithm itself, for example, by splitting the clusters, using the Z-score, after each centroid calculation, and not only after the stabilization of the k-means algorithm,
 for each value of $k$\newline 
 
-\textbf{The main function} \newline
+\textbf{The main program} \newline
 The program itself is running the two functions above, on the same set of images. \newline
 For all the operations on the images, such as reading them, displaying them, and calculating the image elements, we are using the well-known OpenCv library,
 where the heart of the image processing, for our program, is the \textbf{Harris corners detection} function. \newline
 Although the image processing and computer vision aspects of this program are not directly related to the scope of this work, it would be very suitable to mention here that the benefit of a good clustering algorithm can result also in the ability to cluster image elements also for noisy images (where not all the corners are very accurate), and still yield reasonable clustering.
+\newline \newline
+\textbf{Comparing the two clustering 
+ functions} \newline
+There is one major advantage of our Z-score algorithm over the Sklearn k-means algorithm with our implementation of the Elbow method computation. \newline 
+our Z-score algorithm is not given any range of $k$ values for the computation but is running automatically, starting from a very small number of centroids, adding more and more until convergence. \newline
+While the sklearn with our elbow method implementation must get a range of $k$ to work on.
+As we show next, the clustering results of these two functions also indicate that the optimum we achieve using the Z-score computation is usually greater or equal the one obtained from the sklearn k-means, with our elbow implementation.
+ 
 \newpage
 \textbf{Results} \newline
 We present the results of running two clustering algorithms on the same set of images. First, we show some of the images we used for testing: \newline
@@ -511,4 +519,5 @@ Here some of the birds clustering images:
 \textbf{[5]} \href{https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf}{ESWA2013.pdf} \newline
 \textbf{[6]} \href{https://www.investopedia.com/terms/c/central_limit_theorem.asp#:~:text=Key%20Takeaways-,The%20central%20limit%20theorem%20(CLT)%20states%20that%20the%20distribution%20of,for%20the%20CLT%20to%20hold.}{investopedia, limit theorem.asp} \newline
 \textbf{[7]} \href{https://www.investopedia.com/terms/z/zscore.asp#:~:text=Investopedia%20%2F%20Tara%20Anand-,What%20Is%20Z%2DScore%3F,identical%20to%20the%20mean%20score.}{https://www.investopedia.com/terms/z/zscore.asp}
+
 \end{document}
