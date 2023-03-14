@@ -13,15 +13,10 @@
 \usepackage{setspace}
 \usepackage{hyperref}
 
-\documentclass{article}
 
-\usepackage[demo]{graphicx}
 \usepackage{blindtext}
 \usepackage{subfig}
-\usepackage{subfigure}
 
-\renewcommand{\thesubfigure}{Figure \arabic{subfigure}}
-\captionsetup[subfigure]{labelformat=simple, labelsep=colon}
 
 \DeclareRobustCommand{\stirling2}{\genfrac\{\}{0pt}{}}
 
@@ -134,7 +129,7 @@ $k$: the number of clusters to find
 \STATE $f \leftarrow c$
 \ENDIF
 \newline
-\IF{$s.c \neq f$} \newline
+\IF{$s.c \neq f$}
 \STATE $a \leftarrow a+1$
 \ENDIF
 \newline
@@ -282,8 +277,8 @@ So, we edit this algorithm in a slightly different manner,\newline
 \STATE $C \leftarrow null$
 \STATE $k \leftarrow k_0$
 \newline
-\STATE wcss \leftarrow $ float[]
-\STATE opts \leftarrow $ integer[]
+\STATE $wcss \leftarrow $ float[]
+\STATE $opts \leftarrow $ integer[]
 \STATE $r \leftarrow true$
 \newline
 \WHILE{$r$ is $true$ and $k<n$}
@@ -432,24 +427,23 @@ We present the results of running two clustering algorithms on the same set of i
 \begin{figure}[ht]
     \centering
     \subfloat[Birds 1]{%
-        \includegraphics[width=0.45\linewidth]{./results/birds1.jpg}%
+        \includegraphics[width=0.45\linewidth]{./images/birds1.jpg}%
         }%
         \xspace
     \subfloat[Birds 2]{%
-        \includegraphics[width=0.45\linewidth]{./results/birds2.jpg}%
+        \includegraphics[width=0.45\linewidth]{./images/birds2.jpg}%
         }%
         \xspace
     \subfloat[Beans 1]{%
-        \includegraphics[width=0.45\linewidth]{./results/kitniot0.jpg}%
+        \includegraphics[width=0.45\linewidth]{./images/kitniot0.jpg}%
         }%
         \xspace
     \subfloat[Beans 2]{%
-        \includegraphics[width=0.45\linewidth]{./results/kitniot1.jpg}%
+        \includegraphics[width=0.45\linewidth]{./images/kitniot1.jpg}%
         }%
 \end{figure}
 \newpage
 
-\newline
 We applied our implementation of k-means clustering and the implementation provided by the scikit-learn library to 25 images of bowls of beans. Our implementation produced 32 clusters, with each cluster isolating a single bowl from the others. The scikit-learn implementation, with k selected using the elbow method when running from k=3 to k=100, produced 16 clusters, with some clusters containing multiple different bowls. 
 \newline
 
@@ -467,7 +461,7 @@ We applied our implementation of k-means clustering and the implementation provi
 
 We also examined the use of the elbow method for selecting k in the scikit-learn implementation. The Figures show that the value of k changes as we vary the range of k, indicating that the elbow method may not provide a clear choice of k in some cases.
 
-\newline
+
 \begin{figure}[ht]
     \centering
     \subfloat[K Shifting - birds Image]{%
