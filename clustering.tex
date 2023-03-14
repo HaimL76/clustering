@@ -264,6 +264,13 @@ So, we edit this algorithm in a slightly different manner,\newline
 \textbf{8.} if the array of optimal $k$ values has $s$ identical values of $k$, or if their difference is in the range of $t$, we take their value (in case they are identical), or some average between them, and return this value as the final value of $k$ (the elbow). \newline
 \textbf{9.} if $k=n$, return $k$. otherwise, increment $k$, and repeat step 5. \newline
 
+The time and memory complexity of this algorithm depends, obviously, on the complexity of the specific k-means algorithm we are using. Although we have described above the basic concept of the k-means algorithm, there are several practical ways to implement it, with different bounds on the complexity [8]. \newline
+So, if the time complexity of the implementation is $\mathcal{O}(t)$, then iterating through $m$ values of $k$, to find the optimal elbow $k$ value, will be $\mathcal{O}(m \cdot t)$. In addition, we have the computation of the wcss, for each $k$, which is performed in $\mathcal{O}(n)$ (recall the computation is for each cluster, on its associated sampled, so $n$, in total). So far, we have $\mathcal{O}(m \cdot (n+t))$ \newline
+In addition, we also have the computation of the optimal elbow, every $l$ values of $k$, which is going over all the values of the wcss computed so far, finding the most distant point of them all, so this is $\mathcal{O}(m \cdot (n+t)) + \frac{n}{l} \cdot m=
+\newline
+\mathcal{O}(m \cdot (n+t+\frac{n}{l}))=\mathcal{O}(m \cdot \frac{l \cdot (n+t)+n}{l}))=\mathcal{O}(\frac{m \cdot (l \cdot (n+t)+n)}{l}))$ \newline
+Regarding the memory, we are only using an array for the computed wcss, which is $\mathcal{O}(m)$, and the array for storing the computed elbows, which is $\mathcal{O}(\frac{l}{n})$, in the enveloping algorithm. The memory for the k-means computation itself, for each $k$, is assumed to be freed, after each $k$ value. \newline
+
 \begin{algorithm}
 \caption{Calculate elbow for k-means}
 \begin{algorithmic} 
@@ -518,6 +525,8 @@ Here some of the birds clustering images:
 \textbf{[4]} \href{https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203}{https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203} \newline
 \textbf{[5]} \href{https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf}{ESWA2013.pdf} \newline
 \textbf{[6]} \href{https://www.investopedia.com/terms/c/central_limit_theorem.asp#:~:text=Key%20Takeaways-,The%20central%20limit%20theorem%20(CLT)%20states%20that%20the%20distribution%20of,for%20the%20CLT%20to%20hold.}{investopedia, limit theorem.asp} \newline
-\textbf{[7]} \href{https://www.investopedia.com/terms/z/zscore.asp#:~:text=Investopedia%20%2F%20Tara%20Anand-,What%20Is%20Z%2DScore%3F,identical%20to%20the%20mean%20score.}{https://www.investopedia.com/terms/z/zscore.asp}
+\textbf{[7]} \href{https://www.investopedia.com/terms/z/zscore.asp#:~:text=Investopedia%20%2F%20Tara%20Anand-,What%20Is%20Z%2DScore%3F,identical%20to%20the%20mean%20score.}{https://www.investopedia.com/terms/z/zscore.asp} \newline
+\textbf{[8]}
+\href{https://en.wikipedia.org/wiki/K-means_clustering}{wikipedia, k-means clustering}
 
 \end{document}
