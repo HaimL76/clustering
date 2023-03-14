@@ -11,6 +11,7 @@
 \usepackage{algorithmic}
 \usepackage{xfrac}
 \usepackage{setspace}
+\usepackage{hyperref}
 
 \documentclass{article}
 
@@ -27,6 +28,13 @@
 \begin{document}
 \onehalfspacing
 \textbf{\huge Clustering Optimization using k-means} \newline
+
+\textbf{\large Course:} Optimization, 88784-01 \newline
+\textbf{\large Lecturer:} Prof. Gil Ariel \newline
+\textbf{\large submitters:}\newline Shoham Yamin, 319151213 \newline
+Haim Lavi, 038712105 \newline
+
+\textbf{\large Github repository:} \href{https://github.com/HaimL76/clustering.git}{https://github.com/HaimL76/clustering.git}\newline 
 
 \textbf{\large Preface} \newline
 In this paper, we shall demonstrate two approaches for optimizing the \newline
@@ -97,20 +105,21 @@ The basic description of this algorithm, for a given $k$, is, \newline
 \begin{algorithm}
 \caption{Calculate k-means}
 \begin{algorithmic} 
-\REQUIRE $S$: the input list of samples
+\REQUIRE $S$: the input list of samples \newline
+$k$: the number of clusters to find
 \ENSURE $C$: the output list of centroids
+\STATE $C \leftarrow $ InitializeCentroids(S) //\textbf{using some seeding method}
 \STATE $r \leftarrow true$
 \STATE $n \leftarrow size(S)$
 \newline
 \WHILE{$r$ is $true$}
-\STATE $a \leftarrow 0$
-\newline
+\STATE $a \leftarrow 0$ //\textbf{counter of moves of samples between centroids}
 \STATE $i \leftarrow 0$
 \WHILE{$i < n$}
 \STATE $s \leftarrow S[i]$
 \newline
-\STATE $f \leftarrow null$
-\STATE $m \leftarrow null$
+\STATE $f \leftarrow null$ //\textbf{nearest centroid found for the current sample}
+\STATE $m \leftarrow null$ //\textbf{distance from sample center of nearest centroid}
 \newline
 \STATE $j \leftarrow 0$
 \WHILE{$j < k$}
@@ -125,7 +134,7 @@ The basic description of this algorithm, for a given $k$, is, \newline
 \STATE $f \leftarrow c$
 \ENDIF
 \newline
-\IF{$s.c \neq f$}
+\IF{$s.c \neq f$} \newline
 \STATE $a \leftarrow a+1$
 \ENDIF
 \newline
@@ -267,29 +276,26 @@ So, we edit this algorithm in a slightly different manner,\newline
 \STATE $q$: quant of $k$ for optimum calculations
 \STATE $s$: number of successful elbow calculations
 \STATE $t$: tolerance of $k$ value
-\STATE $k0$: the $k$ to start from
-\STATE $samples$: the list of samples
-\ENSURE 
-\STATE $centroids \leftarrow null$
+\STATE $k_0$: the $k$ to start from
+\STATE $S$: the list of samples
+\ENSURE $k_1$ optimal elbow value
+\STATE $C \leftarrow null$
+\STATE $k \leftarrow k_0$
 \newline
-\STATE $k \leftarrow k0$
-\newline
-\STATE $ArrCent \leftarrow $ float[]
-\STATE $ArrOpt \leftarrow $ integer[]
-\newline
+\STATE wcss \leftarrow $ float[]
+\STATE opts \leftarrow $ integer[]
 \STATE $r \leftarrow true$
 \newline
 \WHILE{$r$ is $true$ and $k<n$}
-\STATE $centroids \leftarrow $ k-means($samples, k$)
+\STATE $C \leftarrow $ k-means($S, k$)
 \newline
-\STATE $ArrCent[k] \leftarrow $ wcss($centroids$)
+\STATE $wcss[k] \leftarrow $ CalcWcss($C$)
 \newline
 \IF{$k$ mod $q$ = 0}
 \STATE $m \leftarrow null$
-\newline
 \STATE $i \leftarrow 0$
 \WHILE{$i < k$}
-\STATE $w \leftarrow ArrCent[i]$
+\STATE $w \leftarrow wcss[i]$
 \newline
 \IF{$m = null$ or $m > w$}
 \STATE $m \leftarrow w$
@@ -297,16 +303,19 @@ So, we edit this algorithm in a slightly different manner,\newline
 \newline
 \STATE $i \leftarrow i+1$
 \ENDWHILE
-\STATE $ArrOpt \leftarrow $ append($ArrOpt,m$)
-\ENDIF
-\IF{size($ArrOpt$) = $s$}
+\STATE $opts \leftarrow $ append($opts,i$)
+\ENDIF \newline
+//\textbf{From the array of the elbows we have found so far,}\newline
+//\textbf{find all the identical values, up to $t$, the tolerance}
+\STATE $o \leftarrow $ GetIdentical($opts,t$)
+\IF{size($o$) = $s$}
 \STATE $r \leftarrow false$
 \ELSE
 \STATE $k \leftarrow k+1$
 \ENDIF
 \newline
 \ENDWHILE
-\STATE return average($ArrOpt$)
+\STATE return $k_1$=GetAverage($opts,t$)
 \end{algorithmic}
 \end{algorithm}
 
@@ -325,7 +334,7 @@ as $n$ tends to infinity, is actually very useful in applications, since we prac
 
 This allows us to utilize CLT for our purposes. We can run the basic k-means algorithm on the elements, but then we can automatically split clusters by a very basic statistical observation.
 
-The normal distribution, in statistics, is used for calculating, for each random variable a score, which is called a \textbf{Z-score} or a \textbf{standard score}. This means that we have a linear scale, for measuring the distance of each random variable from the mean, in units of standard deviation, and there exists a formula, which gives us the probability for each Z-score.
+The normal distribution, in statistics, is used for calculating, for each random variable a score, which is called a \textbf{Z-score} or a \textbf{standard score} [7]. This means that we have a linear scale, for measuring the distance of each random variable from the mean, in units of standard deviation, and there exists a formula, which gives us the probability for each Z-score.
 For each sample, $X_i$, its Z-score is $Z_i:=\frac{X_i-\mu}{\sigma}$. The probability, $\mathbb{P}(Z_i < z)$, can be found in a standard table of already calculated values. \newline
 Also, we will be interested in calculating the absolute value of the Z-score, since, for our specific problem, there is no meaning to the question if the sample is located "before" or "after" the center point of the centroid, so there is no difference between $Z_i=\frac{X_i-\mu}{\sigma}$ and -$Z_i=\frac{\mu-X_i}{\sigma}$ \newline
 Indeed, since we are obviously using the standard Euclidean distance, in our calculations, then the distance of any sample from the mean must be positive.
@@ -347,46 +356,44 @@ If the count is lower than $n_0$, then check the “ignore” flag. If it is tru
 \caption{Calculate k-means with Z-score}
 \begin{algorithmic} 
 \REQUIRE
-\STATE $s0$: the minimal count of samples in a cluster (the default is 30)
-\STATE $z0$: the maximal allowed Z-score for a cluster
-\STATE $k0$: the $k$ to start from
-\STATE $samples$: the list of samples
-\ENSURE
+\STATE $s_0$: the minimal count of samples in a cluster (the default is 30)
+\STATE $z_0$: the maximal allowed Z-score for a cluster (the default is 3)
+\STATE $k_0$: the $k$ to start from
+\STATE $S$: the list of samples
+\ENSURE $C$: the list of clusters
 \STATE $r \leftarrow true$
 \newline
-\STATE $centroids \leftarrow null$
-\WHILE{$r = true$}
-\STATE $m \leftarrow 0$
-\STATE $centroids \leftarrow $ k-means($samples, k$)
-\STATE $m \leftarrow $ (number of moves between clusters)
-\newline
-\STATE $i \leftarrow 0$
-\WHILE{$i<k$}
-\STATE $c \leftarrow centroids[i]$
-
+\STATE $C \leftarrow $ InitializeCentroids($S$) //\textbf{using some seeding method}
+\WHILE{$r$ is true}
+\STATE $C \leftarrow $ k-means($S, k$)
+\STATE $l \leftarrow size(C)$
 \STATE $j \leftarrow 0$
-\STATE $c0 \leftarrow sample[]$
-\WHILE{$j<size(c.samples)$}
-\STATE $s \leftarrow c.samples[j]$
+\WHILE{$j<k$}
+\STATE $c \leftarrow C[j]$
+
+\STATE $i \leftarrow 0$
+\STATE $c_0 \leftarrow sample[]$ //\textbf{array for the distant samples of centroid}
+\WHILE{$i<size(c.samples)$}
+\STATE $s \leftarrow c.samples[i]$
 \STATE $z \leftarrow $ Z-score($c,s$)
-\STATE $j \leftarrow j+1$
-\IF{$z<z0$}
+\IF{$z<z_0$}
 \STATE remove($c.samples,s$)
-\STATE append($c0,s$)
+\STATE append($c_0,s$)
 \ENDIF
 \STATE $i \leftarrow i+1$
 \ENDWHILE
-\IF{size($c0) > s0$}
-\STATE append($centroids,centroid(c0)$)
-\newline
-\STATE $m \leftarrow m+1$
+\IF{size($c_0) > s_0$}
+\STATE append($C,centroid(c_0)$)
 \ENDIF
+\STATE $j \leftarrow j+1$
 \ENDWHILE
-\IF{$m$ < 1}
+\newline
+//\textbf{if no new centroid was added, then stop the algorithm}
+\IF{$size(C) = l$}
 \STATE $r \leftarrow false$
 \ENDIF
 \ENDWHILE
-\STATE return $centroids$
+\STATE return $C$
 \end{algorithmic}
 \end{algorithm}
 \newpage
@@ -417,65 +424,87 @@ The program itself is running the two functions above, on the same set of images
 For all the operations on the images, such as reading them, displaying them, and calculating the image elements, we are using the well-known OpenCv library,
 where the heart of the image processing, for our program, is the \textbf{Harris corners detection} function. \newline
 Although the image processing and computer vision aspects of this program are not directly related to the scope of this work, it would be very suitable to mention here that the benefit of a good clustering algorithm can result also in the ability to cluster image elements also for noisy images (where not all the corners are very accurate), and still yield reasonable clustering.
-
-\textbf{Results}
-We shall now display some results that we got, from running the two algorithms, on the same set of images. \newline
-\newline
-First, let's look at some of the Images that we tested the two approaches:
-
+\newpage
+\textbf{Results} \newline
+We present the results of running two clustering algorithms on the same set of images. First, we show some of the images we used for testing: \newline
 \newline
 
 \begin{figure}[ht]
     \centering
     \subfloat[Birds 1]{%
-        \includegraphics[width=0.45\linewidth]{birds1.jpg}%
+        \includegraphics[width=0.45\linewidth]{./results/birds1.jpg}%
         }%
         \xspace
     \subfloat[Birds 2]{%
-        \includegraphics[width=0.45\linewidth]{birds2.jpg}%
+        \includegraphics[width=0.45\linewidth]{./results/birds2.jpg}%
         }%
         \xspace
     \subfloat[Beans 1]{%
-        \includegraphics[width=0.45\linewidth]{kitniot0.jpg}%
+        \includegraphics[width=0.45\linewidth]{./results/kitniot0.jpg}%
         }%
         \xspace
     \subfloat[Beans 2]{%
-        \includegraphics[width=0.45\linewidth]{kitniot1.jpg}%
+        \includegraphics[width=0.45\linewidth]{./results/kitniot1.jpg}%
         }%
 \end{figure}
 \newpage
 
 \newline
-Here  we tried to cluster 25 bowls of beans with Our Implementation and with Sklearn k-mean Implementation in Our Implementation we get 32 clusters where the clusters are isolating each bowel from another.\newline
-With the k-means implemented by Sklearn and with the selection of k using the elbow method we get 16 clusters where the clusters cluster a lot of different bowls together. 
+We applied our implementation of k-means clustering and the implementation provided by the scikit-learn library to 25 images of bowls of beans. Our implementation produced 32 clusters, with each cluster isolating a single bowl from the others. The scikit-learn implementation, with k selected using the elbow method when running from k=3 to k=100, produced 16 clusters, with some clusters containing multiple different bowls. 
 \newline
 
 \begin{figure}[ht]
     \centering
     \subfloat[25 bowls Our Implementation 32 clusters]{%
-        \includegraphics[width=0.45\linewidth]{kitniot0_KMeansImplemented_fixed_cluster.png}%
+        \includegraphics[width=0.45\linewidth]{./results/kitniot0_KMeansImplemented_fixed_cluster.png}%
         }%
         \xspace
     \subfloat[25 bowls k-means by Sklearn 16 clusters]{%
-        \includegraphics[width=0.45\linewidth]{kitniot0_kmeans_by_sklearn_cluster.png}%
+        \includegraphics[width=0.45\linewidth]{./results/kitniot0_kmeans_by_sklearn_cluster.png}%
         }%
 \end{figure}
 \newpage
 
-Here we show that the elbow when we use the elbow method for finding the optimal k for Sklearn k-means algorithm we get that the k is changing if we change the range.
+We also examined the use of the elbow method for selecting k in the scikit-learn implementation. The Figures show that the value of k changes as we vary the range of k, indicating that the elbow method may not provide a clear choice of k in some cases.
 
 \newline
 \begin{figure}[ht]
     \centering
     \subfloat[K Shifting - birds Image]{%
-        \includegraphics[width=0.45\linewidth]{birds1_kmeans_by_sklearn_elbow_method_shifting.png}%
+        \includegraphics[width=0.45\linewidth]{./results/birds1_kmeans_by_sklearn_elbow_method_shifting.png}%
         }%
     \xspace
     \subfloat[K Shifting - beans Image]{%
-        \includegraphics[width=0.45\linewidth]{kitniot1_kmeans_by_sklearn_elbow_method_shifting.png}%
+        \includegraphics[width=0.45\linewidth]{./results/kitniot1_kmeans_by_sklearn_elbow_method_shifting.png}%
         }%
 \end{figure}
 \newpage
+
+Here some of the birds clustering images:
+\begin{figure}[ht]
+    \centering
+    \subfloat[Birds 1 by sklearn k-means 15 clusters]{%
+        \includegraphics[width=0.45\linewidth]{./results/birds1_kmeans_by_sklearn_cluster.png}%
+        }%
+        \xspace
+    \subfloat[Birds 2 by sklearn k-means 19 clusters]{%
+        \includegraphics[width=0.45\linewidth]{./results/birds2_kmeans_by_sklearn_cluster.png}%
+        }%
+        \xspace
+    \subfloat[Birds 1 by Our implementation 58 clusters]{%
+        \includegraphics[width=0.45\linewidth]{./results/birds1_KMeansImplemented_fixed_cluster.png}%
+        }%
+        \xspace
+    \subfloat[Birds 2 by Our implementation 25 clusters]{%
+        \includegraphics[width=0.45\linewidth]{./results/birds2_KMeansImplemented_fixed_cluster.png}%
+        }%
+
+
+    
+\end{figure}
+
+
+
 
 
 
@@ -487,8 +516,6 @@ Here we show that the elbow when we use the elbow method for finding the optimal
 [4]\verb|https://towardsdatascience.com/machine-learning-algorithms-part-9-k-means-example-in-python-f2ad05ed5203|
 [5]\verb|https://faculty.uca.edu/ecelebi/documents/ESWA_2013.pdf| \newline
 [6]\verb|https://www.investopedia.com/terms/c/central_limit_theorem.asp#:~:text=Key%20Takeaways-,The%20central%20limit%20theorem%20(CLT)%20states%20that%20the%20distribution%20of,for%20the%20CLT%20to%20hold.|
-
-
-
+[7]\verb|https://www.investopedia.com/terms/z/zscore.asp#:~:text=Investopedia%20%2F%20Tara%20Anand-,What%20Is%20Z%2DScore%3F,identical%20to%20the%20mean%20score.|
 
 \end{document}
