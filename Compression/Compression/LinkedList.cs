@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,9 +31,53 @@ namespace Compression
 
     }
 
-    public class SortedLinkedList<T, TComp>
-        where TComp : IComparer<T>
+    public class SortedLinkedList<T> : LinkedList<T>
     {
-        public
+        private IComparer<T> comparer;
+
+        public SortedLinkedList(IComparer<T> comp) => comparer = comp;
+
+        public void AddSorted(T val)
+        {
+            if (root == null)
+            {
+                root = new Link<T>(val);
+            }
+            else
+            {
+                Link<T> current = root;
+                Link<T> previous = null;
+
+                bool finished = false;
+
+                while (!finished)
+                {
+                    int c0 = comparer.Compare(val, current.Value);
+
+                    if (c0 > 0)
+                    {
+                        finished = true;
+                    }
+                    else
+                    {
+                        previous = current;
+
+                        current = current.Next;
+
+                        if (current == null)
+                            finished = true;
+                    }
+                }
+
+                if (previous != null)
+                {
+                    Link<T> link = new Link<T>(val);
+
+                    link.SetNext(previous.Next);
+
+                    previous.SetNext(link);
+                }
+            }
+        }
     }
 }

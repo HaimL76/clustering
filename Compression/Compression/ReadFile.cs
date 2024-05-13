@@ -29,17 +29,10 @@ namespace Compression
 
                     int read = await fs.ReadAsync(buffer, 0, buffer.Length);
 
-
-
                     if (read < 1)
-
                         finished = true;
 
-
-
                     int index = 0;
-
-
 
                     long val = 0;
 
