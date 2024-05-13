@@ -21,6 +21,9 @@ namespace Compression
 
             input = @"c:\gpp\bookmarks_3_25_24.html";
 
+            SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList = 
+                new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
+
             using (var fs = new FileStream(inputPath, FileMode.Open))
                 while (!finished && fs.CanRead)
                 //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
@@ -36,20 +39,12 @@ namespace Compression
 
                     long val = 0;
 
-
-
                     while (!finished && index < read)
-
                     {
-
                         for (int i = 0; i < 8; i++)
-
                         {
-
                             if (index < buffer.Length)
-
                             {
-
                                 val <<= 8;
 
                                 byte b = buffer[index++];
@@ -60,55 +55,40 @@ namespace Compression
 
                         }
 
-
-
                         if (dictionary.ContainsKey(val))
-
                             _ = 0;
 
-
+                        TreeNode<(long Val, long Count)> treeNode = null;
 
                         if (!dictionary.ContainsKey(val))
+                        {
+                            treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
 
-                            dictionary.Add(val, new TreeNode<(long Val, long Count)>((Val: val, Count: 0)));
+                            sortedLinkedList.AddSorted(treeNode);
 
+                            dictionary.Add(val, treeNode);
+                        }
 
-
-                        var treeNode = dictionary[val];
-
-
+                        treeNode = dictionary[val];
 
                         treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
-
-
 
                         //Console.WriteLine(val);
 
                         int counter0 = counter++;
 
-
-
                         if (counter0 % 1000 == 0)
-
                             Console.WriteLine(counter0);
-
                     }
-
                 }
 
-
+            sortedLinkedList.Print();
 
             var list = new List<TreeNode<(long Val, long Count)>>(dictionary.Values);
 
-
-
             while (list.Count > 0)
-
             {
-
                 list.Sort(new TreeNodeCountComparer<TreeNode<(long Val, long Count)>>());
-
-
 
                 var first = list[0];
 
@@ -258,22 +238,6 @@ namespace Compression
                     }
                 }
             }
-        }
-    }
-
-    public class TreeNodeCountComparer<T> : IComparer<TreeNode<(long Val, long Count)>>
-    {
-        int IComparer<TreeNode<(long Val, long Count)>>.Compare(TreeNode<(long Val, long Count)> x, TreeNode<(long Val, long Count)> y)
-        {
-            long countX = (x?.Value.Count).GetValueOrDefault();
-
-            long countY = (y?.Value.Count).GetValueOrDefault();
-
-            long countDifference = countX - countY;
-
-            return countDifference == 0
-                ? 0 : countDifference > 0
-                ? 1 : -1;
         }
     }
 }

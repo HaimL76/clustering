@@ -30,5 +30,23 @@ namespace Compression
             else
                 right = child;
         }
+
+        public override string ToString() => val?.ToString();
+    }
+
+    public class TreeNodeCountComparer<T> : IComparer<TreeNode<(long Val, long Count)>>
+    {
+        int IComparer<TreeNode<(long Val, long Count)>>.Compare(TreeNode<(long Val, long Count)> x, TreeNode<(long Val, long Count)> y)
+        {
+            long countX = (x?.Value.Count).GetValueOrDefault();
+
+            long countY = (y?.Value.Count).GetValueOrDefault();
+
+            long countDifference = countX - countY;
+
+            return countDifference == 0
+                ? 0 : countDifference > 0
+                ? 1 : -1;
+        }
     }
 }

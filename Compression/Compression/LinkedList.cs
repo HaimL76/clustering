@@ -28,7 +28,17 @@ namespace Compression
     {
         protected Link<T> root;
 
+        public void Print()
+        {
+            Link<T> current = root;
 
+            while (current != null)
+            {
+                Console.WriteLine(current.Value);
+
+                current = current.Next;
+            }    
+        }
     }
 
     public class SortedLinkedList<T> : LinkedList<T>
