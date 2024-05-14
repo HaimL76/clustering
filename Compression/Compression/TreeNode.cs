@@ -23,7 +23,6 @@ namespace Compression
         public void SetValue(T val0) => val = val0;
 
         public void SetChild(TreeNode<T> child, Side side)
-
         {
             if (side == Side.Left)
                 left = child;

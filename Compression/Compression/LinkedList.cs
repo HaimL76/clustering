@@ -26,15 +26,17 @@ namespace Compression
 
     public class LinkedList<T>
     {
-        protected Link<T> root;
+        protected Link<T> head, tail;
 
         public void Print()
         {
-            Link<T> current = root;
+            int counter = 0;
+
+            Link<T> current = head;
 
             while (current != null)
             {
-                Console.WriteLine(current.Value);
+                Console.WriteLine($"[{counter++}], {current.Value}");
 
                 current = current.Next;
             }    
@@ -47,45 +49,46 @@ namespace Compression
 
         public SortedLinkedList(IComparer<T> comp) => comparer = comp;
 
-        public void AddSorted(T val)
+        public void AddSorted(T val, Link<T> start = null)
         {
-            if (root == null)
+            var newLink = new Link<T>(val);
+
+            if (head == null)
             {
-                root = new Link<T>(val);
+                head = tail = newLink;
             }
             else
             {
-                Link<T> current = root;
-                Link<T> previous = null;
+                Link<T> current = head;
+                Link<T> previous = head;
 
-                bool finished = false;
+                bool added = false;
 
-                while (!finished)
+                while (!added && current != null)
                 {
                     int c0 = comparer.Compare(val, current.Value);
 
-                    if (c0 > 0)
+                    if (c0 < 0)
                     {
-                        finished = true;
+                        newLink.SetNext(previous.Next);
+
+                        previous.SetNext(newLink);
+
+                        added = true;
                     }
                     else
                     {
                         previous = current;
 
                         current = current.Next;
-
-                        if (current == null)
-                            finished = true;
                     }
                 }
 
-                if (previous != null)
+                if (!added)
                 {
-                    Link<T> link = new Link<T>(val);
+                    tail.SetNext(newLink);
 
-                    link.SetNext(previous.Next);
-
-                    previous.SetNext(link);
+                    tail = newLink;
                 }
             }
         }

@@ -84,6 +84,10 @@ namespace Compression
 
             sortedLinkedList.Print();
 
+            Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
+
+            return;
+
             var list = new List<TreeNode<(long Val, long Count)>>(dictionary.Values);
 
             while (list.Count > 0)
