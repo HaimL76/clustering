@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,6 +41,32 @@ namespace Compression
 
                 current = current.Next;
             }    
+        }
+
+        public Link<T> RemoveFirst() => RemoveFirst(1)?.FirstOrDefault();
+
+        public IList<Link<T>> RemoveFirst(int count)
+        {
+            Link<T> current = head;
+            //Link<T> previous = current;
+
+            IList<Link<T>> list = null;
+
+            int counter = count;
+
+            while (current != null && count-- > 0)
+            {
+                (list = list ?? new List<Link<T>>()).Add(current);
+
+                //previous = current;
+                //Console.WriteLine($"[{counter++}], {current.Value}");
+
+                current = current.Next;
+            }
+
+            head = current;
+
+            return list;
         }
     }
 

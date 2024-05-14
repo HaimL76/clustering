@@ -88,6 +88,26 @@ namespace Compression
 
             Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
 
+            bool finished0 = false;
+
+            int counter1 = 0;
+
+            while (!finished0)
+            {
+                var firstLink = sortedLinkedList.RemoveFirst();
+
+                if (firstLink != null)
+                    firstLink = sortedLinkedList.RemoveFirst();
+
+                if (firstLink == null)
+                    finished0 = true;
+
+                int counter2 = counter1++;
+
+                if ((counter2 % 1000 == 0))
+                    Console.WriteLine(counter2);
+            }
+
             return;
 
             var list = new List<TreeNode<(long Val, long Count)>>(dictionary.Values);
