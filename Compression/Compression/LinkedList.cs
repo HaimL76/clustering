@@ -86,9 +86,16 @@ namespace Compression
             }
         }
 
+        private int counter;
+
         public void AddSorted(T val)
         {
             var newLink = new Link<T>(val);
+
+            int counter0 = counter++;
+
+            if ((counter0 % 1000) == 0)
+                Console.WriteLine($"[{counter0}], {nameof(val)}: {val}");
 
             if (head == null)
             {
