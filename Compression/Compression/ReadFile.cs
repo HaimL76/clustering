@@ -64,7 +64,7 @@ namespace Compression
                         {
                             treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
 
-                            sortedLinkedList.AddSorted(treeNode);
+                            //sortedLinkedList.AddSorted(treeNode);
 
                             dictionary.Add(val, treeNode);
                         }
@@ -81,6 +81,8 @@ namespace Compression
                             Console.WriteLine(counter0);
                     }
                 }
+
+            dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
             sortedLinkedList.Print();
 

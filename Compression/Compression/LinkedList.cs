@@ -49,7 +49,44 @@ namespace Compression
 
         public SortedLinkedList(IComparer<T> comp) => comparer = comp;
 
-        public void AddSorted(T val, Link<T> start = null)
+        public void UpdateSorted(Link<T> link)
+        {
+            var val = link.Value;
+
+            Link<T> current = link.Next;
+            Link<T> previous = current;
+
+            bool updated = false;
+
+            while (!updated && current != null)
+            {
+                int c0 = comparer.Compare(val, current.Value);
+
+                if (c0 < 0)
+                {
+                    link.SetNext(previous.Next);
+
+                    previous.SetNext(link);
+
+                    updated = true;
+                }
+                else
+                {
+                    previous = current;
+
+                    current = current.Next;
+                }
+            }
+
+            if (!updated)
+            {
+                tail.SetNext(link);
+
+                tail = link;
+            }
+        }
+
+        public void AddSorted(T val)
         {
             var newLink = new Link<T>(val);
 
@@ -60,7 +97,7 @@ namespace Compression
             else
             {
                 Link<T> current = head;
-                Link<T> previous = head;
+                Link<T> previous = current;
 
                 bool added = false;
 
