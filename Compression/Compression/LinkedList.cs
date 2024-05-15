@@ -37,10 +37,13 @@ namespace Compression
 
             while (current != null)
             {
-                Console.WriteLine($"[{counter++}], {current.Value}");
+                //Console.WriteLine($"[{counter++}], {current.Value}");
+                Console.Write($"{current.Value},");
 
                 current = current.Next;
-            }    
+            }
+
+            Console.WriteLine();
         }
 
         public Link<T> RemoveFirst() => RemoveFirst(1)?.FirstOrDefault();
@@ -136,14 +139,18 @@ namespace Compression
                 bool added = false;
 
                 while (!added && current != null)
-                {
+                {                                                                  
                     int c0 = comparer.Compare(val, current.Value);
 
                     if (c0 < 0)
                     {
-                        newLink.SetNext(previous.Next);
+                        newLink.SetNext(current);
 
-                        previous.SetNext(newLink);
+                        if (previous.Next == current)
+                            previous.SetNext(newLink);
+
+                        if (head == current)
+                            head = newLink;
 
                         added = true;
                     }

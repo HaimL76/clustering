@@ -24,24 +24,35 @@ namespace Compression
             SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList = 
                 new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
 
-            using (var fs = new FileStream(inputPath, FileMode.Open))
-                while (!finished && fs.CanRead)
+            //using (var fs = new FileStream(inputPath, FileMode.Open))
+              //  while (!finished && fs.CanRead)
                 //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
-                {
-                    var buffer = new byte[1024 * 1024];
 
-                    int read = await fs.ReadAsync(buffer, 0, buffer.Length);
+            using (var sr = new StreamReader(inputPath))
+                while (!sr.EndOfStream)
+                {
+                    string line = await sr.ReadLineAsync();
+
+                //var buffer = new byte[1024 * 1024];
+
+                byte[] buffer = null;
+
+                    //int read = await fs.ReadAsync(buffer, 0, buffer.Length);
+
+                    buffer = line?.ToCharArray().Select(ch => (byte)ch).ToArray();
+
+                    int read = (buffer?.Length).GetValueOrDefault();
 
                     if (read < 1)
                         finished = true;
 
                     int index = 0;
 
-                    long val = 0;
-
                     while (!finished && index < read)
                     {
-                        for (int i = 0; i < 8; i++)
+                        long val = 0;
+
+                        for (int i = 0; i < 1; i++)
                         {
                             if (index < buffer.Length)
                             {
@@ -50,9 +61,7 @@ namespace Compression
                                 byte b = buffer[index++];
 
                                 val |= b;
-
                             }
-
                         }
 
                         if (dictionary.ContainsKey(val))
@@ -78,7 +87,7 @@ namespace Compression
                         int counter0 = counter++;
 
                         if (counter0 % 1000 == 0)
-                            Console.WriteLine(counter0);
+                            Console.WriteLine($"{nameof(counter0)}: {counter0}");
                     }
                 }
 
@@ -92,21 +101,46 @@ namespace Compression
 
             int counter1 = 0;
 
+            TreeNode<(long Val, long Count)> parent = null;
+
             while (!finished0)
             {
-                var firstLink = sortedLinkedList.RemoveFirst();
+                long totalCount = 0;
 
-                if (firstLink != null)
-                    firstLink = sortedLinkedList.RemoveFirst();
+                var left = sortedLinkedList.RemoveFirst();
 
-                if (firstLink == null)
+                Link<TreeNode<(long Val, long Count)>> right = null;
+
+                totalCount += (left?.Value.Value.Count).GetValueOrDefault();
+
+                if (left != null)
+                    right = sortedLinkedList.RemoveFirst();
+
+                totalCount += (right?.Value.Value.Count).GetValueOrDefault();
+
+                if (right == null)
+                {
                     finished0 = true;
+                }
+                else
+                {
+                    parent = new TreeNode<(long Val, long Count)>((Val: 0, Count: totalCount));
+
+                    parent.SetChild(left.Value, Side.Left);
+                    parent.SetChild(right.Value, Side.Right);
+
+                    sortedLinkedList.AddSorted(parent);
+
+                    sortedLinkedList.Print();
+                }
 
                 int counter2 = counter1++;
 
-                if ((counter2 % 1000 == 0))
-                    Console.WriteLine(counter2);
+                if ((counter2 % 1000) == 0)
+                    Console.WriteLine($"{nameof(counter2)}: {counter2}");
             }
+
+            parent?.Print();
 
             return;
 
@@ -259,7 +293,7 @@ namespace Compression
                             int counter0 = counter++;
 
                             if (counter0 % 1000 == 0)
-                                Console.WriteLine(counter0);
+                                Console.WriteLine($"{nameof(counter0)}: {counter0}");
                         }
                     }
                 }

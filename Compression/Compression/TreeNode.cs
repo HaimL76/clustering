@@ -31,6 +31,43 @@ namespace Compression
         }
 
         public override string ToString() => val?.ToString();
+
+        public void Print() => Print(new Stack<int>());
+
+        private void Print(Stack<int> stack)
+        {
+            if (left == null && right == null)
+            {
+                string str = string.Join(string.Empty, stack.Reverse());
+
+                string str0 = null;
+
+                if (val is ValueTuple<long, long> tup)
+                    str0 = $"{(char)tup.Item1}, {tup.Item2}";
+
+                Console.WriteLine($"{str}, {str0}");
+            }
+            else
+            {
+                if (left != null)
+                {
+                    stack.Push(0);
+
+                    left.Print(stack);
+
+                    _ = stack.Pop();
+                }
+
+                if (right != null)
+                {
+                    stack.Push(1);
+
+                    right.Print(stack);
+
+                    _ = stack.Pop();
+                }
+            }
+        }
     }
 
     public class TreeNodeCountComparer<T> : IComparer<TreeNode<(long Val, long Count)>>
