@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,47 +26,53 @@ namespace Compression
                 new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
 
             //using (var fs = new FileStream(inputPath, FileMode.Open))
-              //  while (!finished && fs.CanRead)
-                //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
+            //  while (!finished && fs.CanRead)
+            //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
+
+            char ch = '\0';
 
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
+                //while ((ch = (char)sr.Read()) != -1)
                 {
                     string line = await sr.ReadLineAsync();
 
-                //var buffer = new byte[1024 * 1024];
-
-                byte[] buffer = null;
-
-                    //int read = await fs.ReadAsync(buffer, 0, buffer.Length);
-
-                    buffer = line?.ToCharArray().Select(ch => (byte)ch).ToArray();
-
-                    int read = (buffer?.Length).GetValueOrDefault();
-
-                    if (read < 1)
-                        finished = true;
-
-                    int index = 0;
-
-                    while (!finished && index < read)
+                    for (int i = 0; i < line.Length; i++)
                     {
-                        long val = 0;
+                        ////////////////////var buffer = new byte[1024 * 1024];
 
-                        for (int i = 0; i < 1; i++)
-                        {
-                            if (index < buffer.Length)
-                            {
-                                val <<= 8;
+                        //////////////////byte[] buffer = null;
 
-                                byte b = buffer[index++];
+                        //////////////////    //int read = await fs.ReadAsync(buffer, 0, buffer.Length);
 
-                                val |= b;
-                            }
-                        }
+                        //////////////////    buffer = line?.ToCharArray().Select(ch => (byte)ch).ToArray();
 
-                        if (dictionary.ContainsKey(val))
-                            _ = 0;
+                        //////////////////    int read = (buffer?.Length).GetValueOrDefault();
+
+                        //////////////////    if (read < 1)
+                        //////////////////        finished = true;
+
+                        //////////////////    int index = 0;
+
+                        //////////////////    while (!finished && index < read)
+                        //////////////////    {
+                        //////////////////        long val = 0;
+
+                        //////////////////        for (int i = 0; i < 1; i++)
+                        //////////////////        {
+                        //////////////////            if (index < buffer.Length)
+                        //////////////////            {
+                        //////////////////                val <<= 8;
+
+                        //////////////////                byte b = buffer[index++];
+
+                        //////////////////                val |= b;
+                        //////////////////            }
+                        //////////////////        }
+
+                        ch = line[i];
+
+                        int val = ch;
 
                         TreeNode<(long Val, long Count)> treeNode = null;
 
@@ -82,14 +89,17 @@ namespace Compression
 
                         treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
 
-                        //Console.WriteLine(val);
+                        //Console.WriteLine((char)val);
 
                         int counter0 = counter++;
 
                         if (counter0 % 1000 == 0)
                             Console.WriteLine($"{nameof(counter0)}: {counter0}");
+                        //////////////////    }
                     }
                 }
+
+            long count1 = dictionary.Sum(x => x.Value.Value.Count);
 
             dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 

@@ -32,20 +32,27 @@ namespace Compression
 
         public override string ToString() => val?.ToString();
 
-        public void Print() => Print(new Stack<int>());
+        public void Print() => Traverse(new Stack<int>(), (stack, val) =>
+        {
+            string str = string.Join(string.Empty, stack.Reverse());
 
-        private void Print(Stack<int> stack)
+            Console.WriteLine($"{str}, {val}");
+        });
+
+        private void Traverse(Stack<int> stack, Action<Stack<int>, T> action)
         {
             if (left == null && right == null)
             {
-                string str = string.Join(string.Empty, stack.Reverse());
+                //string str = string.Join(string.Empty, stack.Reverse());
 
-                string str0 = null;
+                //string str0 = null;
 
-                if (val is ValueTuple<long, long> tup)
-                    str0 = $"{(char)tup.Item1}, {tup.Item2}";
+                //if (val is ValueTuple<long, long> tup)
+                //    str0 = $"{(char)tup.Item1}, {tup.Item2}";
 
-                Console.WriteLine($"{str}, {str0}");
+                action?.Invoke(stack, val);
+
+                //Console.WriteLine($"{str}, {str0}");
             }
             else
             {
@@ -53,7 +60,7 @@ namespace Compression
                 {
                     stack.Push(0);
 
-                    left.Print(stack);
+                    left.Traverse(stack, action);
 
                     _ = stack.Pop();
                 }
@@ -62,7 +69,7 @@ namespace Compression
                 {
                     stack.Push(1);
 
-                    right.Print(stack);
+                    right.Traverse(stack, action);
 
                     _ = stack.Pop();
                 }
