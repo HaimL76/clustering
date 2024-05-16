@@ -189,55 +189,79 @@ namespace Compression
 
             int totalCounter = 0;
 
+            int tableCounter = 0;
+
             using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Create))
             using (var bw = new BinaryWriter(fs))
+            {
+                var bytes0 = new byte[9 * 256];
+
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    var tup = arr[i];
+
+                    ulong val0 = tup.Val;
+
+                    bytes0[tableCounter++] = (byte)tup.Length;
+
+                    for (int j = 0; j < 8; j++)
+                    {
+                        bytes0[tableCounter++] = (byte)val0;
+
+                        val0 >>= 8;
+                    }
+                }
+
+                bw.Write(bytes0);
+
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
                 //while ((ch = (char)sr.Read()) != -1)
                 {
                     string line = await sr.ReadLineAsync();
 
-                    for (int i = 0; i < line.Length; i++)
-                    {
-                        ch = line[i];
-
-                        if (ch < arr.Length)
+                        for (int i = 0; i < line.Length; i++)
                         {
-                            var tup = arr[ch];
+                            ch = line[i];
 
-                            ulong val = tup.Val;
-                            int len = tup.Length;
-
-                            for (int j = 0; j < len; j++)
+                            if (ch < arr.Length)
                             {
-                                byte bit = (byte)(val & 0x1);
-                                val >>= 1;
-                                pack <<= 1;
+                                var tup = arr[ch];
 
-                                pack |= bit;
+                                ulong val = tup.Val;
+                                int len = tup.Length;
 
-                                counterBits++;
-
-                                if (counterBits == 8)
+                                for (int j = 0; j < len; j++)
                                 {
-                                    counterBits = 0;
+                                    byte bit = (byte)(val & 0x1);
+                                    val >>= 1;
+                                    pack <<= 1;
 
-                                    int totalCounter0 = totalCounter++;
+                                    pack |= bit;
 
-                                    if ((totalCounter0 % 1000) == 0)
-                                        Console.WriteLine($"[{totalCounter0}]: {pack}");
+                                    counterBits++;
 
-                                    (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
-
-                                    if (counterBytes == arr2?.Length)
+                                    if (counterBits == 8)
                                     {
-                                        bw.Write(arr2);
+                                        counterBits = 0;
 
-                                        counterBytes = 0;
-                                        arr2 = null;
+                                        int totalCounter0 = totalCounter++;
+
+                                        if ((totalCounter0 % 1000) == 0)
+                                            Console.WriteLine($"[{totalCounter0}]: {pack}");
+
+                                        (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
+
+                                        if (counterBytes == arr2?.Length)
+                                        {
+                                            bw.Write(arr2);
+
+                                            counterBytes = 0;
+                                            arr2 = null;
+                                        }
+
+                                        pack = 0;
                                     }
-
-                                    pack = 0;
                                 }
                             }
                         }
