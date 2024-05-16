@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -71,6 +72,9 @@ namespace Compression
                         //////////////////        }
 
                         ch = line[i];
+
+                        if (ch > 256)
+                            ch = '-';//TODO:
 
                         int val = ch;
 
@@ -144,14 +148,102 @@ namespace Compression
                     sortedLinkedList.Print();
                 }
 
-                int counter2 = counter1++;
+                int counter3 = counter1++;
 
-                if ((counter2 % 1000) == 0)
-                    Console.WriteLine($"{nameof(counter2)}: {counter2}");
+                if ((counter3 % 1000) == 0)
+                    Console.WriteLine($"{nameof(counter3)}: {counter3}");
             }
 
             parent?.Print();
 
+            var arr = new (ulong Val, int Length)[256];
+
+            parent.Traverse(new Stack<ulong>(), (stack, tup) =>
+            {
+                ulong bits = 0;
+
+                int len = 0;
+
+                foreach (var item in stack.Reverse().ToList())
+                {
+                    bits <<= 1;
+
+                    bits |= (ulong) item;
+
+                    len++;
+                }
+
+                if (tup.Val > 256)
+                    _ = 0;
+
+                arr[tup.Val] = (Val: bits, Length: len);
+            });
+
+            byte pack = 0;
+
+            int counterBits = 0;
+
+            int counterBytes = 0;
+
+            byte[] arr2 = null;
+
+            int totalCounter = 0;
+
+            using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Create))
+            using (var bw = new BinaryWriter(fs))
+            using (var sr = new StreamReader(inputPath))
+                while (!sr.EndOfStream)
+                //while ((ch = (char)sr.Read()) != -1)
+                {
+                    string line = await sr.ReadLineAsync();
+
+                    for (int i = 0; i < line.Length; i++)
+                    {
+                        ch = line[i];
+
+                        if (ch < arr.Length)
+                        {
+                            var tup = arr[ch];
+
+                            ulong val = tup.Val;
+                            int len = tup.Length;
+
+                            for (int j = 0; j < len; j++)
+                            {
+                                byte bit = (byte)(val & 0x1);
+                                val >>= 1;
+                                pack <<= 1;
+
+                                pack |= bit;
+
+                                counterBits++;
+
+                                if (counterBits == 8)
+                                {
+                                    counterBits = 0;
+
+                                    int totalCounter0 = totalCounter++;
+
+                                    if ((totalCounter0 % 1000) == 0)
+                                        Console.WriteLine($"[{totalCounter0}]: {pack}");
+
+                                    (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
+
+                                    if (counterBytes == arr2?.Length)
+                                    {
+                                        bw.Write(arr2);
+
+                                        counterBytes = 0;
+                                        arr2 = null;
+                                    }
+
+                                    pack = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            
             return;
 
             var list = new List<TreeNode<(long Val, long Count)>>(dictionary.Values);

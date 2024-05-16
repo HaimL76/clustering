@@ -32,27 +32,18 @@ namespace Compression
 
         public override string ToString() => val?.ToString();
 
-        public void Print() => Traverse(new Stack<int>(), (stack, val) =>
+        public void Print() => Traverse(new Stack<ulong>(), (stack, val) =>
         {
             string str = string.Join(string.Empty, stack.Reverse());
 
             Console.WriteLine($"{str}, {val}");
         });
 
-        private void Traverse(Stack<int> stack, Action<Stack<int>, T> action)
+        public void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
         {
             if (left == null && right == null)
             {
-                //string str = string.Join(string.Empty, stack.Reverse());
-
-                //string str0 = null;
-
-                //if (val is ValueTuple<long, long> tup)
-                //    str0 = $"{(char)tup.Item1}, {tup.Item2}";
-
                 action?.Invoke(stack, val);
-
-                //Console.WriteLine($"{str}, {str0}");
             }
             else
             {
