@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
@@ -252,7 +253,7 @@ namespace Compression
 
                                         (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
 
-                                        if (counterBytes == arr2?.Length)
+                                        if (counterBytes == arr2?.Length || sr.EndOfStream)
                                         {
                                             bw.Write(arr2);
 
@@ -325,6 +326,13 @@ namespace Compression
                 }
 
                 tree.Print();
+
+                var bytes3 = br.ReadBytes(1024 * 1024);
+
+                for (int i = 0; i < bytes3.Length; i++)
+                {
+                    byte byte0 = bytes3[i];
+                }
             }
 
                 return;

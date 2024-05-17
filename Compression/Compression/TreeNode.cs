@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -75,6 +76,30 @@ namespace Compression
     public class Tree<T>
     {
         private TreeNode<T> root;
+
+        public (T Val, bool Found)  GetValue(params int[] sides)
+        {
+            (T Val, bool Found) result = (Val: default(T), false);
+
+            if (root != null)
+            {
+                var next = root;
+
+                int index = 0;
+
+                while (next != null && index < sides.Length)
+                {
+                    var side = sides[index++];
+
+                    next = side == 0 ? next.Left : next.Right;
+                }
+
+                if (next != null)
+                    result = (Val: next.Value, true);
+            }
+
+            return result;
+        }
 
         public void Add(T val, params int[] sides)
         {
