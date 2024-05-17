@@ -97,7 +97,7 @@ namespace Compression
 
                         int counter0 = counter++;
 
-                        if (counter0 % 1000 == 0)
+                        if (false)//counter0 % 1000 == 0)
                             Console.WriteLine($"{nameof(counter0)}: {counter0}");
                         //////////////////    }
                     }
@@ -107,7 +107,7 @@ namespace Compression
 
             dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
-            sortedLinkedList.Print();
+            //sortedLinkedList.Print();
 
             Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
 
@@ -145,12 +145,12 @@ namespace Compression
 
                     sortedLinkedList.AddSorted(parent);
 
-                    sortedLinkedList.Print();
+                    //sortedLinkedList.Print();
                 }
 
                 int counter3 = counter1++;
 
-                if ((counter3 % 1000) == 0)
+                if (false)//(counter3 % 1000) == 0)
                     Console.WriteLine($"{nameof(counter3)}: {counter3}");
             }
 
@@ -247,7 +247,7 @@ namespace Compression
 
                                         int totalCounter0 = totalCounter++;
 
-                                        if ((totalCounter0 % 1000) == 0)
+                                        if (false)//(totalCounter0 % 1000) == 0)
                                             Console.WriteLine($"[{totalCounter0}]: {pack}");
 
                                         (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
@@ -477,7 +477,7 @@ namespace Compression
 
                             int counter0 = counter++;
 
-                            if (counter0 % 1000 == 0)
+                            if (false)//counter0 % 1000 == 0)
                                 Console.WriteLine($"{nameof(counter0)}: {counter0}");
                         }
                     }
