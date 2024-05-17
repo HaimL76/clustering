@@ -23,7 +23,7 @@ namespace Compression
 
             input = @"c:\gpp\bookmarks_3_25_24.html";
 
-            SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList = 
+            SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList =
                 new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
 
             //using (var fs = new FileStream(inputPath, FileMode.Open))
@@ -168,7 +168,7 @@ namespace Compression
                 {
                     bits <<= 1;
 
-                    bits |= (ulong) item;
+                    bits |= (ulong)item;
 
                     len++;
                 }
@@ -214,11 +214,11 @@ namespace Compression
 
                 bw.Write(bytes0);
 
-            using (var sr = new StreamReader(inputPath))
-                while (!sr.EndOfStream)
-                //while ((ch = (char)sr.Read()) != -1)
-                {
-                    string line = await sr.ReadLineAsync();
+                using (var sr = new StreamReader(inputPath))
+                    while (!sr.EndOfStream)
+                    //while ((ch = (char)sr.Read()) != -1)
+                    {
+                        string line = await sr.ReadLineAsync();
 
                         for (int i = 0; i < line.Length; i++)
                         {
@@ -266,9 +266,40 @@ namespace Compression
                             }
                         }
                     }
+            }
+
+            using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Open))
+            using (var br = new BinaryReader(fs))
+            {
+                var arr0 = new (ulong Val, int Length)[256];
+
+                int bytesCounter = 0;
+
+                var bytes0 = br.ReadBytes(9 * 256);
+
+                int counter4 = 0;
+
+                while (bytesCounter < bytes0.Length)
+                {
+                    byte length = bytes0[bytesCounter++];
+
+                    ulong val0 = 0;
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        ulong val1 = bytes0[bytesCounter++];
+
+                        for (int j = 0; j < i; j++)
+                            val1 <<= 8;
+
+                        val0 |= val1;
+                    }
+
+                    arr0[counter4++] = (Val: val0, Length: length);
                 }
-            
-            return;
+            }
+
+                return;
 
             var list = new List<TreeNode<(long Val, long Count)>>(dictionary.Values);
 
