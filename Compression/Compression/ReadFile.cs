@@ -297,6 +297,34 @@ namespace Compression
 
                     arr0[counter4++] = (Val: val0, Length: length);
                 }
+
+                Tree<char> tree = new Tree<char>();
+
+                for (int i = 0; i < arr0.Length; i++)
+                {
+                    var tup = arr0[i];
+
+                    int[] arr5 = null;
+
+                    if (tup.Length > 0)
+                    {
+                        ulong val5 = tup.Val;
+
+                        for (int j = 0; j < tup.Length; j++)
+                        {
+                            int bit = (int)(val5 & 0x1);
+
+                            val5 >>= 1;
+
+                            (arr5 = arr5 ?? new int[tup.Length])[j] = bit;
+                        }
+                    }
+                    
+                    if (arr5?.Length > 0)
+                        tree.Add((char)i, arr5.Reverse().ToArray());
+                }
+
+                tree.Print();
             }
 
                 return;

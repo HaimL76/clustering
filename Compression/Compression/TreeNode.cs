@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,9 @@ namespace Compression
         private TreeNode<T> left;
 
         private TreeNode<T> right;
+
+        public TreeNode<T> Left => left;
+        public TreeNode<T> Right => right;
 
         private T val;
 
@@ -66,6 +70,40 @@ namespace Compression
                 }
             }
         }
+    }
+
+    public class Tree<T>
+    {
+        private TreeNode<T> root;
+
+        public void Add(T val, params int[] sides)
+        {
+            root = root ?? new TreeNode<T>(val);
+
+            var node = root;
+
+            for (int i = 0; i < sides.Length; i++)
+            {
+                int side = sides[i];
+
+                TreeNode<T> next = side == 0 
+                    ? node.Left : node.Right;
+
+                if (next == null)
+                {
+                    next = new TreeNode<T>(val);
+
+                    if (side == 0)
+                        node.SetChild(next, Side.Left);
+                    else
+                        node.SetChild(next, Side.Right);
+                }
+
+                node = next;
+            }
+        }
+
+        public void Print() => root?.Print();
     }
 
     public class TreeNodeCountComparer<T> : IComparer<TreeNode<(long Val, long Count)>>
