@@ -237,7 +237,7 @@ namespace Compression
 
                                         (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
 
-                                        if (counterBytes == arr2?.Length || sr.EndOfStream)
+                                        if (counterBytes == arr2?.Length)
                                         {
                                             bw.Write(arr2);
 
@@ -251,6 +251,16 @@ namespace Compression
                             }
                         }
                     }
+
+                if (counterBits > 0)
+                {
+                    int totalCounter0 = totalCounter++;
+
+                    (arr2 = arr2 ?? new byte[1])[counterBytes++] = pack;
+                }
+
+                if (counterBytes > 0)
+                    bw.Write(arr2);
             }
 
             using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Open))
@@ -338,17 +348,22 @@ namespace Compression
                     {
                         byte byte0 = bytes3[i];
 
-                        //var arr11 = new int[8];
+                        var arr11 = new int[8];
 
                         for (int j = 0; j < 8; j++)
                         {
-                            //arr11[j] = byte0 & 0x1;
-
-                            var bit = byte0 & 0x1;
-
-                            Side side = bit == 0 ? Side.Left : Side.Right;
+                            arr11[j] = byte0 & 0x1;
 
                             byte0 >>= 1;
+                        }
+
+                        //arr11 = arr11.Reverse().ToArray();
+
+                        for (int j = 0; j < 8; j++)
+                        {
+                            var bit = arr11[j];
+
+                            Side side = bit == 0 ? Side.Left : Side.Right;
 
                             visitor.Visit(side);
 
