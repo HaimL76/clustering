@@ -31,6 +31,8 @@ namespace Compression
             //  while (!finished && fs.CanRead)
             //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
 
+            long charsCount = 0;
+
             char ch = '\0';
 
             using (var sr = new StreamReader(inputPath))
@@ -41,38 +43,9 @@ namespace Compression
 
                     for (int i = 0; i < line.Length; i++)
                     {
-                        ////////////////////var buffer = new byte[1024 * 1024];
-
-                        //////////////////byte[] buffer = null;
-
-                        //////////////////    //int read = await fs.ReadAsync(buffer, 0, buffer.Length);
-
-                        //////////////////    buffer = line?.ToCharArray().Select(ch => (byte)ch).ToArray();
-
-                        //////////////////    int read = (buffer?.Length).GetValueOrDefault();
-
-                        //////////////////    if (read < 1)
-                        //////////////////        finished = true;
-
-                        //////////////////    int index = 0;
-
-                        //////////////////    while (!finished && index < read)
-                        //////////////////    {
-                        //////////////////        long val = 0;
-
-                        //////////////////        for (int i = 0; i < 1; i++)
-                        //////////////////        {
-                        //////////////////            if (index < buffer.Length)
-                        //////////////////            {
-                        //////////////////                val <<= 8;
-
-                        //////////////////                byte b = buffer[index++];
-
-                        //////////////////                val |= b;
-                        //////////////////            }
-                        //////////////////        }
-
                         ch = line[i];
+
+                        charsCount++;
 
                         if (ch > 256)
                             ch = '-';//TODO:
@@ -195,6 +168,17 @@ namespace Compression
             using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Create))
             using (var bw = new BinaryWriter(fs))
             {
+                var chars = new byte[8];
+
+                for (int i = 0; i < 8; i++)
+                {
+                    chars[i] = (byte)charsCount;
+
+                    charsCount >>= 8;
+                }
+
+                bw.Write(chars);
+
                 var bytes0 = new byte[9 * 256];
 
                 for (int i = 0; i < arr.Length; i++)
@@ -272,6 +256,19 @@ namespace Compression
             using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Open))
             using (var br = new BinaryReader(fs))
             {
+                var chars = br.ReadBytes(8);
+
+                chars = chars.Reverse().ToArray();
+
+                charsCount = 0;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    charsCount <<= 8;
+
+                    charsCount |= chars[i];
+                }
+
                 var arr0 = new (ulong Val, int Length)[256];
 
                 int bytesCounter = 0;
@@ -329,9 +326,44 @@ namespace Compression
 
                 var bytes3 = br.ReadBytes(1024 * 1024);
 
-                for (int i = 0; i < bytes3.Length; i++)
+                long charsCounter = 0;
+
+                finished = false;
+
+                var visitor = new TreeVisitor<char>(tree);
+
+                while (!finished && charsCounter < charsCount)
                 {
-                    byte byte0 = bytes3[i];
+                    for (int i = 0; i < bytes3.Length; i++)
+                    {
+                        byte byte0 = bytes3[i];
+
+                        //var arr11 = new int[8];
+
+                        for (int j = 0; j < 8; j++)
+                        {
+                            //arr11[j] = byte0 & 0x1;
+
+                            var bit = byte0 & 0x1;
+
+                            Side side = bit == 0 ? Side.Left : Side.Right;
+
+                            byte0 >>= 1;
+
+                            visitor.Visit(side);
+
+                            var state = visitor.Value;
+
+                            if (state.status)
+                            {
+                                ch = state.Val;
+
+                                Console.WriteLine(ch);
+
+                                charsCounter++;
+                            }
+                        }
+                    }
                 }
             }
 

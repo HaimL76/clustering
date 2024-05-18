@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,7 +12,7 @@ namespace Compression
 {
     public enum Side { Left, Right }
 
-    internal class TreeNode<T>
+    public class TreeNode<T>
     {
         public TreeNode(T val0) => val = val0;
 
@@ -77,6 +79,8 @@ namespace Compression
     {
         private TreeNode<T> root;
 
+        public TreeNode<T> Root => root;
+
         public (T Val, bool Found)  GetValue(params int[] sides)
         {
             (T Val, bool Found) result = (Val: default(T), false);
@@ -129,6 +133,35 @@ namespace Compression
         }
 
         public void Print() => root?.Print();
+    }
+
+    public class TreeVisitor<T>
+    {
+        public TreeVisitor(Tree<T> tree0) => tree = tree0;
+
+        private Tree<T> tree;
+
+        private TreeNode<T> current;
+
+        private (T Val, bool status)? val0;
+
+        public (T Val, bool status) Value => val0.GetValueOrDefault();
+
+        public void Visit(Side side)
+        {
+            current = current ?? tree.Root;
+
+            if (current.Left == null && current.Right == null)
+            {
+                val0 = (Val: current.Value, true);
+            }
+            else
+            { 
+                val0 = null;
+
+                current = side == Side.Left ? current.Left : current.Right;
+            }
+        }
     }
 
     public class TreeNodeCountComparer<T> : IComparer<TreeNode<(long Val, long Count)>>
