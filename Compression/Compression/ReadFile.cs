@@ -33,14 +33,17 @@ namespace Compression
 
                 TreeNode<(long Val, long Count)> treeNode = null;
 
-                if (!dictionary.ContainsKey(val))
+                lock (dictionary)
                 {
-                    treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
+                    if (!dictionary.ContainsKey(val))
+                    {
+                        treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
 
-                    dictionary.Add(val, treeNode);
+                        dictionary.Add(val, treeNode);
+                    }
+
+                    treeNode = dictionary[val];
                 }
-
-                treeNode = dictionary[val];
 
                 treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
             }
@@ -63,6 +66,8 @@ namespace Compression
 
             int index = 0;
 
+            var tasks = new List<Task>();
+
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
                 {
@@ -74,8 +79,10 @@ namespace Compression
 
                     Console.WriteLine($"Read {index} characters from file {inputPath}");
 
-                    ProcessCharsBuffer(chars, readChars, dictionary, ref charsCount);
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(chars, readChars, dictionary, ref charsCount)));
                 }
+
+            Task.WaitAll(tasks.ToArray());
 
             long count1 = dictionary.Sum(x => x.Value.Value.Count);
 
