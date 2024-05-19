@@ -35,15 +35,25 @@ namespace Compression
 
             char ch = '\0';
 
+            int index = 0;
+
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
                 //while ((ch = (char)sr.Read()) != -1)
                 {
-                    string line = await sr.ReadLineAsync();
+                    //string line = await sr.ReadLineAsync();
 
-                    for (int i = 0; i < line.Length; i++)
+                    var chars = new char[1024 * 1024];
+
+                    int readChars = await sr.ReadAsync(chars, 0, chars.Length);
+
+                    index += readChars;
+
+                    Console.WriteLine($"Read {index} characters from file {inputPath}");
+
+                    for (int i = 0; i < readChars; i++)
                     {
-                        ch = line[i];
+                        ch = chars[i];
 
                         charsCount++;
 
@@ -153,8 +163,6 @@ namespace Compression
                 arr[tup.Val] = (Val: bits, Length: len);
             });
 
-            byte pack = 0;
-
             int counterBits = 0;
 
             int counterBytes = 0;
@@ -165,7 +173,7 @@ namespace Compression
 
             int tableCounter = 0;
 
-            using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Create))
+            using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Create))
             using (var bw = new BinaryWriter(fs))
             {
                 var chars = new byte[8];
@@ -199,15 +207,25 @@ namespace Compression
 
                 bw.Write(bytes0);
 
+                byte pack = 0;
+
+                index = 0;
+
                 using (var sr = new StreamReader(inputPath))
                     while (!sr.EndOfStream)
                     //while ((ch = (char)sr.Read()) != -1)
                     {
-                        string line = await sr.ReadLineAsync();
+                        var chars11 = new char[1024 * 1024];
 
-                        for (int i = 0; i < line.Length; i++)
+                        int readChars = await sr.ReadAsync(chars11, 0, chars11.Length);
+
+                        index += readChars;
+
+                        Console.WriteLine($"Read {index} characters from file {inputPath}");
+
+                        for (int i = 0; i < chars11.Length; i++)
                         {
-                            ch = line[i];
+                            ch = chars11[i];
 
                             if (ch < arr.Length)
                             {
@@ -216,10 +234,23 @@ namespace Compression
                                 ulong val = tup.Val;
                                 int len = tup.Length;
 
+                                var arr22 = new byte[len];
+
                                 for (int j = 0; j < len; j++)
                                 {
                                     byte bit = (byte)(val & 0x1);
+
+                                    arr22[j] = bit;
+
                                     val >>= 1;
+                                }
+
+                                arr22 = arr22.Reverse().ToArray();
+
+                                for (int j = 0; j < len; j++)
+                                {
+                                    byte bit = arr22[j];
+
                                     pack <<= 1;
 
                                     pack |= bit;
@@ -263,7 +294,7 @@ namespace Compression
                     bw.Write(arr2);
             }
 
-            using (var fs = new FileStream($@"c:\html\{Path.GetFileNameWithoutExtension(inputPath)}.huffman", FileMode.Open))
+            using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Open))
             using (var br = new BinaryReader(fs))
             {
                 var chars = br.ReadBytes(8);
@@ -344,9 +375,11 @@ namespace Compression
 
                 while (!finished && charsCounter < charsCount)
                 {
-                    for (int i = 0; i < bytes3.Length; i++)
+                    int i = 0;
+
+                    while (charsCounter < charsCount && i < bytes3.Length)
                     {
-                        byte byte0 = bytes3[i];
+                        byte byte0 = bytes3[i++];
 
                         var arr11 = new int[8];
 
@@ -357,11 +390,13 @@ namespace Compression
                             byte0 >>= 1;
                         }
 
-                        //arr11 = arr11.Reverse().ToArray();
+                        arr11 = arr11.Reverse().ToArray();
 
-                        for (int j = 0; j < 8; j++)
+                        int j0 = 0;
+
+                        while (charsCounter < charsCount && j0 < 8)
                         {
-                            var bit = arr11[j];
+                            var bit = arr11[j0++];
 
                             Side side = bit == 0 ? Side.Left : Side.Right;
 
@@ -369,11 +404,11 @@ namespace Compression
 
                             var state = visitor.Value;
 
-                            if (state.status)
+                            if (state.Status)
                             {
                                 ch = state.Val;
 
-                                Console.WriteLine(ch);
+                                Console.Write(ch);
 
                                 charsCounter++;
                             }

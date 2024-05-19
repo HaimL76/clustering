@@ -107,7 +107,7 @@ namespace Compression
 
         public void Add(T val, params int[] sides)
         {
-            root = root ?? new TreeNode<T>(val);
+            root = root ?? new TreeNode<T>(default);
 
             var node = root;
 
@@ -120,7 +120,7 @@ namespace Compression
 
                 if (next == null)
                 {
-                    next = new TreeNode<T>(val);
+                    next = new TreeNode<T>(default);
 
                     if (side == 0)
                         node.SetChild(next, Side.Left);
@@ -130,6 +130,8 @@ namespace Compression
 
                 node = next;
             }
+
+            node.SetValue(val);
         }
 
         public void Print() => root?.Print();
@@ -143,23 +145,23 @@ namespace Compression
 
         private TreeNode<T> current;
 
-        private (T Val, bool status)? val0;
+        private (T Val, bool Status)? val0;
 
-        public (T Val, bool status) Value => val0.GetValueOrDefault();
+        public (T Val, bool Status) Value => val0.GetValueOrDefault();
 
         public void Visit(Side side)
         {
+            val0 = null;
+
             current = current ?? tree.Root;
+
+            current = side == Side.Left ? current.Left : current.Right;
 
             if (current.Left == null && current.Right == null)
             {
-                val0 = (Val: current.Value, true);
-            }
-            else
-            { 
-                val0 = null;
+                val0 = (Val: current.Value, Status: true);
 
-                current = side == Side.Left ? current.Left : current.Right;
+                current = null;
             }
         }
     }
