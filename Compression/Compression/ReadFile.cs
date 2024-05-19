@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -12,24 +14,48 @@ namespace Compression
 {
     internal class ReadFile
     {
+        public static void ProcessCharsBuffer(char[] chars, int readChars,
+            Dictionary<long, TreeNode<(long Val, long Count)>> dictionary, 
+            ref long charsCount)
+        {
+            long charsCount0 = 0;
+
+            for (int i = 0; i < readChars; i++)
+            {
+                var ch = chars[i];
+
+                charsCount0++;
+
+                if (ch > 256)
+                    ch = '-';//TODO:
+
+                int val = ch;
+
+                TreeNode<(long Val, long Count)> treeNode = null;
+
+                if (!dictionary.ContainsKey(val))
+                {
+                    treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
+
+                    dictionary.Add(val, treeNode);
+                }
+
+                treeNode = dictionary[val];
+
+                treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
+            }
+
+            charsCount += charsCount0;
+        }
+
         public static async void ReadFileAsync(string inputPath)
         {
             var dictionary = new Dictionary<long, TreeNode<(long Val, long Count)>>();
 
             bool finished = false;
 
-            int counter = 0;
-
-            string input = @"c:\gpp\MissingCardsSupreme-output.txt";
-
-            input = @"c:\gpp\bookmarks_3_25_24.html";
-
             SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList =
                 new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
-
-            //using (var fs = new FileStream(inputPath, FileMode.Open))
-            //  while (!finished && fs.CanRead)
-            //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
 
             long charsCount = 0;
 
@@ -39,10 +65,7 @@ namespace Compression
 
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
-                //while ((ch = (char)sr.Read()) != -1)
                 {
-                    //string line = await sr.ReadLineAsync();
-
                     var chars = new char[1024 * 1024];
 
                     int readChars = await sr.ReadAsync(chars, 0, chars.Length);
@@ -51,40 +74,7 @@ namespace Compression
 
                     Console.WriteLine($"Read {index} characters from file {inputPath}");
 
-                    for (int i = 0; i < readChars; i++)
-                    {
-                        ch = chars[i];
-
-                        charsCount++;
-
-                        if (ch > 256)
-                            ch = '-';//TODO:
-
-                        int val = ch;
-
-                        TreeNode<(long Val, long Count)> treeNode = null;
-
-                        if (!dictionary.ContainsKey(val))
-                        {
-                            treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
-
-                            //sortedLinkedList.AddSorted(treeNode);
-
-                            dictionary.Add(val, treeNode);
-                        }
-
-                        treeNode = dictionary[val];
-
-                        treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
-
-                        //Console.WriteLine((char)val);
-
-                        int counter0 = counter++;
-
-                        if (false)//counter0 % 1000 == 0)
-                            Console.WriteLine($"{nameof(counter0)}: {counter0}");
-                        //////////////////    }
-                    }
+                    ProcessCharsBuffer(chars, readChars, dictionary, ref charsCount);
                 }
 
             long count1 = dictionary.Sum(x => x.Value.Value.Count);
