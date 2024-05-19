@@ -15,10 +15,12 @@ namespace Compression
 {
     internal class ReadFile
     {
-        public static void ProcessCharsBuffer(char[] chars, int readChars,
+        public static void ProcessCharsBuffer(char[] chars, long index, int readChars,
             Dictionary<long, TreeNode<(long Val, long Count)>> dictionary, 
             ref long charsCount)
         {
+            Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
+
             long charsCount0 = 0;
 
             for (int i = 0; i < readChars; i++)
@@ -65,13 +67,15 @@ namespace Compression
 
             char ch = '\0';
 
-            int index = 0;
+            long index = 0;
 
             var tasks = new List<Task>();
 
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
                 {
+                    long index0 = index;
+
                     var chars = new char[1024 * 1024];
 
                     int readChars = await sr.ReadAsync(chars, 0, chars.Length);
@@ -80,7 +84,7 @@ namespace Compression
 
                     Console.WriteLine($"Read {index} characters from file {inputPath}");
 
-                    tasks.Add(Task.Run(() => ProcessCharsBuffer(chars, readChars, dictionary, ref charsCount)));
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(chars, index0, readChars, dictionary, ref charsCount)));
                 }
 
             Task.WaitAll(tasks.ToArray());
