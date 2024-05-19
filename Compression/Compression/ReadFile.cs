@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Compression
@@ -48,7 +49,7 @@ namespace Compression
                 treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
             }
 
-            charsCount += charsCount0;
+            _ = Interlocked.Add(ref charsCount, charsCount0);
         }
 
         public static async void ReadFileAsync(string inputPath)
