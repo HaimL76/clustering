@@ -15,19 +15,19 @@ namespace Compression
 {
     internal class ReadFile
     {
-        public static void ProcessCharsBuffer(char[] chars, long index, int readChars,
+        public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<long, TreeNode<(long Val, long Count)>> dictionary, 
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
 
-            long charsCount0 = 0;
+            long loopCharsCount = 0;
 
             for (int i = 0; i < readChars; i++)
             {
-                var ch = chars[i];
+                var ch = charsBuffer[i];
 
-                charsCount0++;
+                loopCharsCount++;
 
                 if (ch > 256)
                     ch = '-';//TODO:
@@ -46,13 +46,15 @@ namespace Compression
                     }
 
                     treeNode = dictionary[val];
-                }
 
-                treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
+                    treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
+                }
             }
 
-            _ = Interlocked.Add(ref charsCount, charsCount0);
+            _ = Interlocked.Add(ref charsCount, loopCharsCount);
         }
+
+        public const int BufferSize = 1024 * 1024;
 
         public static async void ReadFileAsync(string inputPath)
         {
@@ -60,40 +62,36 @@ namespace Compression
 
             bool finished = false;
 
-            SortedLinkedList<TreeNode<(long Val, long Count)>> sortedLinkedList =
-                new SortedLinkedList<TreeNode<(long Val, long Count)>>(new TreeNodeCountComparer<(long Val, long Count)>());
+            var treeNodeComparer = new TreeNodeCountComparer<(long Val, long Count)>();
 
-            long charsCount = 0;
+            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Val, long Count)>>(treeNodeComparer);
+
+            long charsCounter = 0, charsCount = 0;
 
             char ch = '\0';
-
-            long index = 0;
 
             var tasks = new List<Task>();
 
             using (var sr = new StreamReader(inputPath))
                 while (!sr.EndOfStream)
                 {
-                    long index0 = index;
+                    var charsBuffer = new char[BufferSize];
 
-                    var chars = new char[1024 * 1024];
+                    int readChars = await sr.ReadAsync(charsBuffer, 0, charsBuffer.Length);
 
-                    int readChars = await sr.ReadAsync(chars, 0, chars.Length);
+                    charsCounter += readChars;
 
-                    index += readChars;
+                    Console.WriteLine($"Read {charsCounter} characters from file {inputPath}");
 
-                    Console.WriteLine($"Read {index} characters from file {inputPath}");
-
-                    tasks.Add(Task.Run(() => ProcessCharsBuffer(chars, index0, readChars, dictionary, ref charsCount)));
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, charsCounter, readChars, dictionary,
+                        ref charsCount)));
                 }
 
             Task.WaitAll(tasks.ToArray());
 
-            long count1 = dictionary.Sum(x => x.Value.Value.Count);
+            long sum = dictionary.Sum(x => (x.Value?.Value.Count).GetValueOrDefault());
 
             dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
-
-            //sortedLinkedList.Print();
 
             Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
 
@@ -211,19 +209,19 @@ namespace Compression
 
                 byte pack = 0;
 
-                index = 0;
+                charsCounter = 0;
 
                 using (var sr = new StreamReader(inputPath))
                     while (!sr.EndOfStream)
                     //while ((ch = (char)sr.Read()) != -1)
                     {
-                        var chars11 = new char[1024 * 1024];
+                        var chars11 = new char[BufferSize];
 
                         int readChars = await sr.ReadAsync(chars11, 0, chars11.Length);
 
-                        index += readChars;
+                        charsCounter += readChars;
 
-                        Console.WriteLine($"Read {index} characters from file {inputPath}");
+                        Console.WriteLine($"Read {charsCounter} characters from file {inputPath}");
 
                         for (int i = 0; i < chars11.Length; i++)
                         {
@@ -268,7 +266,7 @@ namespace Compression
                                         if (false)//(totalCounter0 % 1000) == 0)
                                             Console.WriteLine($"[{totalCounter0}]: {pack}");
 
-                                        (arr2 = arr2 ?? new byte[1024 * 1024])[counterBytes++] = pack;
+                                        (arr2 = arr2 ?? new byte[BufferSize])[counterBytes++] = pack;
 
                                         if (counterBytes == arr2?.Length)
                                         {
@@ -367,9 +365,9 @@ namespace Compression
 
                 tree.Print();
 
-                var bytes3 = br.ReadBytes(1024 * 1024);
+                var bytes3 = br.ReadBytes(BufferSize);
 
-                long charsCounter = 0;
+                charsCounter = charsCount = 0;
 
                 finished = false;
 
@@ -530,7 +528,7 @@ namespace Compression
 
                     //using (var ms = new MemoryStream(bytes, 0, bytes.Length, false, true))
                     {
-                        var buffer = new byte[1024 * 1024];
+                        var buffer = new byte[BufferSize];
 
                         int read = await fr.ReadAsync(buffer, 0, buffer.Length);
 
