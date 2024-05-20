@@ -367,7 +367,7 @@ namespace Compression
 
                 var bytes3 = br.ReadBytes(BufferSize);
 
-                charsCounter = charsCount = 0;
+                charsCounter = 0;
 
                 finished = false;
 
