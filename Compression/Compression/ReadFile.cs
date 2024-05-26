@@ -68,7 +68,7 @@ namespace Compression
 
             var sortedLinkedList = new SortedLinkedList<TreeNode<(long Val, long Count)>>(treeNodeComparer);
 
-            long charsCounter = 0, charsCount = 0;
+            long charsIndex = 0, charsCount = 0;
 
             char ch = '\0';
 
@@ -81,12 +81,16 @@ namespace Compression
 
                     int readChars = await sr.ReadAsync(charsBuffer, 0, charsBuffer.Length);
 
-                    charsCounter += readChars;
+                    Console.WriteLine($"Read {charsIndex} characters from file {inputPath}");
 
-                    Console.WriteLine($"Read {charsCounter} characters from file {inputPath}");
+                    // Need to capture this index value, otherwise all the threads
+                    // refer to the same variable.
+                    long capturedCharsIndex = charsIndex;
 
-                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, charsCounter, readChars, dictionary,
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionary,
                         ref charsCount)));
+
+                    charsIndex += readChars;
                 }
 
             Task.WaitAll(tasks.ToArray());
@@ -98,8 +102,6 @@ namespace Compression
             Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
 
             finished = false;
-
-            int counter1 = 0;
 
             TreeNode<(long Val, long Count)> parent = null;
 
@@ -130,14 +132,7 @@ namespace Compression
                     parent.SetChild(right.Value, Side.Right);
 
                     sortedLinkedList.AddSorted(parent);
-
-                    //sortedLinkedList.Print();
                 }
-
-                int counter3 = counter1++;
-
-                if (false)//(counter3 % 1000) == 0)
-                    Console.WriteLine($"{nameof(counter3)}: {counter3}");
             }
 
             parent?.Print();
@@ -169,9 +164,7 @@ namespace Compression
 
             int counterBytes = 0;
 
-            byte[] arr2 = null;
-
-            int totalCounter = 0;
+            byte[] writeBuffer = null;
 
             int tableCounter = 0;
 
@@ -189,7 +182,7 @@ namespace Compression
 
                 bw.Write(chars);
 
-                var bytes0 = new byte[9 * 256];
+                var translationTableBuffer = new byte[9 * 256];
 
                 for (int i = 0; i < arr.Length; i++)
                 {
@@ -197,37 +190,36 @@ namespace Compression
 
                     ulong val0 = tup.Val;
 
-                    bytes0[tableCounter++] = (byte)tup.Length;
+                    translationTableBuffer[tableCounter++] = (byte)tup.Length;
 
                     for (int j = 0; j < 8; j++)
                     {
-                        bytes0[tableCounter++] = (byte)val0;
+                        translationTableBuffer[tableCounter++] = (byte)val0;
 
                         val0 >>= 8;
                     }
                 }
 
-                bw.Write(bytes0);
+                bw.Write(translationTableBuffer);
 
                 byte pack = 0;
 
-                charsCounter = 0;
+                charsIndex = 0;
 
                 using (var sr = new StreamReader(inputPath))
                     while (!sr.EndOfStream)
-                    //while ((ch = (char)sr.Read()) != -1)
                     {
-                        var chars11 = new char[BufferSize];
+                        var charsBuffer = new char[BufferSize];
 
-                        int readChars = await sr.ReadAsync(chars11, 0, chars11.Length);
+                        int readChars = await sr.ReadAsync(charsBuffer, 0, charsBuffer.Length);
 
-                        charsCounter += readChars;
+                        charsIndex += readChars;
 
-                        Console.WriteLine($"Read {charsCounter} characters from file {inputPath}");
+                        Console.WriteLine($"Read {charsIndex} characters from file {inputPath}");
 
-                        for (int i = 0; i < chars11.Length; i++)
+                        for (int i = 0; i < charsBuffer.Length; i++)
                         {
-                            ch = chars11[i];
+                            ch = charsBuffer[i];
 
                             if (ch < arr.Length)
                             {
@@ -236,22 +228,22 @@ namespace Compression
                                 ulong val = tup.Val;
                                 int len = tup.Length;
 
-                                var arr22 = new byte[len];
+                                var bitsBuffer = new byte[len];
 
                                 for (int j = 0; j < len; j++)
                                 {
                                     byte bit = (byte)(val & 0x1);
 
-                                    arr22[j] = bit;
+                                    bitsBuffer[j] = bit;
 
                                     val >>= 1;
                                 }
 
-                                arr22 = arr22.Reverse().ToArray();
+                                bitsBuffer = bitsBuffer.Reverse().ToArray();
 
                                 for (int j = 0; j < len; j++)
                                 {
-                                    byte bit = arr22[j];
+                                    byte bit = bitsBuffer[j];
 
                                     pack <<= 1;
 
@@ -263,19 +255,14 @@ namespace Compression
                                     {
                                         counterBits = 0;
 
-                                        int totalCounter0 = totalCounter++;
+                                        (writeBuffer = writeBuffer ?? new byte[BufferSize])[counterBytes++] = pack;
 
-                                        if (false)//(totalCounter0 % 1000) == 0)
-                                            Console.WriteLine($"[{totalCounter0}]: {pack}");
-
-                                        (arr2 = arr2 ?? new byte[BufferSize])[counterBytes++] = pack;
-
-                                        if (counterBytes == arr2?.Length)
+                                        if (counterBytes == writeBuffer?.Length)
                                         {
-                                            bw.Write(arr2);
+                                            bw.Write(writeBuffer);
 
                                             counterBytes = 0;
-                                            arr2 = null;
+                                            writeBuffer = null;
                                         }
 
                                         pack = 0;
@@ -286,14 +273,10 @@ namespace Compression
                     }
 
                 if (counterBits > 0)
-                {
-                    int totalCounter0 = totalCounter++;
-
-                    (arr2 = arr2 ?? new byte[1])[counterBytes++] = pack;
-                }
+                    (writeBuffer = writeBuffer ?? new byte[1])[counterBytes++] = pack;
 
                 if (counterBytes > 0)
-                    bw.Write(arr2);
+                    bw.Write(writeBuffer);
             }
 
             using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Open))
@@ -316,19 +299,19 @@ namespace Compression
 
                 int bytesCounter = 0;
 
-                var bytes0 = br.ReadBytes(9 * 256);
+                var translationTableBuffer = br.ReadBytes(9 * 256);
 
                 int counter4 = 0;
 
-                while (bytesCounter < bytes0.Length)
+                while (bytesCounter < translationTableBuffer.Length)
                 {
-                    byte length = bytes0[bytesCounter++];
+                    byte length = translationTableBuffer[bytesCounter++];
 
                     ulong val0 = 0;
 
                     for (int i = 0; i < 8; i++)
                     {
-                        ulong val1 = bytes0[bytesCounter++];
+                        ulong val1 = translationTableBuffer[bytesCounter++];
 
                         for (int j = 0; j < i; j++)
                             val1 <<= 8;
@@ -369,17 +352,17 @@ namespace Compression
 
                 var bytes3 = br.ReadBytes(BufferSize);
 
-                charsCounter = 0;
+                charsIndex = 0;
 
                 finished = false;
 
                 var visitor = new TreeVisitor<char>(tree);
 
-                while (!finished && charsCounter < charsCount)
+                while (!finished && charsIndex < charsCount)
                 {
                     int i = 0;
 
-                    while (charsCounter < charsCount && i < bytes3.Length)
+                    while (charsIndex < charsCount && i < bytes3.Length)
                     {
                         byte byte0 = bytes3[i++];
 
@@ -396,7 +379,7 @@ namespace Compression
 
                         int j0 = 0;
 
-                        while (charsCounter < charsCount && j0 < 8)
+                        while (charsIndex < charsCount && j0 < 8)
                         {
                             var bit = arr11[j0++];
 
@@ -412,7 +395,7 @@ namespace Compression
 
                                 Console.Write(ch);
 
-                                charsCounter++;
+                                charsIndex++;
                             }
                         }
                     }
