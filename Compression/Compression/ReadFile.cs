@@ -276,7 +276,14 @@ namespace Compression
                     (writeBuffer = writeBuffer ?? new byte[1])[counterBytes++] = pack;
 
                 if (counterBytes > 0)
-                    bw.Write(writeBuffer);
+                {
+                    var copyBuffer = new byte[counterBytes];
+
+                    for (int i = 0; i < counterBytes; i++)
+                        copyBuffer[i] = writeBuffer[i];
+
+                    bw.Write(copyBuffer);
+                }
             }
 
             writeBuffer = new byte[BufferSize];
@@ -422,7 +429,16 @@ namespace Compression
                 }
 
                 if (writeIndex > 0)
-                    bw.Write(writeBuffer);
+                {
+                    var copyBuffer = new byte[writeIndex];
+
+                    for (int i = 0; i < writeIndex; i++)
+                        copyBuffer[i] = writeBuffer[i];
+
+                    bw.Write(copyBuffer);
+                }
+
+                Console.WriteLine(nameof(finished));
             }
         }
     }
