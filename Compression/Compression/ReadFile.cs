@@ -188,15 +188,15 @@ namespace Compression
                 {
                     var tup = arr[i];
 
-                    ulong val0 = tup.Val;
+                    ulong val = tup.Val;
 
                     translationTableBuffer[tableCounter++] = (byte)tup.Length;
 
                     for (int j = 0; j < 8; j++)
                     {
-                        translationTableBuffer[tableCounter++] = (byte)val0;
+                        translationTableBuffer[tableCounter++] = (byte)val;
 
-                        val0 >>= 8;
+                        val >>= 8;
                     }
                 }
 
@@ -295,50 +295,50 @@ namespace Compression
                     charsCount |= chars[i];
                 }
 
-                var arr0 = new (ulong Val, int Length)[256];
+                arr = new (ulong Val, int Length)[256];
 
                 int bytesCounter = 0;
 
                 var translationTableBuffer = br.ReadBytes(9 * 256);
 
-                int counter4 = 0;
+                long counter = 0;
 
                 while (bytesCounter < translationTableBuffer.Length)
                 {
                     byte length = translationTableBuffer[bytesCounter++];
 
-                    ulong val0 = 0;
+                    ulong val = 0;
 
                     for (int i = 0; i < 8; i++)
                     {
-                        ulong val1 = translationTableBuffer[bytesCounter++];
+                        ulong byteVal = translationTableBuffer[bytesCounter++];
 
                         for (int j = 0; j < i; j++)
-                            val1 <<= 8;
+                            byteVal <<= 8;
 
-                        val0 |= val1;
+                        val |= byteVal;
                     }
 
-                    arr0[counter4++] = (Val: val0, Length: length);
+                    arr[counter++] = (Val: val, Length: length);
                 }
 
                 Tree<char> tree = new Tree<char>();
 
-                for (int i = 0; i < arr0.Length; i++)
+                for (int i = 0; i < arr.Length; i++)
                 {
-                    var tup = arr0[i];
+                    var tup = arr[i];
 
                     int[] arr5 = null;
 
                     if (tup.Length > 0)
                     {
-                        ulong val5 = tup.Val;
+                        ulong val = tup.Val;
 
                         for (int j = 0; j < tup.Length; j++)
                         {
-                            int bit = (int)(val5 & 0x1);
+                            int bit = (int)(val & 0x1);
 
-                            val5 >>= 1;
+                            val >>= 1;
 
                             (arr5 = arr5 ?? new int[tup.Length])[j] = bit;
                         }
