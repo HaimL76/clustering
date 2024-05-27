@@ -279,8 +279,13 @@ namespace Compression
                     bw.Write(writeBuffer);
             }
 
+            writeBuffer = new byte[BufferSize];
+            long writeIndex = 0, totalCounter = 0;
+
             using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Open))
+            using (var fsw = new FileStream($@"{inputPath}.huffman.txt", FileMode.Create))
             using (var br = new BinaryReader(fs))
+            using (var bw = new BinaryWriter(fsw))
             {
                 var chars = br.ReadBytes(8);
 
@@ -393,13 +398,31 @@ namespace Compression
                             {
                                 ch = state.Val;
 
-                                Console.Write(ch);
+                                //Console.Write(ch);
+
+                                writeBuffer[writeIndex++] = (byte)ch;
+
+                                if (writeIndex >= writeBuffer.Length)
+                                {
+                                    totalCounter += writeIndex;
+
+                                    Console.WriteLine($"{nameof(totalCounter)}: {totalCounter}");
+
+                                    writeIndex = 0;
+
+                                    bw.Write(writeBuffer);
+
+                                    writeBuffer = new byte[BufferSize];
+                                }
 
                                 charsIndex++;
                             }
                         }
                     }
                 }
+
+                if (writeIndex > 0)
+                    bw.Write(writeBuffer);
             }
         }
     }
