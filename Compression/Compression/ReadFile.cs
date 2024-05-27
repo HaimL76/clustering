@@ -328,7 +328,7 @@ namespace Compression
                 {
                     var tup = arr[i];
 
-                    int[] arr5 = null;
+                    int[] bits = null;
 
                     if (tup.Length > 0)
                     {
@@ -340,17 +340,17 @@ namespace Compression
 
                             val >>= 1;
 
-                            (arr5 = arr5 ?? new int[tup.Length])[j] = bit;
+                            (bits = bits ?? new int[tup.Length])[j] = bit;
                         }
                     }
                     
-                    if (arr5?.Length > 0)
-                        tree.Add((char)i, arr5.Reverse().ToArray());
+                    if (bits?.Length > 0)
+                        tree.Add((char)i, bits.Reverse().ToArray());
                 }
 
                 tree.Print();
 
-                var bytes3 = br.ReadBytes(BufferSize);
+                var bytes = br.ReadBytes(BufferSize);
 
                 charsIndex = 0;
 
@@ -362,26 +362,26 @@ namespace Compression
                 {
                     int i = 0;
 
-                    while (charsIndex < charsCount && i < bytes3.Length)
+                    while (charsIndex < charsCount && i < bytes.Length)
                     {
-                        byte byte0 = bytes3[i++];
+                        byte byteVal = bytes[i++];
 
-                        var arr11 = new int[8];
+                        var byteBuffer = new int[8];
 
                         for (int j = 0; j < 8; j++)
                         {
-                            arr11[j] = byte0 & 0x1;
+                            byteBuffer[j] = byteVal & 0x1;
 
-                            byte0 >>= 1;
+                            byteVal >>= 1;
                         }
 
-                        arr11 = arr11.Reverse().ToArray();
+                        byteBuffer = byteBuffer.Reverse().ToArray();
 
-                        int j0 = 0;
+                        int index = 0;
 
-                        while (charsIndex < charsCount && j0 < 8)
+                        while (charsIndex < charsCount && index < 8)
                         {
-                            var bit = arr11[j0++];
+                            var bit = byteBuffer[index++];
 
                             Side side = bit == 0 ? Side.Left : Side.Right;
 
