@@ -417,33 +417,7 @@ namespace Compression
 
                             if (state.Status)
                             {
-                                if (charsIndex > 1863402)
-                                    _ = 0;
-
                                 char ch = state.Val;
-
-                                //////var line = sr.ReadLine();
-
-                                //////while (line.Length < 1)
-                                //////    line = sr.ReadLine();
-
-                                //////    var arrr = line?.Split(',');
-
-                                //////if (byte.TryParse(arrr[0], out byte val))
-                                //////{
-                                //////    if (queue.Count > 110)
-                                //////        _ = queue.Dequeue();
-
-                                //////    queue.Enqueue(val);
-
-
-                                //////    if (ch != val)
-                                //////    {
-                                //////        var str = new string(queue.Select(x => (char)x).ToArray());
-                                //////    }
-                                //////}
-
-                                //Console.Write(ch);
 
                                 writeBuffer[writeIndex++] = (byte)ch;
 
