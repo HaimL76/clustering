@@ -208,6 +208,7 @@ namespace Compression
 
                 using (var sr = new StreamReader(inputPath))
                 using (var sw = new StreamWriter($"{inputPath}.debug.txt"))
+                using (var sw0 = new StreamWriter($"{inputPath}.debug0.txt"))
                     while (!sr.EndOfStream)
                     {
                         var charsBuffer = new char[BufferSize];
@@ -224,9 +225,11 @@ namespace Compression
 
                             if (ch > 0 && ch < arr.Length)
                             {
+                                sw0.Write(ch);
+
                                 var tup = arr[ch];
 
-                                sw.WriteLine($"{ch},0x{tup.Val:X},{tup.Length}");
+                                sw.WriteLine($"{(byte)ch},0x{tup.Val:X},{tup.Length}");
 
                                 ulong val = tup.Val;
                                 int len = tup.Length;
@@ -260,6 +263,8 @@ namespace Compression
 
                                         (writeBuffer = writeBuffer ?? new byte[BufferSize])[counterBytes++] = pack;
 
+                                        sw0.Write($"{pack},");
+
                                         if (counterBytes == writeBuffer?.Length)
                                         {
                                             bw.Write(writeBuffer);
@@ -271,6 +276,8 @@ namespace Compression
                                         pack = 0;
                                     }
                                 }
+
+                                sw0.WriteLine();
                             }
                         }
                     }
@@ -292,10 +299,13 @@ namespace Compression
             writeBuffer = new byte[BufferSize];
             long writeIndex = 0, totalCounter = 0;
 
+            var queue = new Queue<long>();
+
             using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Open))
             using (var fsw = new FileStream($@"{inputPath}.huffman.txt", FileMode.Create))
             using (var br = new BinaryReader(fs))
             using (var bw = new BinaryWriter(fsw))
+            using (var sr = new StreamReader($"{inputPath}.debug.txt"))
             {
                 var chars = br.ReadBytes(8);
 
@@ -406,7 +416,31 @@ namespace Compression
 
                             if (state.Status)
                             {
+                                if (charsIndex > 1863402)
+                                    _ = 0;
+
                                 ch = state.Val;
+
+                                var line = sr.ReadLine();
+
+                                while (line.Length < 1)
+                                    line = sr.ReadLine();
+
+                                    var arrr = line?.Split(',');
+
+                                if (byte.TryParse(arrr[0], out byte val))
+                                {
+                                    if (queue.Count > 110)
+                                        _ = queue.Dequeue();
+
+                                    queue.Enqueue(val);
+
+
+                                    if (ch != val)
+                                    {
+                                        var str = new string(queue.Select(x => (char)x).ToArray());
+                                    }
+                                }
 
                                 //Console.Write(ch);
 

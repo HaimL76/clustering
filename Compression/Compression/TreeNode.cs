@@ -145,12 +145,24 @@ namespace Compression
 
         private TreeNode<T> current;
 
-        private (T Val, bool Status)? val0;
+        private (T Val, bool Status, long Key, int Length)? val0;
 
-        public (T Val, bool Status) Value => val0.GetValueOrDefault();
+        public (T Val, bool Status, long Key, int Length) Value => val0.GetValueOrDefault();
+
+        private long key;
+
+        private int counter;
 
         public void Visit(Side side)
         {
+            long bit = side == Side.Left ? 0 : 1;
+
+            key <<= 1;
+
+            key |= bit;
+
+            counter++;
+
             val0 = null;
 
             current = current ?? tree.Root;
@@ -159,7 +171,11 @@ namespace Compression
 
             if (current.Left == null && current.Right == null)
             {
-                val0 = (Val: current.Value, Status: true);
+                val0 = (Val: current.Value, Status: true, Key: key, Length: counter);
+
+                key = 0;
+
+                counter = 0;
 
                 current = null;
             }
