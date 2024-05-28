@@ -207,6 +207,7 @@ namespace Compression
                 charsIndex = 0;
 
                 using (var sr = new StreamReader(inputPath))
+                using (var sw = new StreamWriter($"{inputPath}.debug.txt"))
                     while (!sr.EndOfStream)
                     {
                         var charsBuffer = new char[BufferSize];
@@ -221,9 +222,11 @@ namespace Compression
                         {
                             ch = charsBuffer[i];
 
-                            if (ch < arr.Length)
+                            if (ch > 0 && ch < arr.Length)
                             {
                                 var tup = arr[ch];
+
+                                sw.WriteLine($"{ch},0x{tup.Val:X},{tup.Length}");
 
                                 ulong val = tup.Val;
                                 int len = tup.Length;
