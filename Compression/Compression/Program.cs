@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,20 @@ namespace Compression
     {
         static void Main(string[] args)
         {
+            RunAsync();
+
+            _ = Console.ReadKey();
+        }
+
+        private static async void RunAsync()
+        { 
             string inputPath = @"c:\html\Introducing WinZip _ Get the all-new WinZip today.html";
 
             inputPath = @"c:\html\dickens.txt";
 
-            Compression.ReadFile.ReadFileAsync(inputPath);
+            await Compression.ReadFile.CompressFileAsync(inputPath);
 
-            _ = Console.ReadKey();
+            await Compression.ReadFile.DecompressFileAsync(inputPath);
         }
     }
 }

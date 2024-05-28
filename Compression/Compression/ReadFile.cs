@@ -56,7 +56,7 @@ namespace Compression
 
         public const int BufferSize = 1024 * 1024;
 
-        public static async void ReadFileAsync(string inputPath)
+        public static async Task CompressFileAsync(string inputPath)
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
@@ -206,6 +206,10 @@ namespace Compression
 
                 charsIndex = 0;
 
+                long charsCount0 = 0;
+
+                var queue = new Queue<char>();
+
                 using (var sr = new StreamReader(inputPath))
                 using (var sw = new StreamWriter($"{inputPath}.debug.txt"))
                 using (var sw0 = new StreamWriter($"{inputPath}.debug0.txt"))
@@ -225,7 +229,19 @@ namespace Compression
 
                             if (ch > 0 && ch < arr.Length)
                             {
-                                sw0.Write(ch);
+                                if (queue.Count > 100)
+                                    _ = queue.Dequeue();
+
+                                queue.Enqueue(ch);
+
+                                if (charsCount0 == 1863404)
+                                {
+                                    string str = new string(queue.Select(x => (char)x).ToArray());
+                                }
+
+                                charsCount0++;
+
+                                //sw0.Write(ch);
 
                                 var tup = arr[ch];
 
@@ -263,7 +279,7 @@ namespace Compression
 
                                         (writeBuffer = writeBuffer ?? new byte[BufferSize])[counterBytes++] = pack;
 
-                                        sw0.Write($"{pack},");
+                                        //sw0.Write($"{pack},");
 
                                         if (counterBytes == writeBuffer?.Length)
                                         {
@@ -277,7 +293,7 @@ namespace Compression
                                     }
                                 }
 
-                                sw0.WriteLine();
+                                //sw0.WriteLine();
                             }
                         }
                     }
@@ -295,8 +311,11 @@ namespace Compression
                     bw.Write(copyBuffer);
                 }
             }
+        }
 
-            writeBuffer = new byte[BufferSize];
+        public static async Task DecompressFileAsync(string inputPath)
+        { 
+            var writeBuffer = new byte[BufferSize];
             long writeIndex = 0, totalCounter = 0;
 
             var queue = new Queue<long>();
@@ -305,13 +324,13 @@ namespace Compression
             using (var fsw = new FileStream($@"{inputPath}.huffman.txt", FileMode.Create))
             using (var br = new BinaryReader(fs))
             using (var bw = new BinaryWriter(fsw))
-            using (var sr = new StreamReader($"{inputPath}.debug.txt"))
+            //using (var sr = new StreamReader($"{inputPath}.debug.txt"))
             {
                 var chars = br.ReadBytes(8);
 
                 chars = chars.Reverse().ToArray();
 
-                charsCount = 0;
+                long charsCount = 0;
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -320,7 +339,7 @@ namespace Compression
                     charsCount |= chars[i];
                 }
 
-                arr = new (ulong Val, int Length)[256];
+                var arr = new (ulong Val, int Length)[256];
 
                 int bytesCounter = 0;
 
@@ -375,16 +394,23 @@ namespace Compression
 
                 tree.Print();
 
-                var bytes = br.ReadBytes(BufferSize);
+                long charsIndex = 0;
 
-                charsIndex = 0;
-
-                finished = false;
+                bool finished = false;
 
                 var visitor = new TreeVisitor<char>(tree);
 
                 while (!finished && charsIndex < charsCount)
                 {
+                    Console.WriteLine($"{nameof(charsIndex)}: {charsIndex}");
+
+                    var bytes = br.ReadBytes(BufferSize);
+
+                    long lenBytes = (bytes?.Length).GetValueOrDefault();
+
+                    if (lenBytes < BufferSize)
+                        finished = true;
+
                     int i = 0;
 
                     while (charsIndex < charsCount && i < bytes.Length)
@@ -419,28 +445,28 @@ namespace Compression
                                 if (charsIndex > 1863402)
                                     _ = 0;
 
-                                ch = state.Val;
+                                char ch = state.Val;
 
-                                var line = sr.ReadLine();
+                                //////var line = sr.ReadLine();
 
-                                while (line.Length < 1)
-                                    line = sr.ReadLine();
+                                //////while (line.Length < 1)
+                                //////    line = sr.ReadLine();
 
-                                    var arrr = line?.Split(',');
+                                //////    var arrr = line?.Split(',');
 
-                                if (byte.TryParse(arrr[0], out byte val))
-                                {
-                                    if (queue.Count > 110)
-                                        _ = queue.Dequeue();
+                                //////if (byte.TryParse(arrr[0], out byte val))
+                                //////{
+                                //////    if (queue.Count > 110)
+                                //////        _ = queue.Dequeue();
 
-                                    queue.Enqueue(val);
+                                //////    queue.Enqueue(val);
 
 
-                                    if (ch != val)
-                                    {
-                                        var str = new string(queue.Select(x => (char)x).ToArray());
-                                    }
-                                }
+                                //////    if (ch != val)
+                                //////    {
+                                //////        var str = new string(queue.Select(x => (char)x).ToArray());
+                                //////    }
+                                //////}
 
                                 //Console.Write(ch);
 
