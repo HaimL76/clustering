@@ -206,13 +206,7 @@ namespace Compression
 
                 charsIndex = 0;
 
-                long charsCount0 = 0;
-
-                var queue = new Queue<char>();
-
                 using (var sr = new StreamReader(inputPath))
-                using (var sw = new StreamWriter($"{inputPath}.debug.txt"))
-                using (var sw0 = new StreamWriter($"{inputPath}.debug0.txt"))
                     while (!sr.EndOfStream)
                     {
                         var charsBuffer = new char[BufferSize];
@@ -229,23 +223,7 @@ namespace Compression
 
                             if (ch > 0 && ch < arr.Length)
                             {
-                                if (queue.Count > 100)
-                                    _ = queue.Dequeue();
-
-                                queue.Enqueue(ch);
-
-                                if (charsCount0 == 1863404)
-                                {
-                                    string str = new string(queue.Select(x => (char)x).ToArray());
-                                }
-
-                                charsCount0++;
-
-                                //sw0.Write(ch);
-
                                 var tup = arr[ch];
-
-                                sw.WriteLine($"{(byte)ch},0x{tup.Val:X},{tup.Length}");
 
                                 ulong val = tup.Val;
                                 int len = tup.Length;
@@ -279,8 +257,6 @@ namespace Compression
 
                                         (writeBuffer = writeBuffer ?? new byte[BufferSize])[counterBytes++] = pack;
 
-                                        //sw0.Write($"{pack},");
-
                                         if (counterBytes == writeBuffer?.Length)
                                         {
                                             bw.Write(writeBuffer);
@@ -292,8 +268,6 @@ namespace Compression
                                         pack = 0;
                                     }
                                 }
-
-                                //sw0.WriteLine();
                             }
                         }
                     }
@@ -314,7 +288,9 @@ namespace Compression
         }
 
         public static async Task DecompressFileAsync(string inputPath)
-        { 
+        {
+            await Task.Delay(1);
+
             var writeBuffer = new byte[BufferSize];
             long writeIndex = 0, totalCounter = 0;
 
@@ -324,7 +300,6 @@ namespace Compression
             using (var fsw = new FileStream($@"{inputPath}.huffman.txt", FileMode.Create))
             using (var br = new BinaryReader(fs))
             using (var bw = new BinaryWriter(fsw))
-            //using (var sr = new StreamReader($"{inputPath}.debug.txt"))
             {
                 var chars = br.ReadBytes(8);
 
