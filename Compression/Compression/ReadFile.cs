@@ -190,7 +190,7 @@ namespace Compression
 
             parent?.Print();
 
-            var table = new Dictionary<long, (ulong Val, int Length)>();
+            var table = new Dictionary<long, (ulong Bits, int NumBits)>();
 
             parent.Traverse(new Stack<ulong>(), (stack, tup) =>
             {
@@ -210,7 +210,7 @@ namespace Compression
                 if (tup.Character > 256)
                     _ = 0;
 
-                table[tup.Character] = (Val: bits, Length: len);
+                table[tup.Character] = (Bits: bits, NumBits: len);
             });
 
             int counterBits = 0;
@@ -246,12 +246,12 @@ namespace Compression
                     CopyToBytesArray((ulong)key, translationTableBuffer, baseIndex, LenKey);
                     baseIndex += LenKey;
 
-                    ulong val = tup.Val;
+                    ulong bits = tup.Bits;
 
-                    CopyToBytesArray((ulong)tup.Length, translationTableBuffer, baseIndex, LenLength);
+                    CopyToBytesArray((ulong)tup.NumBits, translationTableBuffer, baseIndex, LenLength);
                     baseIndex += LenLength;
 
-                    CopyToBytesArray(val, translationTableBuffer, baseIndex, LenCharacter);
+                    CopyToBytesArray(bits, translationTableBuffer, baseIndex, LenCharacter);
                 }
 
                 bw.Write(translationTableBuffer);
@@ -275,14 +275,12 @@ namespace Compression
                         {
                             ch = charsBuffer[i];
 
-                            if (ch > 0 && ch < tableArray.Length)
+                            if (ch > 0 && table.ContainsKey(ch))
                             {
-                                var pair = tableArray[ch];
+                                var tup = table[ch];
 
-                                var tup = pair.Value;
-
-                                ulong val = tup.Val;
-                                int len = tup.Length;
+                                ulong val = tup.Bits;
+                                int len = tup.NumBits;
 
                                 var bitsBuffer = new byte[len];
 
