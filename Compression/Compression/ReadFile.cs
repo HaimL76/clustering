@@ -65,7 +65,7 @@ namespace Compression
         }
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<long, TreeNode<(long Character, long NumBits)>> dictionary,
+            Dictionary<long, TreeNode<(long Character, long NumOccurances)>> dictionary,
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -83,20 +83,20 @@ namespace Compression
 
                 int val = ch;
 
-                TreeNode<(long Character, long NumBits)> treeNode = null;
+                TreeNode<(long Character, long NumOccurances)> treeNode = null;
 
                 lock (dictionary)
                 {
                     if (!dictionary.ContainsKey(val))
                     {
-                        treeNode = new TreeNode<(long Character, long NumBits)>((Character: val, NumBits: 0));
+                        treeNode = new TreeNode<(long Character, long NumOccurances)>((Character: val, NumOccurances: 0));
 
                         dictionary.Add(val, treeNode);
                     }
 
                     treeNode = dictionary[val];
 
-                    treeNode.SetValue((treeNode.Value.Character, NumBits: treeNode.Value.NumBits + 1));
+                    treeNode.SetValue((treeNode.Value.Character, NumOccurances: treeNode.Value.NumOccurances + 1));
                 }
             }
 
@@ -117,7 +117,7 @@ namespace Compression
 
             bool finished = false;
 
-            var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumBits)>();
+            var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumOccurances)>();
 
             var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumBits)>>(treeNodeComparer);
 
@@ -156,7 +156,7 @@ namespace Compression
 
             finished = false;
 
-            TreeNode<(long Character, long NumBits)> parent = null;
+            TreeNode<(long Character, long NumOccurances)> parent = null;
 
             while (!finished)
             {
