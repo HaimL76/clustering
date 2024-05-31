@@ -65,7 +65,7 @@ namespace Compression
         }
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<long, TreeNode<(long Val, long Count)>> dictionary,
+            Dictionary<long, TreeNode<(long Character, long NumBits)>> dictionary,
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -83,20 +83,20 @@ namespace Compression
 
                 int val = ch;
 
-                TreeNode<(long Val, long Count)> treeNode = null;
+                TreeNode<(long Character, long NumBits)> treeNode = null;
 
                 lock (dictionary)
                 {
                     if (!dictionary.ContainsKey(val))
                     {
-                        treeNode = new TreeNode<(long Val, long Count)>((Val: val, Count: 0));
+                        treeNode = new TreeNode<(long Character, long NumBits)>((Character: val, NumBits: 0));
 
                         dictionary.Add(val, treeNode);
                     }
 
                     treeNode = dictionary[val];
 
-                    treeNode.SetValue((treeNode.Value.Val, Count: treeNode.Value.Count + 1));
+                    treeNode.SetValue((treeNode.Value.Character, NumBits: treeNode.Value.NumBits + 1));
                 }
             }
 
@@ -107,19 +107,19 @@ namespace Compression
 
         private const int LenKey = 2;
         private const int LenLength = 1;
-        private const int LenValue = 8;
+        private const int LenCharacter = 8;
 
         public static async Task CompressFileAsync(string inputPath)
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
-            var dictionary = new Dictionary<long, TreeNode<(long Val, long Count)>>();
+            var dictionary = new Dictionary<long, TreeNode<(long Character, long NumBits)>>();
 
             bool finished = false;
 
-            var treeNodeComparer = new TreeNodeCountComparer<(long Val, long Count)>();
+            var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumBits)>();
 
-            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Val, long Count)>>(treeNodeComparer);
+            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumBits)>>(treeNodeComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -148,7 +148,7 @@ namespace Compression
 
             Task.WaitAll(tasks.ToArray());
 
-            long sum = dictionary.Sum(x => (x.Value?.Value.Count).GetValueOrDefault());
+            long sum = dictionary.Sum(x => (x.Value?.Value.NumBits).GetValueOrDefault());
 
             dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
@@ -156,7 +156,7 @@ namespace Compression
 
             finished = false;
 
-            TreeNode<(long Val, long Count)> parent = null;
+            TreeNode<(long Character, long NumBits)> parent = null;
 
             while (!finished)
             {
@@ -164,14 +164,14 @@ namespace Compression
 
                 var left = sortedLinkedList.RemoveFirst();
 
-                Link<TreeNode<(long Val, long Count)>> right = null;
+                Link<TreeNode<(long Character, long NumBits)>> right = null;
 
-                totalCount += (left?.Value.Value.Count).GetValueOrDefault();
+                totalCount += (left?.Value.Value.NumBits).GetValueOrDefault();
 
                 if (left != null)
                     right = sortedLinkedList.RemoveFirst();
 
-                totalCount += (right?.Value.Value.Count).GetValueOrDefault();
+                totalCount += (right?.Value.Value.NumBits).GetValueOrDefault();
 
                 if (right == null)
                 {
@@ -179,7 +179,7 @@ namespace Compression
                 }
                 else
                 {
-                    parent = new TreeNode<(long Val, long Count)>((Val: 0, Count: totalCount));
+                    parent = new TreeNode<(long Character, long NumBits)>((Character: 0, NumBits: totalCount));
 
                     parent.SetChild(left.Value, Side.Left);
                     parent.SetChild(right.Value, Side.Right);
@@ -207,10 +207,10 @@ namespace Compression
                     len++;
                 }
 
-                if (tup.Val > 256)
+                if (tup.Character > 256)
                     _ = 0;
 
-                table[tup.Val] = (Val: bits, Length: len);
+                table[tup.Character] = (Val: bits, Length: len);
             });
 
             int counterBits = 0;
@@ -232,11 +232,11 @@ namespace Compression
 
                 bw.Write(buffer);
 
-                var translationTableBuffer = new byte[(LenLength + LenKey + LenValue) * tableArray.Length];
+                var translationTableBuffer = new byte[(LenLength + LenKey + LenCharacter) * tableArray.Length];
 
                 for (int i = 0; i < tableArray.Length; i++)
                 {
-                    int baseIndex = i * (LenLength + LenKey + LenValue);
+                    int baseIndex = i * (LenLength + LenKey + LenCharacter);
 
                     var pair = tableArray[i];
 
@@ -251,7 +251,7 @@ namespace Compression
                     CopyToBytesArray((ulong)tup.Length, translationTableBuffer, baseIndex, LenLength);
                     baseIndex += LenLength;
 
-                    CopyToBytesArray(val, translationTableBuffer, baseIndex, LenValue);
+                    CopyToBytesArray(val, translationTableBuffer, baseIndex, LenCharacter);
                 }
 
                 bw.Write(translationTableBuffer);
@@ -365,17 +365,17 @@ namespace Compression
 
                 int tableCount = (int)ConvertFromBytes(buffer);
 
-                var table = new Dictionary<long, (ulong Val, int Length)>();
+                var table = new Dictionary<long, (ulong Bits, int NumBits)>();
 
                 int bytesCounter = 0;
 
-                var translationTableBuffer = br.ReadBytes((LenKey + LenLength + LenValue) * tableCount);
+                var translationTableBuffer = br.ReadBytes((LenKey + LenLength + LenCharacter) * tableCount);
 
                 long counter = 0;
 
                 for (int i = 0; i < tableCount; i++)
                 {
-                    int baseindex = i * (LenKey + LenLength + LenValue);
+                    int baseindex = i * (LenKey + LenLength + LenCharacter);
 
                     int key = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenKey);
                     baseindex += LenKey;
@@ -383,9 +383,9 @@ namespace Compression
                     int length = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenLength);
                     baseindex += LenLength;
 
-                    ulong val = (ulong)ConvertFromBytes(translationTableBuffer, baseindex, LenValue);
+                    ulong val = (ulong)ConvertFromBytes(translationTableBuffer, baseindex, LenCharacter);
 
-                    table[key] = (Val: val, Length: length);
+                    table[key] = (Bits: val, NumBits: length);
                 }
 
                 Tree<char> tree = new Tree<char>();
@@ -398,24 +398,28 @@ namespace Compression
 
                     var tup = pair.Value;
 
-                    int[] bits = null;
+                    int[] bitsArray = null;
 
-                    if (tup.Length > 0)
+                    long character = pair.Key;
+
+                    ulong bits = tup.Bits;
+
+                    int numBits = tup.NumBits;
+
+                    if (tup.NumBits > 0)
                     {
-                        ulong val = tup.Val;
-
-                        for (int j = 0; j < tup.Length; j++)
+                        for (int j = 0; j < numBits; j++)
                         {
-                            int bit = (int)(val & 0x1);
+                            int bit = (int)(bits & 0x1);
 
-                            val >>= 1;
+                            bits >>= 1;
 
-                            (bits = bits ?? new int[tup.Length])[j] = bit;
+                            (bitsArray = bitsArray ?? new int[numBits])[j] = bit;
                         }
                     }
 
-                    if (bits?.Length > 0)
-                        tree.Add((char)i, bits.Reverse().ToArray());
+                    if (bitsArray?.Length > 0)
+                        tree.Add((char)character, bitsArray.Reverse().ToArray());
                 }
 
                 tree.Print();
