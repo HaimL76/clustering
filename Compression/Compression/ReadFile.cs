@@ -51,7 +51,14 @@ namespace Compression
             {
                 val <<= 8;
 
-                val |= arr[index + i];
+                try
+                {
+                    val |= arr[index + i];
+                }
+                catch(Exception exception)
+                {
+                    _ = exception;
+                }
             }
 
             return val;
@@ -366,7 +373,7 @@ namespace Compression
 
                 long counter = 0;
 
-                for (int i = 0; i < translationTableBuffer.Length; i++)
+                for (int i = 0; i < tableCount; i++)
                 {
                     int baseindex = i * (LenKey + LenLength + LenValue);
 
