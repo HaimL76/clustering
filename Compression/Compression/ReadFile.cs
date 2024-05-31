@@ -5,6 +5,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
@@ -15,8 +16,49 @@ namespace Compression
 {
     internal class ReadFile
     {
+        public static byte[] ConvertToBytes(long val, int numBytes)
+        {
+            var bytes = new byte[numBytes];
+
+            for (int i = 0; i < numBytes; i++)
+            {
+                bytes[i] = (byte)val;
+
+                val >>= 8;
+            }
+
+            return bytes;
+        }
+
+        public static void CopyToBytesArray(ulong val, byte[] buffer, int index, int numBytes)
+        {
+            for (int i = 0; i < numBytes; i++)
+            {
+                buffer[index + i] = (byte)val;
+
+                val >>= 8;
+            }
+        }
+
+        public static long ConvertFromBytes(byte[] arr, int index = 0, int length = 0)
+        {
+            long val = 0;
+
+            if (length < 1)
+                length = arr.Length;
+
+            for (int i = length - 1; i >= 0; i--)
+            {
+                val <<= 8;
+
+                val |= arr[index + i];
+            }
+
+            return val;
+        }
+
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<long, TreeNode<(long Val, long Count)>> dictionary, 
+            Dictionary<long, TreeNode<(long Val, long Count)>> dictionary,
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -55,6 +97,10 @@ namespace Compression
         }
 
         public const int BufferSize = 1024 * 1024;
+
+        private const int LenKey = 2;
+        private const int LenLength = 1;
+        private const int LenValue = 8;
 
         public static async Task CompressFileAsync(string inputPath)
         {
@@ -137,7 +183,7 @@ namespace Compression
 
             parent?.Print();
 
-            var arr = new (ulong Val, int Length)[256];
+            var table = new Dictionary<long, (ulong Val, int Length)>();
 
             parent.Traverse(new Stack<ulong>(), (stack, tup) =>
             {
@@ -157,7 +203,7 @@ namespace Compression
                 if (tup.Val > 256)
                     _ = 0;
 
-                arr[tup.Val] = (Val: bits, Length: len);
+                table[tup.Val] = (Val: bits, Length: len);
             });
 
             int counterBits = 0;
@@ -166,38 +212,39 @@ namespace Compression
 
             byte[] writeBuffer = null;
 
-            int tableCounter = 0;
-
             using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Create))
             using (var bw = new BinaryWriter(fs))
             {
-                var chars = new byte[8];
+                var buffer = ConvertToBytes(charsCount, 8);
 
-                for (int i = 0; i < 8; i++)
+                bw.Write(buffer);
+
+                var tableArray = table.ToArray();
+
+                buffer = ConvertToBytes(tableArray.Length, 2);
+
+                bw.Write(buffer);
+
+                var translationTableBuffer = new byte[(LenLength + LenKey + LenValue) * tableArray.Length];
+
+                for (int i = 0; i < tableArray.Length; i++)
                 {
-                    chars[i] = (byte)charsCount;
+                    int baseIndex = i * (LenLength + LenKey + LenValue);
 
-                    charsCount >>= 8;
-                }
+                    var pair = tableArray[i];
 
-                bw.Write(chars);
+                    var key = pair.Key;
+                    var tup = pair.Value;
 
-                var translationTableBuffer = new byte[9 * 256];
-
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    var tup = arr[i];
+                    CopyToBytesArray((ulong)key, translationTableBuffer, baseIndex, LenKey);
+                    baseIndex += LenKey;
 
                     ulong val = tup.Val;
 
-                    translationTableBuffer[tableCounter++] = (byte)tup.Length;
+                    CopyToBytesArray((ulong)tup.Length, translationTableBuffer, baseIndex, LenLength);
+                    baseIndex += LenLength;
 
-                    for (int j = 0; j < 8; j++)
-                    {
-                        translationTableBuffer[tableCounter++] = (byte)val;
-
-                        val >>= 8;
-                    }
+                    CopyToBytesArray(val, translationTableBuffer, baseIndex, LenValue);
                 }
 
                 bw.Write(translationTableBuffer);
@@ -221,9 +268,11 @@ namespace Compression
                         {
                             ch = charsBuffer[i];
 
-                            if (ch > 0 && ch < arr.Length)
+                            if (ch > 0 && ch < tableArray.Length)
                             {
-                                var tup = arr[ch];
+                                var pair = tableArray[ch];
+
+                                var tup = pair.Value;
 
                                 ulong val = tup.Val;
                                 int len = tup.Length;
@@ -301,51 +350,46 @@ namespace Compression
             using (var br = new BinaryReader(fs))
             using (var bw = new BinaryWriter(fsw))
             {
-                var chars = br.ReadBytes(8);
+                var buffer = br.ReadBytes(8);
 
-                chars = chars.Reverse().ToArray();
+                long charsCount = ConvertFromBytes(buffer);
 
-                long charsCount = 0;
+                buffer = br.ReadBytes(2);
 
-                for (int i = 0; i < 8; i++)
-                {
-                    charsCount <<= 8;
+                int tableCount = (int)ConvertFromBytes(buffer);
 
-                    charsCount |= chars[i];
-                }
-
-                var arr = new (ulong Val, int Length)[256];
+                var table = new Dictionary<long, (ulong Val, int Length)>();
 
                 int bytesCounter = 0;
 
-                var translationTableBuffer = br.ReadBytes(9 * 256);
+                var translationTableBuffer = br.ReadBytes((LenKey + LenLength + LenValue) * tableCount);
 
                 long counter = 0;
 
-                while (bytesCounter < translationTableBuffer.Length)
+                for (int i = 0; i < translationTableBuffer.Length; i++)
                 {
-                    byte length = translationTableBuffer[bytesCounter++];
+                    int baseindex = i * (LenKey + LenLength + LenValue);
 
-                    ulong val = 0;
+                    int key = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenKey);
+                    baseindex += LenKey;
 
-                    for (int i = 0; i < 8; i++)
-                    {
-                        ulong byteVal = translationTableBuffer[bytesCounter++];
+                    int length = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenLength);
+                    baseindex += LenLength;
 
-                        for (int j = 0; j < i; j++)
-                            byteVal <<= 8;
+                    ulong val = (ulong)ConvertFromBytes(translationTableBuffer, baseindex, LenValue);
 
-                        val |= byteVal;
-                    }
-
-                    arr[counter++] = (Val: val, Length: length);
+                    table[key] = (Val: val, Length: length);
                 }
 
                 Tree<char> tree = new Tree<char>();
 
-                for (int i = 0; i < arr.Length; i++)
+                var tableArray = table.ToArray();
+
+                for (int i = 0; i < tableArray.Length; i++)
                 {
-                    var tup = arr[i];
+                    var pair = tableArray[i];
+
+                    var tup = pair.Value;
 
                     int[] bits = null;
 
@@ -362,7 +406,7 @@ namespace Compression
                             (bits = bits ?? new int[tup.Length])[j] = bit;
                         }
                     }
-                    
+
                     if (bits?.Length > 0)
                         tree.Add((char)i, bits.Reverse().ToArray());
                 }
