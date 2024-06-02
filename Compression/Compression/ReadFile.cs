@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
@@ -67,13 +68,13 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
-            ref long charsCount)
+            ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
 
             long loopCharsCount = 0;
 
-            var queue = new Queue<char>(2);
+            var queue = new Queue<char>(maxStringLength);
 
             for (int i = 0; i < readChars; i++)
             {
@@ -86,48 +87,50 @@ namespace Compression
 
                 string str = null;
 
-                if (queue.Count > 1)
+                TreeNode<(string StringKey, long NumOccurances)> treeNode = null;
+
+                if (queue.Count >= maxStringLength)
                 {
-                    str = string.Join(string.Empty, queue);
+                    var arr = queue.ToArray();
+
+                    for (int j = maxStringLength; j >= 2; j--)
+                    {
+                        str = new string(arr, 0, j);
+
+                        lock (dictionaryStrings)
+                        {
+                            if (!dictionaryStrings.ContainsKey(str))
+                            {
+                                treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
+
+                                dictionaryStrings.Add(str, treeNode);
+                            }
+
+                            treeNode = dictionaryStrings[str];
+
+                            treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                        }
+                    }
 
                     _ = queue.Dequeue();
                 }
 
                 queue.Enqueue(ch);
 
-                if (str?.Length > 1)
+                lock (dictionaryCharacters)
                 {
-                    TreeNode<(string StringKey, long NumOccurances)> treeNode = null;
+                    string strChar = new string(new[] { ch });
 
-                    lock (dictionaryCharacters)
+                    if (!dictionaryCharacters.ContainsKey(ch))
                     {
-                        string strChar = new string(new[] { ch });
+                        treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: strChar, NumOccurances: 0));
 
-                        if (!dictionaryCharacters.ContainsKey(ch))
-                        {
-                            treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: strChar, NumOccurances: 0));
-
-                            dictionaryCharacters.Add(ch, treeNode);
-                        }
-
-                        treeNode = dictionaryCharacters[ch];
-
-                        treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                        dictionaryCharacters.Add(ch, treeNode);
                     }
 
-                    lock (dictionaryStrings)
-                    {
-                        if (!dictionaryStrings.ContainsKey(str))
-                        {
-                            treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
+                    treeNode = dictionaryCharacters[ch];
 
-                            dictionaryStrings.Add(str, treeNode);
-                        }
-
-                        treeNode = dictionaryStrings[str];
-
-                        treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
-                    }
+                    treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
                 }
             }
 
@@ -140,7 +143,7 @@ namespace Compression
         private const int LenLength = 1;
         private const int LenCharacter = 8;
 
-        public static async Task CompressFileAsync(string inputPath)
+        public static async Task CompressFileAsync(string inputPath, int maxStringLength = 2)
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
@@ -173,7 +176,7 @@ namespace Compression
                     long capturedCharsIndex = charsIndex;
 
                     tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
-                        dictionaryCharacters, ref charsCount)));
+                        dictionaryCharacters, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
                 }
@@ -186,7 +189,16 @@ namespace Compression
 
             double averageCharactersOccurances = dictionaryCharacters.Average(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            dictionaryStrings =  dictionaryStrings.Where(x => x.Value.Value.NumOccurances > averageCharactersOccurances)
+            dictionaryStrings =  dictionaryStrings.Where(x =>
+            {
+                double numOcurrances = x.Value.Value.NumOccurances;
+
+                double len = x.Value.Value.StringKey.Length;
+
+                double weight = numOcurrances * (1 + len / 10.0);
+
+                return weight > averageCharactersOccurances;
+            })
                 .ToDictionary(x => x.Key, x => x.Value);
 
             dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
