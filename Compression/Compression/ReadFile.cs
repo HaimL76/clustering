@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
@@ -68,6 +67,7 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
+            SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>> sortedLinkedList,
             ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -99,8 +99,12 @@ namespace Compression
 
                         lock (dictionaryStrings)
                         {
+                            bool newEntry = false;
+
                             if (!dictionaryStrings.ContainsKey(str))
                             {
+                                newEntry = true;
+
                                 treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
 
                                 dictionaryStrings.Add(str, treeNode);
@@ -109,6 +113,9 @@ namespace Compression
                             treeNode = dictionaryStrings[str];
 
                             treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+
+                            if (newEntry)
+                                sortedLinkedList.AddSorted(treeNode);
                         }
                     }
 
@@ -153,8 +160,12 @@ namespace Compression
             bool finished = false;
 
             var treeNodeComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances)>();
+            var treeNodeReverseComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances)>();
+            treeNodeReverseComparer.reverse = true;
 
             var sortedLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeComparer);
+
+            var sortedReverseLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -176,12 +187,14 @@ namespace Compression
                     long capturedCharsIndex = charsIndex;
 
                     tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
-                        dictionaryCharacters, ref charsCount, maxStringLength: maxStringLength)));
+                        dictionaryCharacters, sortedReverseLinkedList, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
                 }
 
             Task.WaitAll(tasks.ToArray());
+
+            dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
 
             long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
@@ -189,16 +202,16 @@ namespace Compression
 
             double averageCharactersOccurances = dictionaryCharacters.Average(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            dictionaryStrings =  dictionaryStrings.Where(x =>
+            dictionaryStrings.ToList().ForEach(x =>
             {
-                double numOcurrances = x.Value.Value.NumOccurances;
+                var treeNode = x.Value;
 
-                double len = x.Value.Value.StringKey.Length;
+                int len = treeNode.Value.StringKey.Length;
 
-                double weight = numOcurrances * (1 + len / 10.0);
+                x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len));
+            });
 
-                return weight > averageCharactersOccurances;
-            })
+            dictionaryStrings =  dictionaryStrings.Where(x => x.Value.Value.NumOccurances > averageCharactersOccurances)
                 .ToDictionary(x => x.Key, x => x.Value);
 
             dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
@@ -336,7 +349,7 @@ namespace Compression
                         {
                             (ulong Bits, int NumOccurrances)? tup = null;
 
-                            int numChars = Math.Min(5, charsBuffer.Length - index);
+                            int numChars = Math.Min(maxStringLength, charsBuffer.Length - index);
 
                             while (!tup.HasValue && numChars > 0)
                             {

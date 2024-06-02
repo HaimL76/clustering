@@ -25,6 +25,26 @@ namespace Compression
         public void SetNext(Link<T> next0) => next = next0;
     }
 
+    public class DoubleLink<T>
+    {
+        public DoubleLink(T val0) => val = val0;
+
+        private DoubleLink<T> next;
+        private DoubleLink<T> prev;
+
+        public DoubleLink<T> Next => next;
+        public DoubleLink<T> Prev => prev;
+
+        private T val;
+
+        public T Value => val;
+
+        public void SetValue(T val0) => val = val0;
+
+        public void SetNext(DoubleLink<T> next0) => next = next0;
+        public void SetPrev(DoubleLink<T> prev0) => prev = prev0;
+    }
+
     public class LinkedList<T>
     {
         protected Link<T> head, tail;
@@ -73,48 +93,60 @@ namespace Compression
         }
     }
 
+    public class DoubleLinkedList<T>
+    {
+        protected DoubleLink<T> head, tail;
+
+        public void Print()
+        {
+            int counter = 0;
+
+            DoubleLink<T> current = head;
+
+            while (current != null)
+            {
+                //Console.WriteLine($"[{counter++}], {current.Value}");
+                Console.Write($"{current.Value},");
+
+                current = current.Next;
+            }
+
+            Console.WriteLine();
+        }
+
+        public DoubleLink<T> RemoveFirst() => RemoveFirst(1)?.FirstOrDefault();
+
+        public IList<DoubleLink<T>> RemoveFirst(int count)
+        {
+            DoubleLink<T> current = head;
+            //Link<T> previous = current;
+
+            IList<DoubleLink<T>> list = null;
+
+            int counter = count;
+
+            while (current != null && count-- > 0)
+            {
+                (list = list ?? new List<DoubleLink<T>>()).Add(current);
+
+                //previous = current;
+                //Console.WriteLine($"[{counter++}], {current.Value}");
+
+                current = current.Next;
+            }
+
+            head = current;
+            head.SetPrev(null);
+
+            return list;
+        }
+    }
+
     public class SortedLinkedList<T> : LinkedList<T>
     {
         private IComparer<T> comparer;
 
         public SortedLinkedList(IComparer<T> comp) => comparer = comp;
-
-        public void UpdateSorted(Link<T> link)
-        {
-            var val = link.Value;
-
-            Link<T> current = link.Next;
-            Link<T> previous = current;
-
-            bool updated = false;
-
-            while (!updated && current != null)
-            {
-                int c0 = comparer.Compare(val, current.Value);
-
-                if (c0 < 0)
-                {
-                    link.SetNext(previous.Next);
-
-                    previous.SetNext(link);
-
-                    updated = true;
-                }
-                else
-                {
-                    previous = current;
-
-                    current = current.Next;
-                }
-            }
-
-            if (!updated)
-            {
-                tail.SetNext(link);
-
-                tail = link;
-            }
-        }
 
         private int counter;
 
@@ -165,6 +197,73 @@ namespace Compression
                 if (!added)
                 {
                     tail.SetNext(newLink);
+
+                    tail = newLink;
+                }
+            }
+        }
+    }
+
+    public class SortedDoubleLinkedList<T> : DoubleLinkedList<T>
+    {
+        private IComparer<T> comparer;
+
+        public SortedDoubleLinkedList(IComparer<T> comp) => comparer = comp;
+
+        private int counter;
+
+        public void AddSorted(T val)
+        {
+            var newLink = new DoubleLink<T>(val);
+
+            int counter0 = counter++;
+
+            if ((counter0 % 1000) == 0)
+                Console.WriteLine($"[{counter0}], {nameof(val)}: {val}");
+
+            if (head == null)
+            {
+                head = tail = newLink;
+            }
+            else
+            {
+                DoubleLink<T> current = head;
+                DoubleLink<T> previous = current;
+
+                bool added = false;
+
+                while (!added && current != null)
+                {
+                    int c0 = comparer.Compare(val, current.Value);
+
+                    if (c0 < 0)
+                    {
+                        newLink.SetNext(current);
+                        current.SetPrev(newLink);
+
+                        if (previous.Next == current)
+                        {
+                            previous.SetNext(newLink);
+                            newLink.SetPrev(previous);
+                        }
+
+                        if (head == current)
+                            head = newLink;
+
+                        added = true;
+                    }
+                    else
+                    {
+                        previous = current;
+
+                        current = current.Next;
+                    }
+                }
+
+                if (!added)
+                {
+                    tail.SetNext(newLink);
+                    newLink.SetPrev(tail);
 
                     tail = newLink;
                 }

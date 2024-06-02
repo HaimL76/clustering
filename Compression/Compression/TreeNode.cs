@@ -184,6 +184,8 @@ namespace Compression
 
     public class TreeNodeCountComparer<T> : IComparer<TreeNode<(string Val, long Count)>>
     {
+        public bool reverse;
+
         int IComparer<TreeNode<(string Val, long Count)>>.Compare(TreeNode<(string Val, long Count)> x, TreeNode<(string Val, long Count)> y)
         {
             long countX = (x?.Value.Count).GetValueOrDefault();
@@ -192,9 +194,14 @@ namespace Compression
 
             long countDifference = countX - countY;
 
-            return countDifference == 0
+            int comp = countDifference == 0
                 ? 0 : countDifference > 0
                 ? 1 : -1;
+
+            if (reverse)
+                comp *= -1;
+
+            return comp;
         }
     }
 }
