@@ -150,7 +150,7 @@ namespace Compression
 
         private int counter;
 
-        public void AddSorted(T val)
+        public Link<T> AddSorted(T val)
         {
             var newLink = new Link<T>(val);
 
@@ -201,6 +201,8 @@ namespace Compression
                     tail = newLink;
                 }
             }
+
+            return newLink;
         }
     }
 
@@ -212,7 +214,63 @@ namespace Compression
 
         private int counter;
 
-        public void AddSorted(T val)
+        public void Update(DoubleLink<T> doubleLink)
+        {
+            if (doubleLink.Next != null && comparer.Compare(doubleLink.Value, doubleLink.Next.Value) > 0)
+            {
+                var prev = doubleLink.Prev ?? head;
+
+                prev.SetNext(doubleLink.Next);
+
+                DoubleLink<T> current = prev;
+                DoubleLink<T> previous = current;
+
+                bool added = false;
+
+                while (!added && current != null)
+                {
+                    int c0 = comparer.Compare(doubleLink.Value, current.Value);
+
+                    if (c0 < 0)
+                    {
+                        doubleLink.SetNext(current);
+                        current.SetPrev(doubleLink);
+
+                        if (previous.Next == current)
+                        {
+                            previous.SetNext(doubleLink);
+                            doubleLink.SetPrev(previous);
+                        }
+
+                        if (head == current)
+                            head = doubleLink;
+
+                        added = true;
+                    }
+                    else
+                    {
+                        previous = current;
+
+                        current = current.Next;
+                    }
+                }
+
+                if (!added)
+                {
+                    tail.SetNext(doubleLink);
+                    doubleLink.SetPrev(tail);
+
+                    tail = doubleLink;
+                }
+            }
+
+            if (doubleLink.Prev != null && comparer.Compare(doubleLink.Value, doubleLink.Prev.Value) < 0)
+            {
+
+            }
+        }
+
+        public DoubleLink<T> AddSorted(T val)
         {
             var newLink = new DoubleLink<T>(val);
 
@@ -268,6 +326,8 @@ namespace Compression
                     tail = newLink;
                 }
             }
+
+            return newLink;
         }
     }
 }

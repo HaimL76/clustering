@@ -67,7 +67,7 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
-            SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>> sortedLinkedList,
+            SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>> sortedDoubleLinkedList,
             ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -108,14 +108,20 @@ namespace Compression
                                 treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
 
                                 dictionaryStrings.Add(str, treeNode);
+
+                                var doubleLink = sortedDoubleLinkedList.AddSorted(treeNode);
+
+                                treeNode.aaa = doubleLink;
                             }
 
                             treeNode = dictionaryStrings[str];
 
                             treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
 
-                            if (newEntry)
-                                sortedLinkedList.AddSorted(treeNode);
+                            var aaa = treeNode.aaa;
+
+                            if (!newEntry && aaa is DoubleLink<TreeNode<(string, long)>> bbb)
+                                sortedDoubleLinkedList.Update(bbb);
                         }
                     }
 
@@ -165,7 +171,7 @@ namespace Compression
 
             var sortedLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeComparer);
 
-            var sortedReverseLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
+            var sortedReverseLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
 
             long charsIndex = 0, charsCount = 0;
 
