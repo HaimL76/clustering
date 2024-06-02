@@ -365,6 +365,8 @@ namespace Compression
             }
         }
 
+        private const string Banner = "decompressed by Haim Lavi software";
+
         public static async Task DecompressFileAsync(string inputPath)
         {
             await Task.Delay(1);
@@ -375,10 +377,16 @@ namespace Compression
             var queue = new Queue<long>();
 
             using (var fs = new FileStream($@"{inputPath}.huffman", FileMode.Open))
-            using (var fsw = new FileStream($@"{inputPath}.huffman.txt", FileMode.Create))
+            using (var fsw = new FileStream($@"{inputPath}.huffman.decompressed.txt", FileMode.Create))
             using (var br = new BinaryReader(fs))
             using (var bw = new BinaryWriter(fsw))
             {
+                string banner = $@"<<<{Banner}, {DateTime.Now}>>>{Environment.NewLine}";
+
+                var bannerBytes = Encoding.ASCII.GetBytes(banner);
+
+                bw.Write(bannerBytes);
+
                 var buffer = br.ReadBytes(8);
 
                 long charsCount = ConvertFromBytes(buffer);
@@ -389,11 +397,7 @@ namespace Compression
 
                 var table = new Dictionary<string, (ulong Bits, int NumBits)>();
 
-                int bytesCounter = 0;
-
                 var translationTableBuffer = br.ReadBytes((LenKey + LenLength + LenCharacter) * tableCount);
-
-                long counter = 0;
 
                 for (int i = 0; i < tableCount; i++)
                 {
