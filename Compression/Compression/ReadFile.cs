@@ -65,7 +65,8 @@ namespace Compression
         }
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<long, TreeNode<(string StringKey, long NumOccurances)>> dictionary,
+            Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
+            Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -83,29 +84,50 @@ namespace Compression
                 if (ch > 256)
                     ch = '-';//TODO:
 
-                int val = ch;
+                string str = null;
 
                 if (queue.Count > 1)
+                {
+                    str = string.Join(string.Empty, queue);
+
                     _ = queue.Dequeue();
+                }
 
                 queue.Enqueue(ch);
 
-                string str = string.Join(string.Empty, queue);
-
-                TreeNode<(string StringKey, long NumOccurances)> treeNode = null;
-
-                lock (dictionary)
+                if (str?.Length > 1)
                 {
-                    if (!dictionary.ContainsKey(val))
-                    {
-                        treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
+                    TreeNode<(string StringKey, long NumOccurances)> treeNode = null;
 
-                        dictionary.Add(val, treeNode);
+                    lock (dictionaryCharacters)
+                    {
+                        string strChar = new string(new[] { ch });
+
+                        if (!dictionaryCharacters.ContainsKey(ch))
+                        {
+                            treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: strChar, NumOccurances: 0));
+
+                            dictionaryCharacters.Add(ch, treeNode);
+                        }
+
+                        treeNode = dictionaryCharacters[ch];
+
+                        treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
                     }
 
-                    treeNode = dictionary[val];
+                    lock (dictionaryStrings)
+                    {
+                        if (!dictionaryStrings.ContainsKey(str))
+                        {
+                            treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
 
-                    treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                            dictionaryStrings.Add(str, treeNode);
+                        }
+
+                        treeNode = dictionaryStrings[str];
+
+                        treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                    }
                 }
             }
 
@@ -114,7 +136,7 @@ namespace Compression
 
         public const int BufferSize = 1024 * 1024;
 
-        private const int LenKey = 2;
+        private const int SizeOfStringLengthField = 1;//we can have strings of up to 256 bytes
         private const int LenLength = 1;
         private const int LenCharacter = 8;
 
@@ -122,7 +144,8 @@ namespace Compression
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
-            var dictionary = new Dictionary<long, TreeNode<(string StringKey, long NumBits)>>();
+            var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>>();
+            var dictionaryCharacters = new Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>>();
 
             bool finished = false;
 
@@ -149,19 +172,28 @@ namespace Compression
                     // refer to the same variable.
                     long capturedCharsIndex = charsIndex;
 
-                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionary,
-                        ref charsCount)));
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
+                        dictionaryCharacters, ref charsCount)));
 
                     charsIndex += readChars;
                 }
 
             Task.WaitAll(tasks.ToArray());
 
-            long sum = dictionary.Sum(x => (x.Value?.Value.NumBits).GetValueOrDefault());
+            long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            dictionary.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
+            long sumStrings = dictionaryStrings.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            Console.WriteLine($"{nameof(dictionary)}: {dictionary.Count}");
+            double averageCharactersOccurances = dictionaryCharacters.Average(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
+
+            dictionaryStrings =  dictionaryStrings.Where(x => x.Value.Value.NumOccurances > averageCharactersOccurances)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
+
+            dictionaryStrings.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
+
+            Console.WriteLine($"{nameof(dictionaryStrings)}: {dictionaryStrings.Count}");
 
             finished = false;
 
@@ -199,7 +231,7 @@ namespace Compression
 
             parent?.Print();
 
-            var table = new Dictionary<string, (ulong Bits, int NumBits)>();
+            var table = new Dictionary<string, (ulong Bits, int NumOccurances)>();
 
             parent.Traverse(new Stack<ulong>(), (stack, tup) =>
             {
@@ -235,31 +267,30 @@ namespace Compression
 
                 bw.Write(buffer);
 
-                var tableArray = table.ToArray();
+                var tableArray = new (byte[] StringBytes, int SizeStringBytes, ulong Bits, int NumBits)[table.Count];
 
                 buffer = ConvertToBytes(tableArray.Length, 2);
 
                 bw.Write(buffer);
 
-                var translationTableBuffer = new byte[(LenLength + LenKey + LenCharacter) * tableArray.Length];
+                var translationTableBuffer = new byte[(LenLength + SizeOfStringLengthField + LenCharacter) * tableArray.Length];
+
+                var tableToArray = table.ToArray();
 
                 for (int i = 0; i < tableArray.Length; i++)
                 {
-                    int baseIndex = i * (LenLength + LenKey + LenCharacter);
+                    int baseIndex = i * (LenLength + SizeOfStringLengthField + LenCharacter);
 
-                    var pair = tableArray[i];
+                    var tup = tableArray[i];
 
-                    var key = pair.Key;
-                    var tup = pair.Value;
+                    var pair = tableToArray[i];
 
-                    //CopyToBytesArray((ulong)key, translationTableBuffer, baseIndex, LenKey);
+                    var stringBytes = Encoding.ASCII.GetBytes(pair.Key);
 
-                    translationTableBuffer[baseIndex++] = (byte) key[0];
+                    tableArray[i] = (StringBytes: stringBytes, SizeStringBytes: stringBytes.Length, pair.Value.Bits, pair.Value.NumOccurances);
 
-                    if (key.Length > 1)
-                        translationTableBuffer[baseIndex] = (byte)key[1];
-
-                    baseIndex++;
+                    CopyToBytesArray((ulong)stringBytes.Length, translationTableBuffer, baseIndex, SizeOfStringLengthField);
+                    baseIndex += SizeOfStringLengthField;
 
                     ulong bits = tup.Bits;
 
@@ -271,11 +302,12 @@ namespace Compression
 
                 bw.Write(translationTableBuffer);
 
+                for (int i = 0; i < tableArray.Length; i++)
+                    bw.Write(tableArray[i].StringBytes);
+                
                 byte pack = 0;
 
                 charsIndex = 0;
-
-                var queue = new Queue<char>();
 
                 using (var sr = new StreamReader(inputPath))
                     while (!sr.EndOfStream)
@@ -288,23 +320,32 @@ namespace Compression
 
                         Console.WriteLine($"Read {charsIndex} characters from file {inputPath}");
 
-                        for (int i = 0; i < charsBuffer.Length; i++)
+                        int index = 0;
+
+                        while (index < charsBuffer.Length)
                         {
-                            ch = charsBuffer[i];
+                            (ulong Bits, int NumOccurrances)? tup = null;
 
-                            if (queue.Count > 1)
-                                _ = queue.Dequeue();
+                            int numChars = 5;
 
-                            queue.Enqueue(ch);
-
-                            string str = string.Join(string.Empty, queue);
-
-                            if (ch > 0 && table.ContainsKey(str))
+                            while (!tup.HasValue && numChars > 0)
                             {
-                                var tup = table[str];
+                                string str = new string(charsBuffer, index, numChars);
 
-                                ulong val = tup.Bits;
-                                int len = tup.NumBits;
+                                if (table.ContainsKey(str))
+                                {
+                                    tup = table[str];
+
+                                    index += numChars;
+                                }
+
+                                numChars--;
+                            }
+
+                            if (tup.HasValue)
+                            {
+                                ulong val = tup.Value.Bits;
+                                int len = tup.Value.NumOccurrances;
 
                                 var bitsBuffer = new byte[len];
 
@@ -397,25 +438,23 @@ namespace Compression
 
                 var table = new Dictionary<string, (ulong Bits, int NumBits)>();
 
-                var translationTableBuffer = br.ReadBytes((LenKey + LenLength + LenCharacter) * tableCount);
+                var translationTableBuffer = br.ReadBytes((SizeOfStringLengthField + LenLength + LenCharacter) * tableCount);
+
+                var arrTable = new (byte SizeString, ulong Bits, int NumBits)[tableCount];
 
                 for (int i = 0; i < tableCount; i++)
                 {
-                    int baseindex = i * (LenKey + LenLength + LenCharacter);
+                    int baseindex = i * (SizeOfStringLengthField + LenLength + LenCharacter);
 
-                    //int key = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenKey);
-                    char ch0 = (char)translationTableBuffer[baseindex++];
-                    char ch1 = (char)translationTableBuffer[baseindex++];
-                    //baseindex += LenKey;
-
-                    string key = new string(new char[] { ch0, ch1 });
+                    byte sizeString = (byte)ConvertFromBytes(translationTableBuffer, baseindex, SizeOfStringLengthField);
+                    baseindex += SizeOfStringLengthField;
 
                     int length = (int)ConvertFromBytes(translationTableBuffer, baseindex, LenLength);
                     baseindex += LenLength;
 
                     ulong val = (ulong)ConvertFromBytes(translationTableBuffer, baseindex, LenCharacter);
 
-                    table[key] = (Bits: val, NumBits: length);
+                    arrTable[i] = (SizeString: sizeString, Bits: val, NumBits: length);
                 }
 
                 Tree<string> tree = new Tree<string>();
