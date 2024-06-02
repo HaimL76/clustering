@@ -231,7 +231,7 @@ namespace Compression
 
             parent?.Print();
 
-            var table = new Dictionary<string, (ulong Bits, int NumOccurances)>();
+            var table = new Dictionary<string, (ulong Bits, int NumBits)>();
 
             parent.Traverse(new Stack<ulong>(), (stack, tup) =>
             {
@@ -281,13 +281,11 @@ namespace Compression
                 {
                     int baseIndex = i * (LenLength + SizeOfStringLengthField + LenCharacter);
 
-                    var tup = tableArray[i];
-
                     var pair = tableToArray[i];
 
                     var stringBytes = Encoding.ASCII.GetBytes(pair.Key);
 
-                    tableArray[i] = (StringBytes: stringBytes, SizeStringBytes: stringBytes.Length, pair.Value.Bits, pair.Value.NumOccurances);
+                    var tup = tableArray[i] = (StringBytes: stringBytes, SizeStringBytes: stringBytes.Length, pair.Value.Bits, pair.Value.NumBits);
 
                     CopyToBytesArray((ulong)stringBytes.Length, translationTableBuffer, baseIndex, SizeOfStringLengthField);
                     baseIndex += SizeOfStringLengthField;
@@ -326,7 +324,7 @@ namespace Compression
                         {
                             (ulong Bits, int NumOccurrances)? tup = null;
 
-                            int numChars = 5;
+                            int numChars = Math.Min(5, charsBuffer.Length - index);
 
                             while (!tup.HasValue && numChars > 0)
                             {
@@ -337,10 +335,16 @@ namespace Compression
                                     tup = table[str];
 
                                     index += numChars;
+
+                                    if (str.Length > 1)
+                                        _ = 0;
                                 }
 
                                 numChars--;
                             }
+
+                            if (!tup.HasValue)
+                                index++;
 
                             if (tup.HasValue)
                             {
@@ -440,7 +444,7 @@ namespace Compression
 
                 var translationTableBuffer = br.ReadBytes((SizeOfStringLengthField + LenLength + LenCharacter) * tableCount);
 
-                var arrTable = new (byte SizeString, ulong Bits, int NumBits)[tableCount];
+                var arrTable = new (string StringValue, byte SizeString, ulong Bits, int NumBits)[tableCount];
 
                 for (int i = 0; i < tableCount; i++)
                 {
@@ -454,22 +458,20 @@ namespace Compression
 
                     ulong val = (ulong)ConvertFromBytes(translationTableBuffer, baseindex, LenCharacter);
 
-                    arrTable[i] = (SizeString: sizeString, Bits: val, NumBits: length);
+                    arrTable[i] = (StringValue: null, SizeString: sizeString, Bits: val, NumBits: length);
                 }
 
-                Tree<string> tree = new Tree<string>();
+                Tree<byte[]> tree = new Tree<byte[]>();
 
-                var tableArray = table.ToArray();
-
-                for (int i = 0; i < tableArray.Length; i++)
+                for (int i = 0; i < arrTable.Length; i++)
                 {
-                    var pair = tableArray[i];
+                    var tup = arrTable[i];
 
-                    var tup = pair.Value;
+                    var bytesString = br.ReadBytes(tup.SizeString);
+
+                    string StringKey = Encoding.ASCII.GetString(bytesString);
 
                     int[] bitsArray = null;
-
-                    string StringKey = pair.Key;
 
                     ulong bits = tup.Bits;
 
@@ -488,7 +490,7 @@ namespace Compression
                     }
 
                     if (bitsArray?.Length > 0)
-                        tree.Add(StringKey, bitsArray.Reverse().ToArray());
+                        tree.Add(bytesString, bitsArray.Reverse().ToArray());
                 }
 
                 tree.Print();
@@ -497,7 +499,7 @@ namespace Compression
 
                 bool finished = false;
 
-                var visitor = new TreeVisitor<string>(tree);
+                var visitor = new TreeVisitor<byte[]>(tree);
 
                 while (!finished && charsIndex < charsCount)
                 {
@@ -541,26 +543,36 @@ namespace Compression
 
                             if (state.Status)
                             {
+                                byte[] bytesString = state.Val;
+
                                 //char ch = state.Val;
-                                string str = state.Val;
+                                //string str = state.Val;
 
-                                writeBuffer[writeIndex++] = (byte)str[0];
-                                writeBuffer[writeIndex++] = (byte)str[1];
+                                //writeBuffer[writeIndex++] = (byte)str[0];
+                                //writeBuffer[writeIndex++] = (byte)str[1];
 
-                                if (writeIndex >= writeBuffer.Length)
+                                if (bytesString.Length > 1)
+                                    _ = 0;
+
+                                for (int j = 0; j < bytesString.Length; j++)
                                 {
-                                    totalCounter += writeIndex;
+                                    writeBuffer[writeIndex++] = bytesString[j];
 
-                                    Console.WriteLine($"{nameof(totalCounter)}: {totalCounter}");
+                                    if (writeIndex >= writeBuffer.Length)
+                                    {
+                                        totalCounter += writeIndex;
 
-                                    writeIndex = 0;
+                                        Console.WriteLine($"{nameof(totalCounter)}: {totalCounter}");
 
-                                    bw.Write(writeBuffer);
+                                        writeIndex = 0;
 
-                                    writeBuffer = new byte[BufferSize];
+                                        bw.Write(writeBuffer);
+
+                                        writeBuffer = new byte[BufferSize];
+                                    }
+
+                                    charsIndex++;
                                 }
-
-                                charsIndex++;
                             }
                         }
                     }
