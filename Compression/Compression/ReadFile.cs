@@ -119,7 +119,7 @@ namespace Compression
 
             var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumOccurances)>();
 
-            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumBits)>>(treeNodeComparer);
+            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumOccurances)>>(treeNodeComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -164,14 +164,14 @@ namespace Compression
 
                 var left = sortedLinkedList.RemoveFirst();
 
-                Link<TreeNode<(long Character, long NumBits)>> right = null;
+                Link<TreeNode<(long Character, long NumOccurances)>> right = null;
 
-                totalCount += (left?.Value.Value.NumBits).GetValueOrDefault();
+                totalCount += (left?.Value.Value.NumOccurances).GetValueOrDefault();
 
                 if (left != null)
                     right = sortedLinkedList.RemoveFirst();
 
-                totalCount += (right?.Value.Value.NumBits).GetValueOrDefault();
+                totalCount += (right?.Value.Value.NumOccurances).GetValueOrDefault();
 
                 if (right == null)
                 {
@@ -179,7 +179,7 @@ namespace Compression
                 }
                 else
                 {
-                    parent = new TreeNode<(long Character, long NumBits)>((Character: 0, NumBits: totalCount));
+                    parent = new TreeNode<(long Character, long NumOccurances)>((Character: 0, NumOccurances: totalCount));
 
                     parent.SetChild(left.Value, Side.Left);
                     parent.SetChild(right.Value, Side.Right);
