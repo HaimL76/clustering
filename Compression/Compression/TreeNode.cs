@@ -14,8 +14,6 @@ namespace Compression
 
     public class TreeNode<T>
     {
-        public object aaa;
-
         public TreeNode(T val0) => val = val0;
 
         private TreeNode<T> left;

@@ -51,6 +51,8 @@ namespace Compression
     public class LinkedList<T, LType>
         where LType : Link<T>
     {
+        public Func<T, string> Format { get; set; }
+
         protected LType head, tail;
 
         public void Print()
@@ -59,8 +61,10 @@ namespace Compression
 
             while (current != null)
             {
+                string str = Format?.Invoke(current.Value) ?? $"{current.Value}";
+
                 //Console.WriteLine($"[{counter++}], {current.Value}");
-                Console.Write($"{current.Value},");
+                Console.Write($"{str},");
 
                 current = (LType)current.Next;
             }

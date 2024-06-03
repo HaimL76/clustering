@@ -174,6 +174,8 @@ namespace Compression
 
             var sortedDoubleLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
+            sortedDoubleLinkedList.Format = node => node.Value.StringKey;
+
             long charsIndex = 0, charsCount = 0;
 
             char ch = '\0';
@@ -202,6 +204,8 @@ namespace Compression
             Task.WaitAll(tasks.ToArray());
 
             long counter = sortedDoubleLinkedList.GetCount();
+
+            sortedDoubleLinkedList.Print();
 
             //dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
 

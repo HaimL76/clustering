@@ -22,6 +22,8 @@ namespace Compression
 
             inputPath = @"c:\html\dickens.txt";
 
+            //inputPath = @"c:\html\aaa.txt";
+
             await Compression.ReadFile.CompressFileAsync(inputPath, 5);
 
             await Compression.ReadFile.DecompressFileAsync(inputPath);
