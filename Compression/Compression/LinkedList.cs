@@ -93,6 +93,22 @@ namespace Compression
 
             return list;
         }
+
+        public long GetCount()
+        {
+            int counter = 0;
+
+            var link = head;
+
+            while (link != null)
+            {
+                counter++;
+
+                link = (LType) link.Next;
+            }
+
+            return counter;
+        }
     }
 
     public class DoubleLinkedList<T> : LinkedList<T, DoubleLink<T>>
@@ -105,11 +121,21 @@ namespace Compression
 
         public void Update(DoubleLink<T> link)
         {
-            var prev = link.Prev ?? head;
+            var next = link?.Next;
 
-            prev.SetNext(prev.Next);
+            if (next != null)
+            {
+                int comp = Comparer.Compare(link.Value, next.Value);
 
-            AddSorted(link.Value, prev);
+                if (comp > 0)
+                {
+                    var prev = link.Prev ?? head;
+
+                    prev.SetNext(prev.Next);
+
+                    AddSorted(link.Value, prev);
+                }
+            }
         }
     }
 
@@ -117,6 +143,8 @@ namespace Compression
         where LType : Link<T>, new()
     {
         private IComparer<T> comparer;
+
+        public IComparer<T> Comparer => comparer;
 
         public SortedLinkedList(IComparer<T> comp) => comparer = comp;
 
@@ -129,7 +157,7 @@ namespace Compression
 
             int counter0 = counter++;
 
-            if ((counter0 % 1000) == 0)
+            if ((counter0 % 100000) == 0)
                 Console.WriteLine($"[{counter0}], {nameof(val)}: {val}");
 
             if (head == null)
@@ -146,7 +174,9 @@ namespace Compression
 
                 bool added = false;
 
-                while (!added && current != null)
+                bool finished = false;
+
+                while (!finished && current != null)
                 {                                                                  
                     int c0 = comparer.Compare(val, current.Value);
 
@@ -160,13 +190,17 @@ namespace Compression
                         if (head == current)
                             head = (LType)newLink;
 
-                        added = true;
+                        finished = added = true;
                     }
-                    else
+                    else if (c0 > 0)
                     {
                         previous = current;
 
                         current = (LType)current.Next;
+                    }
+                    else
+                    {
+                        finished = true;
                     }
                 }
 

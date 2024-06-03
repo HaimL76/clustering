@@ -1,0 +1,5 @@
+bin/
+obj/
+*.doc
+*.pdf
+.vs/

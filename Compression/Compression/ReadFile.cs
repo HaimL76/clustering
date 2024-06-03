@@ -115,7 +115,9 @@ namespace Compression
 
                             treeNode = dictionaryStrings[str];
 
-                            treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1, treeNode.Value.LinkObject));
+                            treeNode.SetValue((treeNode.Value.StringKey, 
+                                NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length, 
+                                treeNode.Value.LinkObject));
 
                             if (doubleLink == null)
                             {
@@ -199,22 +201,24 @@ namespace Compression
 
             Task.WaitAll(tasks.ToArray());
 
+            long counter = sortedDoubleLinkedList.GetCount();
+
             //dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
 
-            long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
+            //long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            long sumStrings = dictionaryStrings.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
+            //long sumStrings = dictionaryStrings.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
             double averageCharactersOccurances = dictionaryCharacters.Average(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            dictionaryStrings.ToList().ForEach(x =>
-            {
-                var treeNode = x.Value;
+            ////////dictionaryStrings.ToList().ForEach(x =>
+            ////////{
+            ////////    var treeNode = x.Value;
 
-                int len = treeNode.Value.StringKey.Length;
+            ////////    int len = treeNode.Value.StringKey.Length;
 
-                x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len, x.Value.Value.LinkObject));
-            });
+            ////////    x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len, x.Value.Value.LinkObject));
+            ////////});
 
             dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
 
