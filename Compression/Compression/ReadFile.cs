@@ -67,7 +67,6 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
-            SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>> sortedDoubleLinkedList,
             ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -109,9 +108,9 @@ namespace Compression
 
                                 dictionaryStrings.Add(str, treeNode);
 
-                                var doubleLink = sortedDoubleLinkedList.AddSorted(treeNode);
+                                //var doubleLink = sortedDoubleLinkedList.AddSorted(treeNode);
 
-                                treeNode.aaa = doubleLink;
+                                //treeNode.aaa = doubleLink;
                             }
 
                             treeNode = dictionaryStrings[str];
@@ -120,8 +119,8 @@ namespace Compression
 
                             var aaa = treeNode.aaa;
 
-                            if (!newEntry && aaa is DoubleLink<TreeNode<(string, long)>> bbb)
-                                sortedDoubleLinkedList.Update(bbb);
+                            //if (!newEntry && aaa is DoubleLink<TreeNode<(string, long)>> bbb)
+                                //sortedDoubleLinkedList.Update(bbb);
                         }
                     }
 
@@ -169,9 +168,10 @@ namespace Compression
             var treeNodeReverseComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances)>();
             treeNodeReverseComparer.reverse = true;
 
-            var sortedLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeComparer);
+            var sortedLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>,
+                Link<TreeNode<(string StringKey, long NumOccurances)>>>(treeNodeComparer);
 
-            var sortedReverseLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
+            //var sortedReverseLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -193,14 +193,14 @@ namespace Compression
                     long capturedCharsIndex = charsIndex;
 
                     tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
-                        dictionaryCharacters, sortedReverseLinkedList, ref charsCount, maxStringLength: maxStringLength)));
+                        dictionaryCharacters, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
                 }
 
             Task.WaitAll(tasks.ToArray());
 
-            dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
+            //dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
 
             long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
