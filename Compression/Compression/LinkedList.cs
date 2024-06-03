@@ -38,12 +38,14 @@ namespace Compression
 
         public DoubleLink<T> Prev => prev;
 
-        public void SetNext(DoubleLink<T> next0)
+        public override void SetNext(Link<T> next0)
         {
             base.SetNext(next0);
 
-            next0?.SetNext(this);
+            (next0 as DoubleLink<T>)?.SetPrev(this);
         }
+
+        public void SetPrev(DoubleLink<T> prev0) => prev = prev0;
     }
 
     public class LinkedList<T, LType>
@@ -139,8 +141,8 @@ namespace Compression
             }
             else
             {
-                Link<T> current = start ?? head;
-                Link<T> previous = current;
+                LType current = start ?? head;
+                LType previous = current;
 
                 bool added = false;
 
@@ -164,7 +166,7 @@ namespace Compression
                     {
                         previous = current;
 
-                        current = current.Next;
+                        current = (LType)current.Next;
                     }
                 }
 
