@@ -65,8 +65,9 @@ namespace Compression
         }
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>> dictionaryStrings,
-            Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>> dictionaryCharacters,
+            Dictionary<string, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> dictionaryStrings,
+            Dictionary<char, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> dictionaryCharacters,
+            SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> sortedDoubleLinkedList,
             ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -86,7 +87,7 @@ namespace Compression
 
                 string str = null;
 
-                TreeNode<(string StringKey, long NumOccurances)> treeNode = null;
+                TreeNode<(string StringKey, long NumOccurances, object LinkObject)> treeNode = null;
 
                 if (queue.Count >= maxStringLength)
                 {
@@ -98,29 +99,31 @@ namespace Compression
 
                         lock (dictionaryStrings)
                         {
-                            bool newEntry = false;
+                            DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> doubleLink = null;
 
                             if (!dictionaryStrings.ContainsKey(str))
                             {
-                                newEntry = true;
-
-                                treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: str, NumOccurances: 0));
+                                treeNode = new TreeNode<(string StringKey, long NumOccurances, object LinkObject)>((StringKey: str, NumOccurances: 0, LinkObject: null));
 
                                 dictionaryStrings.Add(str, treeNode);
+                                
+                                doubleLink = sortedDoubleLinkedList.AddSorted(treeNode) 
+                                    as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
 
-                                //var doubleLink = sortedDoubleLinkedList.AddSorted(treeNode);
-
-                                //treeNode.aaa = doubleLink;
+                                treeNode.SetValue((StringKey: treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances, LinkObject: doubleLink));
                             }
 
                             treeNode = dictionaryStrings[str];
 
-                            treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                            treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1, treeNode.Value.LinkObject));
 
-                            var aaa = treeNode.aaa;
+                            if (doubleLink == null)
+                            {
+                                doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
 
-                            //if (!newEntry && aaa is DoubleLink<TreeNode<(string, long)>> bbb)
-                                //sortedDoubleLinkedList.Update(bbb);
+                                if (doubleLink != null)
+                                    sortedDoubleLinkedList.Update(doubleLink);
+                            }
                         }
                     }
 
@@ -135,14 +138,15 @@ namespace Compression
 
                     if (!dictionaryCharacters.ContainsKey(ch))
                     {
-                        treeNode = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: strChar, NumOccurances: 0));
+                        treeNode = new TreeNode<(string StringKey, long NumOccurances, object LinkObject)>((StringKey: strChar, NumOccurances: 0, 
+                            LinkObject: null));
 
                         dictionaryCharacters.Add(ch, treeNode);
                     }
 
                     treeNode = dictionaryCharacters[ch];
 
-                    treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1));
+                    treeNode.SetValue((treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances + 1, treeNode.Value.LinkObject));
                 }
             }
 
@@ -159,19 +163,14 @@ namespace Compression
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
-            var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, long NumOccurances)>>();
-            var dictionaryCharacters = new Dictionary<char, TreeNode<(string StringKey, long NumOccurances)>>();
+            var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>();
+            var dictionaryCharacters = new Dictionary<char, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>();
 
             bool finished = false;
 
-            var treeNodeComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances)>();
-            var treeNodeReverseComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances)>();
-            treeNodeReverseComparer.reverse = true;
+            var treeNodeComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances, object LinkObject)>();
 
-            var sortedLinkedList = new SortedLinkedList<TreeNode<(string StringKey, long NumOccurances)>,
-                Link<TreeNode<(string StringKey, long NumOccurances)>>>(treeNodeComparer);
-
-            //var sortedReverseLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances)>>(treeNodeReverseComparer);
+            var sortedDoubleLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -193,7 +192,7 @@ namespace Compression
                     long capturedCharsIndex = charsIndex;
 
                     tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
-                        dictionaryCharacters, ref charsCount, maxStringLength: maxStringLength)));
+                        dictionaryCharacters, sortedDoubleLinkedList, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
                 }
@@ -214,36 +213,31 @@ namespace Compression
 
                 int len = treeNode.Value.StringKey.Length;
 
-                x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len));
+                x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len, x.Value.Value.LinkObject));
             });
 
-            dictionaryStrings =  dictionaryStrings.Where(x => x.Value.Value.NumOccurances > averageCharactersOccurances)
-                .ToDictionary(x => x.Key, x => x.Value);
-
             dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
-
-            dictionaryStrings.Values.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
             Console.WriteLine($"{nameof(dictionaryStrings)}: {dictionaryStrings.Count}");
 
             finished = false;
 
-            TreeNode<(string StringKey, long NumOccurances)> parent = null;
+            TreeNode<(string StringKey, long NumOccurances, object LinkObject)> parent = null;
 
             while (!finished)
             {
                 long totalCount = 0;
 
-                var left = sortedLinkedList.RemoveFirst();
+                var left = sortedDoubleLinkedList.RemoveFirst();
 
-                Link<TreeNode<(string StringKey, long NumBits)>> right = null;
+                Link<TreeNode<(string StringKey, long NumOccurences, object LinkObject)>> right = null;
 
                 totalCount += (left?.Value.Value.NumOccurances).GetValueOrDefault();
 
                 if (left != null)
-                    right = sortedLinkedList.RemoveFirst();
+                    right = sortedDoubleLinkedList.RemoveFirst();
 
-                totalCount += (right?.Value.Value.NumBits).GetValueOrDefault();
+                totalCount += (right?.Value.Value.NumOccurences).GetValueOrDefault();
 
                 if (right == null)
                 {
@@ -251,12 +245,13 @@ namespace Compression
                 }
                 else
                 {
-                    parent = new TreeNode<(string StringKey, long NumOccurances)>((StringKey: string.Empty, NumOccurances: totalCount));
+                    parent = new TreeNode<(string StringKey, long NumOccurances, object LinkObject)>((StringKey: string.Empty, NumOccurances: totalCount,
+                        LinkObject: null));
 
                     parent.SetChild(left.Value, Side.Left);
                     parent.SetChild(right.Value, Side.Right);
 
-                    sortedLinkedList.AddSorted(parent);
+                    sortedDoubleLinkedList.AddSorted(parent);
                 }
             }
 

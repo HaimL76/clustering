@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace Compression
 {
     public class Link<T>
     {
+        public Link() => _ = 0;
+
         public Link(T val0) => val = val0;
 
         private Link<T> next;
@@ -27,6 +30,8 @@ namespace Compression
 
     public class DoubleLink<T> : Link<T>
     {
+        public DoubleLink() : base() => _ = 0;
+
         public DoubleLink(T val0) : base(val0) => _ = 0;
 
         private DoubleLink<T> prev;
@@ -90,16 +95,24 @@ namespace Compression
 
     public class DoubleLinkedList<T> : LinkedList<T, DoubleLink<T>>
     {
+    }
+
+    public class SortedDoubleLinkedList<T> : SortedLinkedList<T, DoubleLink<T>>
+    {
+        public SortedDoubleLinkedList(IComparer<T> comp) : base(comp) => _ = 0;
+
         public void Update(DoubleLink<T> link)
         {
             var prev = link.Prev ?? head;
 
             prev.SetNext(prev.Next);
+
+            AddSorted(link.Value, prev);
         }
     }
 
     public class SortedLinkedList<T, LType> : LinkedList<T, LType>
-        where LType : Link<T>
+        where LType : Link<T>, new()
     {
         private IComparer<T> comparer;
 
@@ -109,7 +122,8 @@ namespace Compression
 
         public Link<T> AddSorted(T val, LType start = null)
         {
-            var newLink = new Link<T>(val);
+            var newLink = new LType();
+            newLink.SetValue(val);
 
             int counter0 = counter++;
 
