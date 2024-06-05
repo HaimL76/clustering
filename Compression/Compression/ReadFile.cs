@@ -175,7 +175,7 @@ namespace Compression
             var sortedLinkedList = 
                 new SortedOneWayLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
-            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 100);
+            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 3);
 
             //sortedDoubleLinkedList.Format = node => node.Value.StringKey;
 
