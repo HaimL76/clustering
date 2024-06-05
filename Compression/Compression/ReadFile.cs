@@ -67,7 +67,7 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> dictionaryCharacters,
-            SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> sortedDoubleLinkedList,
+            SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>> sortedBuffer,
             ref long charsCount, int maxStringLength = 2)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -107,10 +107,10 @@ namespace Compression
 
                                 dictionaryStrings.Add(str, treeNode);
                                 
-                                doubleLink = sortedDoubleLinkedList.AddSorted(treeNode) 
+                                doubleLink = sortedBuffer.AddSorted(treeNode) 
                                     as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
 
-                                treeNode.SetValue((StringKey: treeNode.Value.StringKey, NumOccurances: treeNode.Value.NumOccurances, LinkObject: doubleLink));
+                                treeNode.SetValue((treeNode.Value.StringKey, treeNode.Value.NumOccurances, LinkObject: doubleLink));
                             }
 
                             treeNode = dictionaryStrings[str];
@@ -124,7 +124,7 @@ namespace Compression
                                 doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
 
                                 if (doubleLink != null)
-                                    sortedDoubleLinkedList.Update(doubleLink);
+                                    sortedBuffer.Replace(doubleLink);
                             }
                         }
                     }
@@ -172,9 +172,12 @@ namespace Compression
 
             var treeNodeComparer = new TreeNodeCountComparer<(string StringKey, long NumOccurances, object LinkObject)>();
 
-            var sortedDoubleLinkedList = new SortedDoubleLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
+            var sortedLinkedList = 
+                new SortedOneWayLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
-            sortedDoubleLinkedList.Format = node => node.Value.StringKey;
+            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 100);
+
+            //sortedDoubleLinkedList.Format = node => node.Value.StringKey;
 
             long charsIndex = 0, charsCount = 0;
 
@@ -196,16 +199,16 @@ namespace Compression
                     long capturedCharsIndex = charsIndex;
 
                     tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
-                        dictionaryCharacters, sortedDoubleLinkedList, ref charsCount, maxStringLength: maxStringLength)));
+                        dictionaryCharacters, sortedBuffer, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
                 }
 
             Task.WaitAll(tasks.ToArray());
 
-            long counter = sortedDoubleLinkedList.GetCount();
+            //long counter = sortedBuffer.GetCount();
 
-            sortedDoubleLinkedList.Print();
+            sortedBuffer.Print();
 
             //dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
 
@@ -236,14 +239,14 @@ namespace Compression
             {
                 long totalCount = 0;
 
-                var left = sortedDoubleLinkedList.RemoveFirst();
+                var left = sortedLinkedList.RemoveFirst();
 
                 Link<TreeNode<(string StringKey, long NumOccurences, object LinkObject)>> right = null;
 
                 totalCount += (left?.Value.Value.NumOccurances).GetValueOrDefault();
 
                 if (left != null)
-                    right = sortedDoubleLinkedList.RemoveFirst();
+                    right = sortedLinkedList.RemoveFirst();
 
                 totalCount += (right?.Value.Value.NumOccurences).GetValueOrDefault();
 
@@ -259,7 +262,7 @@ namespace Compression
                     parent.SetChild(left.Value, Side.Left);
                     parent.SetChild(right.Value, Side.Right);
 
-                    sortedDoubleLinkedList.AddSorted(parent);
+                    sortedLinkedList.AddSorted(parent);
                 }
             }
 

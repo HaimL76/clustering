@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -119,11 +121,113 @@ namespace Compression
     {
     }
 
+    public class SortedOneWayLinkedList<T> : SortedLinkedList<T, Link<T>>
+    {
+        public SortedOneWayLinkedList(IComparer<T> comp) : base(comp) => _ = 0;
+    }
+
     public class SortedDoubleLinkedList<T> : SortedLinkedList<T, DoubleLink<T>>
     {
         public SortedDoubleLinkedList(IComparer<T> comp) : base(comp) => _ = 0;
 
         public void Update(DoubleLink<T> link)
+        {
+            var next = link?.Next;
+
+            if (next != null)
+            {
+                int comp = Comparer.Compare(link.Value, next.Value);
+
+                if (comp > 0)
+                {
+                    var prev = link.Prev ?? head;
+
+                    prev.SetNext(prev.Next);
+
+                    AddSorted(link.Value, prev);
+                }
+            }
+        }
+    }
+
+    public class SortedBuffer<T> : SortedLinkedList<T, DoubleLink<T>>
+    {
+        private int size;
+
+        private int count;
+
+        public SortedBuffer(IComparer<T> comp, int sz) : base(comp) => size = sz;
+
+        public override Link<T> AddSorted(T val, DoubleLink<T> start = null)
+        {
+            DoubleLink<T> newLink = null;
+
+            if (head == null)
+            {
+                if (start != null)
+                    throw new ApplicationException(nameof(head));
+
+                head = tail = new DoubleLink<T>(val);
+            }
+            else
+            {
+                DoubleLink <T> current = start ?? head;
+
+                bool addVal = count < size || (Comparer?.Compare(val, head.Value))
+                    .GetValueOrDefault() > 0;
+
+                if (addVal)
+                {
+                    newLink = new DoubleLink<T>(val);
+
+                    if (count > size)
+                    {
+                        _ = RemoveFirst();
+
+                        count--;
+                    }
+
+                    int counter = 0;
+
+                    int count0 = count;
+
+                    while (count0 == count && current != null && counter++ < size)
+                    {
+                        int comp = (Comparer?.Compare(val, current.Value))
+                            .GetValueOrDefault();
+
+                        if (comp < 0)
+                        {
+                            var prev = current.Prev;
+
+                            newLink.SetNext(current);
+                            newLink.SetPrev(prev);
+
+                            prev?.SetNext(newLink);
+
+                            if (current == head)
+                                head = newLink;
+
+                            count++;
+                        }
+                    }
+
+                    if (count0 == count)
+                    {
+                        tail.SetNext(newLink);
+                        newLink.SetPrev(tail);
+
+                        tail = newLink;
+
+                        count++;
+                    }
+                }
+            }
+
+            return newLink;
+        }
+
+        public void Replace(DoubleLink<T> link)
         {
             var next = link?.Next;
 
@@ -154,7 +258,7 @@ namespace Compression
 
         private int counter;
 
-        public Link<T> AddSorted(T val, LType start = null)
+        public virtual Link<T> AddSorted(T val, LType start = null)
         {
             var newLink = new LType();
             newLink.SetValue(val);
@@ -169,7 +273,7 @@ namespace Compression
                 if (start != null)
                     throw new ApplicationException(nameof(head));
 
-                head = tail = (LType)newLink;
+                head = tail = newLink;
             }
             else
             {
@@ -212,7 +316,7 @@ namespace Compression
                 {
                     tail.SetNext(newLink);
 
-                    tail = (LType)newLink;
+                    tail = newLink;
                 }
             }
 
