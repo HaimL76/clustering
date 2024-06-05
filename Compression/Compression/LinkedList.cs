@@ -66,6 +66,22 @@ namespace Compression
 
         protected LType head, tail;
 
+        public List<T> ToList()
+        {
+            var list = new List<T>();
+
+            LType current = head;
+
+            while (current != null)
+            {
+                list.Add(current.Value);
+
+                current = (LType)current.Next;
+            }
+
+            return list;
+        }
+
         public void Print()
         {
             LType current = head;

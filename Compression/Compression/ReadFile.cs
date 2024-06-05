@@ -227,7 +227,9 @@ namespace Compression
             ////////    x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len, x.Value.Value.LinkObject));
             ////////});
 
-            dictionaryCharacters.ToList().ForEach(x => dictionaryStrings[x.Value.Value.StringKey] = x.Value);
+            dictionaryCharacters.ToList().ForEach(x => sortedLinkedList.AddSorted(x.Value));// dictionaryStrings[x.Value.Value.StringKey] = x.Value);
+
+            sortedBuffer.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
             Console.WriteLine($"{nameof(dictionaryStrings)}: {dictionaryStrings.Count}");
 
