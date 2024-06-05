@@ -101,9 +101,11 @@ namespace Compression
                 //previous = current;
                 //Console.WriteLine($"[{counter++}], {current.Value}");
 
-                current = (LType)current.Next;
+                var next = (LType)current.Next;
 
-                current?.Disconnect();
+                current.Disconnect();
+
+                current = next;
             }
 
             head = current;
