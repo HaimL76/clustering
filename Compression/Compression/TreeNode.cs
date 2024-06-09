@@ -77,13 +77,13 @@ namespace Compression
 
     public class Tree<T>
     {
-        private TreeNode<T> root;
+        protected TreeNode<T> root;
 
         public TreeNode<T> Root => root;
 
-        public (T Val, bool Found)  GetValue(params int[] sides)
+        public TreeNode<T> GetNode(params int[] sides)
         {
-            (T Val, bool Found) result = (Val: default(T), false);
+            TreeNode<T> result = null;
 
             if (root != null)
             {
@@ -99,13 +99,13 @@ namespace Compression
                 }
 
                 if (next != null)
-                    result = (Val: next.Value, true);
+                    result = next;
             }
 
             return result;
         }
 
-        public void Add(T val, params int[] sides)
+        public virtual void Add(T val, params int[] sides)
         {
             root = root ?? new TreeNode<T>(default);
 
@@ -179,6 +179,50 @@ namespace Compression
 
                 current = null;
             }
+        }
+    }
+
+    public class DictionaryTree : Tree<long?>
+    {
+        private long count;
+
+        public bool Add(params int[] sides)
+        {
+            long count0 = count;
+
+            Add(null, sides);
+
+            return count > count0;
+        }
+
+        public override void Add(long? val, params int[] sides)
+        {
+            root = root ?? new TreeNode<long?>(null);
+
+            var node = root;
+
+            for (int i = 0; i < sides.Length; i++)
+            {
+                int side = sides[i];
+
+                TreeNode<long?> next = side == 0
+                    ? node.Left : node.Right;
+
+                if (next == null)
+                {
+                    next = new TreeNode<long?>(null);
+
+                    if (side == 0)
+                        node.SetChild(next, Side.Left);
+                    else
+                        node.SetChild(next, Side.Right);
+                }
+
+                node = next;
+            }
+
+            if (!node.Value.HasValue)
+                node.SetValue(count++);
         }
     }
 

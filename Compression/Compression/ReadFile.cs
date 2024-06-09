@@ -78,9 +78,6 @@ namespace Compression
 
                 loopCharsCount++;
 
-                if (ch > 256)
-                    ch = '-';//TODO:
-
                 int val = ch;
 
                 TreeNode<(long Character, long NumOccurances)> treeNode = null;
@@ -202,13 +199,10 @@ namespace Compression
                 {
                     bits <<= 1;
 
-                    bits |= (ulong)item;
+                    bits |= item;
 
                     len++;
                 }
-
-                if (tup.Character > 256)
-                    _ = 0;
 
                 table[tup.Character] = (Bits: bits, NumBits: len);
             });
