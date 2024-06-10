@@ -82,15 +82,21 @@ namespace Compression
             return list;
         }
 
-        public void Print()
+        public void Print(bool sepearetLines = true)
         {
             LType current = head;
+
+            long counter = 0;
 
             while (current != null)
             {
                 string str = Format?.Invoke(current.Value) ?? $"{current.Value}";
 
-                Console.Write($"{str},");
+                Console.Write($"{str}");
+
+                str = sepearetLines ? $"[{counter++}]{str}{Environment.NewLine}" : $"{str},";
+
+                Console.Write(str);
 
                 current = (LType)current.Next;
             }
@@ -232,6 +238,14 @@ namespace Compression
                             count++;
                         }
                     }
+                    else if (comp > 0)
+                    {
+                        current = (DoubleLink<T>)current.Next;
+                    }
+                    else
+                    {
+                        finished = true;
+                    }
                 }
 
                 if (count0 == count)
@@ -247,7 +261,11 @@ namespace Compression
 
             if (count > size)
             {
-                head = (DoubleLink<T>)head.Next;
+                var next = (DoubleLink<T>)head.Next;
+
+                head.SetNext(null);
+
+                head = next;
                 head.SetPrev(null);
 
                 count--;
