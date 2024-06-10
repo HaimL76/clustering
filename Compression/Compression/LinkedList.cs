@@ -90,7 +90,6 @@ namespace Compression
             {
                 string str = Format?.Invoke(current.Value) ?? $"{current.Value}";
 
-                //Console.WriteLine($"[{counter++}], {current.Value}");
                 Console.Write($"{str},");
 
                 current = (LType)current.Next;
@@ -104,22 +103,16 @@ namespace Compression
         public IList<LType> RemoveFirst(int count)
         {
             LType current = head;
-            //Link<T> previous = current;
 
             IList<LType> list = null;
 
-            int counter = count;
-
             while (current != null && count-- > 0)
             {
-                (list = list ?? new List<LType>()).Add(current);
-
-                //previous = current;
-                //Console.WriteLine($"[{counter++}], {current.Value}");
-
                 var next = (LType)current.Next;
 
                 current.Disconnect();
+
+                (list = list ?? new List<LType>()).Add(current);
 
                 current = next;
             }
@@ -196,64 +189,74 @@ namespace Compression
 
                 head = tail = link;
 
-                count = 1;
+                count++;
             }
             else
             {
-                DoubleLink <T> current = start ?? head;
+                DoubleLink<T> current = start ?? head;
 
-                bool addVal = count < size || (Comparer?.Compare(link.Value, head.Value))
-                    .GetValueOrDefault() > 0;
+                int count0 = count;
 
-                if (addVal)
+                bool finished = false;
+
+                while (!finished && count0 == count && current != null)
                 {
-                    if (count > size)
+                    int comp = (Comparer?.Compare(link.Value, current.Value))
+                        .GetValueOrDefault();
+
+                    var prev = current.Prev;
+
+                    if (comp < 0)
                     {
-                        _ = RemoveFirst();
-
-                        count--;
-                    }
-
-                    int counter = 0;
-
-                    int count0 = count;
-
-                    while (count0 == count && current != null && counter++ < size)
-                    {
-                        int comp = (Comparer?.Compare(link.Value, current.Value))
-                            .GetValueOrDefault();
-
-                        if (comp < 0)
+                        if (prev == null && count > size)
                         {
-                            var prev = current.Prev;
-
+                            finished = true;
+                        }
+                        else
+                        {
                             link.SetNext(current);
-                            link.SetPrev(prev);
 
-                            prev?.SetNext(link);
-
-                            if (current == head)
+                            if (prev == null)//This means current is the head.
+                            {
                                 head = link;
+                            }
+                            else
+                            {
+                                prev.SetNext(link);
+                                link.SetPrev(prev);
+
+                                link.SetNext(current);
+                                current.SetPrev(link);
+                            }
 
                             count++;
                         }
                     }
-
-                    if (count0 == count)
-                    {
-                        tail.SetNext(link);
-                        link.SetPrev(tail);
-
-                        tail = link;
-
-                        count++;
-                    }
                 }
+
+                if (count0 == count)
+                {
+                    tail.SetNext(link);
+                    link.SetPrev(tail);
+
+                    tail = link;
+
+                    count++;
+                }
+            }
+
+            if (count > size)
+            {
+                head = (DoubleLink<T>)head.Next;
+                head.SetPrev(null);
+
+                count--;
             }
         }
 
         public void Replace(DoubleLink<T> link)
         {
+            return;
             if (link.Next == null)
             {
                 AddSorted(link);
@@ -340,7 +343,7 @@ namespace Compression
                             previous.SetNext(link);
 
                         if (head == current)
-                            head = (LType)link;
+                            head = link;
 
                         finished = added = true;
                     }
