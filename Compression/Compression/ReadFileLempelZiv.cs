@@ -17,7 +17,7 @@ namespace Compression
     internal class ReadFileLempelZiv
     {
         public static void ProcessBytesBuffer(byte[] bytesBuffer, long index, int readBytes,
-            DictionaryTree tree,
+            DictionaryTree tree, int minLength,
             ref long bytesCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readBytes - 1}");
@@ -44,18 +44,24 @@ namespace Compression
                 {
                     int bit = arr0[j];
 
-                    queue.Enqueue(bit);
-
-                    loopBytesCount++;
-
                     lock (tree)
                     {
-                        var arr = queue.Select(x => x).ToArray();
+                        if (tree.CanAdd)
+                        {
+                            queue.Enqueue(bit);
 
-                        bool added = tree.Add(arr);
+                            if (queue.Count >= minLength)
+                            {
+                                var arr = queue.Select(x => x).ToArray();
 
-                        if (added)
-                            queue.Clear();
+                                (bool Found, bool Added) result = tree.FindOrAdd(arr);
+
+                                if (result.Added)
+                                    queue.Clear();
+                            }
+                        }
+
+                        loopBytesCount++;
                     }
                 }
             }
@@ -68,6 +74,8 @@ namespace Compression
         private const int LenKey = 2;
         private const int LenLength = 1;
         private const int LenCharacter = 8;
+
+        private const int MinBitLength = 1;
 
         public static async Task CompressFileAsync(string inputPath)
         {
@@ -98,7 +106,7 @@ namespace Compression
                     // refer to the same variable.
                     long capturedBytesIndex = bytesIndex;
 
-                    tasks.Add(Task.Run(() => ProcessBytesBuffer(buffer, capturedBytesIndex, readBytes, tree,
+                    tasks.Add(Task.Run(() => ProcessBytesBuffer(buffer, capturedBytesIndex, readBytes, tree, MinBitLength,
                         ref bytesCount)));
 
                     bytesIndex += readBytes;

@@ -182,22 +182,21 @@ namespace Compression
         }
     }
 
-    public class DictionaryTree : Tree<long?>
+    public class DictionaryTree : Tree<(long Index, long Count)>
     {
-        private long count;
+        public DictionaryTree(int mxIndex = 256) => maxIndex = mxIndex;
 
-        public bool Add(params int[] sides)
+        private int maxIndex = 256;
+
+        private long index, count;
+
+        public bool CanAdd => index < maxIndex;
+
+        public (bool Found, bool Added) FindOrAdd(params int[] sides)
         {
-            long count0 = count;
+            (bool Found, bool Added) result = (Found: false, Added: false);
 
-            Add(null, sides);
-
-            return count > count0;
-        }
-
-        public override void Add(long? val, params int[] sides)
-        {
-            root = root ?? new TreeNode<long?>(null);
+            root = root ?? new TreeNode<(long Index, long Count)>((Index: 0, Count: 0));
 
             var node = root;
 
@@ -205,12 +204,12 @@ namespace Compression
             {
                 int side = sides[i];
 
-                TreeNode<long?> next = side == 0
+                TreeNode<(long Index, long Count)> next = side == 0
                     ? node.Left : node.Right;
 
                 if (next == null)
                 {
-                    next = new TreeNode<long?>(null);
+                    next = new TreeNode<(long Index, long Count)>((Index: 0, Count: 0));
 
                     if (side == 0)
                         node.SetChild(next, Side.Left);
@@ -221,8 +220,23 @@ namespace Compression
                 node = next;
             }
 
-            if (!node.Value.HasValue)
-                node.SetValue(count++);
+            if (node.Value.Index < 1 && index < maxIndex)
+            {
+                node.SetValue((Index: ++index, Count: 0));
+
+                result = (Found: false, Added: true);
+            }
+
+            if (node.Value.Index > 0)
+            {
+                node.SetValue((node.Value.Index, Count: node.Value.Count + 1));
+
+                count++;
+
+                result = (Found: true, result.Added);
+            }
+
+            return result;
         }
     }
 
