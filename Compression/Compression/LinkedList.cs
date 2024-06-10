@@ -6,6 +6,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -188,6 +189,30 @@ namespace Compression
 
         public override void AddSorted(DoubleLink<T> link, DoubleLink<T> start = null)
         {
+            var next = link.Next as DoubleLink<T>;
+            var prev = link.Prev as DoubleLink<T>;
+
+            if (next != null)
+            {
+                if (prev == null)
+                    _ = 0;
+
+                prev?.SetNext(next);
+                next.SetPrev(prev);
+
+                start = prev;
+
+                count--;
+            }
+            else if (prev != null)
+            {
+                prev.SetNext(null);
+
+                link.SetPrev(null);
+
+                count--;
+            }
+
             if (head == null)
             {
                 if (start != null)
@@ -210,7 +235,7 @@ namespace Compression
                     int comp = (Comparer?.Compare(link.Value, current.Value))
                         .GetValueOrDefault();
 
-                    var prev = current.Prev;
+                    prev = current.Prev;
 
                     if (comp < 0)
                     {
@@ -261,7 +286,7 @@ namespace Compression
 
             if (count > size)
             {
-                var next = (DoubleLink<T>)head.Next;
+                next = (DoubleLink<T>)head.Next;
 
                 head.SetNext(null);
 

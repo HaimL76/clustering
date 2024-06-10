@@ -118,14 +118,10 @@ namespace Compression
                             treeNode.SetValue((treeNode.Value.StringKey, 
                                 NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length, 
                                 treeNode.Value.LinkObject));
-
-                            if (doubleLink == null)
-                            {
-                                doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
-
-                                if (doubleLink != null)
-                                    sortedBuffer.Replace(doubleLink);
-                            }
+                            
+                            doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
+                            
+                            sortedBuffer.AddSorted(doubleLink);
                         }
                     }
 
