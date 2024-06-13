@@ -238,6 +238,28 @@ namespace Compression
                         finished = true;
                     }
                 }
+
+                if (count == count0)
+                {
+                    tail.SetNext(link);
+                    link.SetPrev(tail);
+
+                    tail = link;
+
+                    count++;
+                }
+
+                if (count > size)
+                {
+                    var next = head.Next;
+
+                    head.SetNext(null);
+
+                    head = (DoubleLink<T>) next;
+                    head.SetPrev(null);
+
+                    count--;
+                }
             }
         }
     }
