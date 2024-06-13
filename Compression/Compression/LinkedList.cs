@@ -43,12 +43,12 @@ namespace Compression
 
         public DoubleLink<T> Prev => prev;
 
-        public override void SetNext(Link<T> next0)
-        {
-            base.SetNext(next0);
+        //////public override void SetNext(Link<T> next0)
+        //////{
+        //////    base.SetNext(next0);
 
-            (next0 as DoubleLink<T>)?.SetPrev(this);
-        }
+        //////    (next0 as DoubleLink<T>)?.SetPrev(this);
+        //////}
 
         public void SetPrev(DoubleLink<T> prev0) => prev = prev0;
 
@@ -181,147 +181,61 @@ namespace Compression
 
     public class SortedBuffer<T> : SortedLinkedList<T, DoubleLink<T>>
     {
-        private int size;
+        public SortedBuffer(IComparer<T> comp, int sz) 
+            : base(comp) => size = sz;
 
         private int count;
 
-        public SortedBuffer(IComparer<T> comp, int sz) : base(comp) => size = sz;
+        private readonly int size;
 
         public override void AddSorted(DoubleLink<T> link, DoubleLink<T> start = null)
         {
-            var next = link.Next as DoubleLink<T>;
-            var prev = link.Prev as DoubleLink<T>;
+            var current = link.Prev ?? head;
 
-            if (next != null)
+            if (current == null)
             {
-                if (prev == null)
-                    _ = 0;
-
-                prev?.SetNext(next);
-                next.SetPrev(prev);
-
-                start = prev;
-
-                count--;
-            }
-            else if (prev != null)
-            {
-                prev.SetNext(null);
-
-                link.SetPrev(null);
-
-                count--;
-            }
-
-            if (head == null)
-            {
-                if (start != null)
-                    throw new ApplicationException(nameof(head));
-
                 head = tail = link;
 
                 count++;
             }
             else
             {
-                DoubleLink<T> current = start ?? head;
+                link.Prev?.SetNext(link.Next);
 
-                int count0 = count;
+                link.SetNext(null);
+                link.SetPrev(null);
 
                 bool finished = false;
 
-                while (!finished && count0 == count && current != null)
+                int count0 = count;
+
+                while (!finished && current != null)
                 {
-                    int comp = (Comparer?.Compare(link.Value, current.Value))
-                        .GetValueOrDefault();
-
-                    prev = current.Prev;
-
-                    if (comp < 0)
-                    {
-                        if (prev == null && count > size)
-                        {
-                            finished = true;
-                        }
-                        else
-                        {
-                            link.SetNext(current);
-
-                            if (prev == null)//This means current is the head.
-                            {
-                                head = link;
-                            }
-                            else
-                            {
-                                prev.SetNext(link);
-                                link.SetPrev(prev);
-
-                                link.SetNext(current);
-                                current.SetPrev(link);
-                            }
-
-                            count++;
-                        }
-                    }
-                    else if (comp > 0)
-                    {
-                        current = (DoubleLink<T>)current.Next;
-                    }
-                    else
-                    {
-                        finished = true;
-                    }
-                }
-
-                if (count0 == count)
-                {
-                    tail.SetNext(link);
-                    link.SetPrev(tail);
-
-                    tail = link;
-
-                    count++;
-                }
-            }
-
-            if (count > size)
-            {
-                next = (DoubleLink<T>)head.Next;
-
-                head.SetNext(null);
-
-                head = next;
-                head.SetPrev(null);
-
-                count--;
-            }
-        }
-
-        public void Replace(DoubleLink<T> link)
-        {
-            return;
-            if (link.Next == null)
-            {
-                AddSorted(link);
-            }
-            else
-            {
-                var next = link?.Next;
-
-                if (next != null)
-                {
-                    int comp = Comparer.Compare(link.Value, next.Value);
+                    int comp = Comparer.Compare(link.Value, current.Value);
 
                     if (comp > 0)
                     {
-                        var prev = link.Prev;
+                        current = (DoubleLink<T>) current.Next;
+                    }
+                    else
+                    {
+                        if (count < size || current != head)
+                        {
+                            var prev = current.Prev;
 
-                        prev?.SetNext(link.Next);
-                        (link.Next as DoubleLink<T>)?.SetPrev(prev);
+                            link.SetNext(current);
+                            current.SetPrev(link);
 
-                        link.Disconnect();
+                            prev?.SetNext(link);
+                            link.SetPrev(prev);
 
-                        AddSorted(link);
+                            if (prev == null)
+                                head = link;
+
+                            count++;
+                        }
+
+                        finished = true;
                     }
                 }
             }

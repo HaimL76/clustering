@@ -115,13 +115,16 @@ namespace Compression
 
                             treeNode = dictionaryStrings[str];
 
-                            treeNode.SetValue((treeNode.Value.StringKey, 
-                                NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length, 
-                                treeNode.Value.LinkObject));
-                            
-                            doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
-                            
-                            sortedBuffer.AddSorted(doubleLink);
+                            ////////treeNode.SetValue((treeNode.Value.StringKey, 
+                            ////////    NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length, 
+                            ////////    treeNode.Value.LinkObject));
+
+                            if (doubleLink == null)
+                            {
+                                doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>;
+
+                                sortedBuffer.AddSorted(doubleLink);
+                            }
                         }
                     }
 
@@ -171,7 +174,7 @@ namespace Compression
             var sortedLinkedList = 
                 new SortedOneWayLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
-            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 100);
+            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 3);
 
             //sortedDoubleLinkedList.Format = node => node.Value.StringKey;
 
