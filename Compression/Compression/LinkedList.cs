@@ -200,10 +200,27 @@ namespace Compression
             }
             else
             {
-                link.Prev?.SetNext(link.Next);
+                var next = (DoubleLink<T>)link.Next;
+                var prev = link.Prev;
 
-                link.SetNext(null);
-                link.SetPrev(null);
+                bool disconnected = next == null && prev == null;
+
+                if (!disconnected)
+                {
+                    link.Prev?.SetNext(next);
+                    next?.SetPrev(link.Prev);
+
+                    if (prev == null)
+                        head = (DoubleLink<T>)link.Next;
+
+                    if (next == null)
+                        tail = link.Prev;
+
+                    link.SetNext(null);
+                    link.SetPrev(null);
+
+                    count--;
+                }
 
                 bool finished = false;
 
@@ -221,7 +238,7 @@ namespace Compression
                     {
                         if (count < size || current != head)
                         {
-                            var prev = current.Prev;
+                            prev = current.Prev;
 
                             link.SetNext(current);
                             current.SetPrev(link);
@@ -256,7 +273,7 @@ namespace Compression
 
                 if (count > size)
                 {
-                    var next = head.Next;
+                    next = (DoubleLink<T>)head.Next;
 
                     head.SetNext(null);
 
