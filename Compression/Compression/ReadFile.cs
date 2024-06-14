@@ -160,7 +160,8 @@ namespace Compression
         private const int LenLength = 1;
         private const int LenCharacter = 8;
 
-        public static async Task CompressFileAsync(string inputPath, int maxStringLength = 2)
+        public static async Task CompressFileAsync(string inputPath, int maxStringLength = 2,
+            int sortedBufferSize = 28)
         {
             // Collect all the characters from the input file,
             // and prepare a dictionary of their statistics. 
@@ -174,7 +175,7 @@ namespace Compression
             var sortedLinkedList = 
                 new SortedOneWayLinkedList<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer);
 
-            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, 3);
+            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, long NumOccurances, object LinkObject)>>(treeNodeComparer, sortedBufferSize);
 
             //sortedDoubleLinkedList.Format = node => node.Value.StringKey;
 
