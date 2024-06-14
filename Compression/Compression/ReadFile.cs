@@ -65,7 +65,7 @@ namespace Compression
         }
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<long, TreeNode<(long Character, long NumOccurances)>> dictionary,
+            Dictionary<long, TreeNode<(long Character, long NumOccurrences)>> dictionary,
             ref long charsCount)
         {
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
@@ -80,20 +80,20 @@ namespace Compression
 
                 int val = ch;
 
-                TreeNode<(long Character, long NumOccurances)> treeNode = null;
+                TreeNode<(long Character, long NumOccurrences)> treeNode = null;
 
                 lock (dictionary)
                 {
                     if (!dictionary.ContainsKey(val))
                     {
-                        treeNode = new TreeNode<(long Character, long NumOccurances)>((Character: val, NumOccurances: 0));
+                        treeNode = new TreeNode<(long Character, long NumOccurrences)>((Character: val, NumOccurrences: 0));
 
                         dictionary.Add(val, treeNode);
                     }
 
                     treeNode = dictionary[val];
 
-                    treeNode.SetValue((treeNode.Value.Character, NumOccurances: treeNode.Value.NumOccurances + 1));
+                    treeNode.SetValue((treeNode.Value.Character, NumOccurrences: treeNode.Value.NumOccurrences + 1));
                 }
             }
 
@@ -114,9 +114,9 @@ namespace Compression
 
             bool finished = false;
 
-            var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumOccurances)>();
+            var treeNodeComparer = new TreeNodeCountComparer<(long Character, long NumOccurrences)>();
 
-            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumOccurances)>>(treeNodeComparer);
+            var sortedLinkedList = new SortedLinkedList<TreeNode<(long Character, long NumOccurrences)>>(treeNodeComparer);
 
             long charsIndex = 0, charsCount = 0;
 
@@ -153,7 +153,7 @@ namespace Compression
 
             finished = false;
 
-            TreeNode<(long Character, long NumOccurances)> parent = null;
+            TreeNode<(long Character, long NumOccurrences)> parent = null;
 
             while (!finished)
             {
@@ -161,14 +161,14 @@ namespace Compression
 
                 var left = sortedLinkedList.RemoveFirst();
 
-                Link<TreeNode<(long Character, long NumOccurances)>> right = null;
+                Link<TreeNode<(long Character, long NumOccurrences)>> right = null;
 
-                totalCount += (left?.Value.Value.NumOccurances).GetValueOrDefault();
+                totalCount += (left?.Value.Value.NumOccurrences).GetValueOrDefault();
 
                 if (left != null)
                     right = sortedLinkedList.RemoveFirst();
 
-                totalCount += (right?.Value.Value.NumOccurances).GetValueOrDefault();
+                totalCount += (right?.Value.Value.NumOccurrences).GetValueOrDefault();
 
                 if (right == null)
                 {
@@ -176,7 +176,7 @@ namespace Compression
                 }
                 else
                 {
-                    parent = new TreeNode<(long Character, long NumOccurances)>((Character: 0, NumOccurances: totalCount));
+                    parent = new TreeNode<(long Character, long NumOccurrences)>((Character: 0, NumOccurrences: totalCount));
 
                     parent.SetChild(left.Value, Side.Left);
                     parent.SetChild(right.Value, Side.Right);
