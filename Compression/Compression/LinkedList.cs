@@ -190,9 +190,7 @@ namespace Compression
 
         public override void AddSorted(DoubleLink<T> link, DoubleLink<T> start = null)
         {
-            var current = link.Prev ?? head;
-
-            if (current == null)
+            if (head == null)
             {
                 head = tail = link;
 
@@ -207,14 +205,14 @@ namespace Compression
 
                 if (!disconnected)
                 {
-                    link.Prev?.SetNext(next);
-                    next?.SetPrev(link.Prev);
+                    prev?.SetNext(next);
+                    next?.SetPrev(prev);
 
                     if (prev == null)
-                        head = (DoubleLink<T>)link.Next;
+                        head = next;
 
                     if (next == null)
-                        tail = link.Prev;
+                        tail = prev;
 
                     link.SetNext(null);
                     link.SetPrev(null);
@@ -225,6 +223,8 @@ namespace Compression
                 bool finished = false;
 
                 int count0 = count;
+
+                var current = head;// link.Prev ?? head;
 
                 while (!finished && current != null)
                 {
