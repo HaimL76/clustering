@@ -24,7 +24,7 @@ namespace Compression
 
             //inputPath = @"c:\html\aaa.txt";
 
-            await Compression.ReadFile.CompressFileAsync(inputPath, 5);
+            await Compression.ReadFile.CompressFileAsync(inputPath, 5, 666);
 
             await Compression.ReadFile.DecompressFileAsync(inputPath);
         }

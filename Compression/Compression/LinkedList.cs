@@ -224,7 +224,7 @@ namespace Compression
 
                 int count0 = count;
 
-                var current = head;// link.Prev ?? head;
+                var current = next ?? head;// link.Prev ?? head;
 
                 while (!finished && current != null)
                 {
