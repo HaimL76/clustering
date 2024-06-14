@@ -208,24 +208,9 @@ namespace Compression
 
             sortedBuffer.Print();
 
-            //dictionaryStrings.Values.ToList().ForEach(x => sortedReverseLinkedList.AddSorted(x));
-
-            //long sumCharacters = dictionaryCharacters.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
-
-            //long sumStrings = dictionaryStrings.Sum(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
-
             double averageCharactersOccurances = dictionaryCharacters.Average(x => (x.Value?.Value.NumOccurances).GetValueOrDefault());
 
-            ////////dictionaryStrings.ToList().ForEach(x =>
-            ////////{
-            ////////    var treeNode = x.Value;
-
-            ////////    int len = treeNode.Value.StringKey.Length;
-
-            ////////    x.Value.SetValue((x.Value.Value.StringKey, x.Value.Value.NumOccurances * len, x.Value.Value.LinkObject));
-            ////////});
-
-            dictionaryCharacters.ToList().ForEach(x => sortedLinkedList.AddSorted(x.Value));// dictionaryStrings[x.Value.Value.StringKey] = x.Value);
+            dictionaryCharacters.ToList().ForEach(x => sortedLinkedList.AddSorted(x.Value));
 
             sortedBuffer.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
 
