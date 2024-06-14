@@ -182,17 +182,17 @@ namespace Compression
         }
     }
 
-    public class TreeNodeCountComparer<T> : IComparer<TreeNode<(string Val, long Count, object LinkObject)>>
+    public class TreeNodeCountComparer<T> : IComparer<TreeNode<(string Val, double NumOccurrences, object LinkObject)>>
     {
         public bool reverse;
 
-        int IComparer<TreeNode<(string Val, long Count, object LinkObject)>>.Compare(TreeNode<(string Val, long Count, object LinkObject)> x, TreeNode<(string Val, long Count, object LinkObject)> y)
+        int IComparer<TreeNode<(string Val, double NumOccurrences, object LinkObject)>>.Compare(TreeNode<(string Val, double NumOccurrences, object LinkObject)> x, TreeNode<(string Val, double NumOccurrences, object LinkObject)> y)
         {
-            long countX = (x?.Value.Count).GetValueOrDefault();
+            double countX = (x?.Value.NumOccurrences).GetValueOrDefault();
 
-            long countY = (y?.Value.Count).GetValueOrDefault();
+            double countY = (y?.Value.NumOccurrences).GetValueOrDefault();
 
-            long countDifference = countX - countY;
+            double countDifference = countX - countY;
 
             int comp = countDifference == 0
                 ? 0 : countDifference > 0
