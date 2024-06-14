@@ -115,9 +115,9 @@ namespace Compression
 
                             treeNode = dictionaryStrings[str];
 
-                            ////////treeNode.SetValue((treeNode.Value.StringKey, 
-                            ////////    NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length, 
-                            ////////    treeNode.Value.LinkObject));
+                            treeNode.SetValue((treeNode.Value.StringKey,
+                                NumOccurances: treeNode.Value.NumOccurances + treeNode.Value.StringKey.Length,
+                                treeNode.Value.LinkObject));
 
                             if (doubleLink == null)
                             {

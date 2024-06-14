@@ -241,12 +241,17 @@ namespace Compression
 
                 if (count == count0)
                 {
-                    tail.SetNext(link);
-                    link.SetPrev(tail);
+                    int comp = Comparer.Compare(link.Value, tail.Value);
 
-                    tail = link;
+                    if (comp >= 0)
+                    {
+                        tail.SetNext(link);
+                        link.SetPrev(tail);
 
-                    count++;
+                        tail = link;
+
+                        count++;
+                    }
                 }
 
                 if (count > size)
