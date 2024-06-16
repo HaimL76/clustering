@@ -64,7 +64,18 @@ namespace Compression
             return val;
         }
 
-        private static Func<string, double> CalculateStringWeight = str => 1;
+        private static Func<string, double> CalculateStringWeight = str =>
+        {
+            double result = 1.0;
+
+            if (MaxStringLength > 0)
+                result += str.Length * MaxStringLengthFraction;
+
+            return result;
+        };
+
+        public static int MaxStringLength = 0;
+        public static double MaxStringLengthFraction = 0.0;
 
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryStrings,
@@ -72,11 +83,16 @@ namespace Compression
             SortedBuffer<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> sortedBuffer,
             ref long charsCount, int maxStringLength = 2)
         {
+            MaxStringLength = maxStringLength;
+
+            if (MaxStringLength > 0)
+                MaxStringLengthFraction = 1.0 / MaxStringLength;
+
             Console.WriteLine($"Processing buffer, from {index} to {index + readChars - 1}");
 
             long loopCharsCount = 0;
 
-            var queue = new Queue<char>(maxStringLength);
+            var queue = new Queue<char>(MaxStringLength);
 
             for (int i = 0; i < readChars; i++)
             {
@@ -84,18 +100,18 @@ namespace Compression
 
                 loopCharsCount++;
 
-                if (ch > 256)
-                    ch = '-';//TODO:
+                //if (ch > 256)
+                  //  ch = '-';//TODO:
 
                 string str = null;
 
                 TreeNode<(string StringKey, double NumOccurrences, object LinkObject)> treeNode = null;
 
-                if (queue.Count >= maxStringLength)
+                if (queue.Count >= MaxStringLength)
                 {
                     var arr = queue.ToArray();
 
-                    for (int j = maxStringLength; j >= 2; j--)
+                    for (int j = MaxStringLength; j >= 2; j--)
                     {
                         str = new string(arr, 0, j);
 
@@ -346,7 +362,7 @@ namespace Compression
                         {
                             (ulong Bits, int NumOccurrances)? tup = null;
 
-                            int numChars = Math.Min(maxStringLength, charsBuffer.Length - index);
+                            int numChars = Math.Min(MaxStringLength, charsBuffer.Length - index);
 
                             while (!tup.HasValue && numChars > 0)
                             {
