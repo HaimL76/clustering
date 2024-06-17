@@ -170,7 +170,9 @@ namespace Compression
 
                 while (!finished0 && i < links.Length)
                 {
-                    var link = links[i++] = sortedLinkedList.RemoveFirst();
+                    int index = i++;
+
+                    var link = links[index] = sortedLinkedList.RemoveFirst();
 
                     if (link == null)
                     {
@@ -179,13 +181,15 @@ namespace Compression
                     else
                     {
                         var parent0 = parents[j] = parents[j] ??
-                            new TreeNode<(long Character, long NumOccurrences)>((Character: 0, NumOccurrences: totalCount));
+                            new TreeNode<(long Character, long NumOccurrences)>((Character: 0, NumOccurrences: 0));
 
-                        Side side0 = i % 2 == 0 ? Side.Left : Side.Right;
+                        parent0.SetValue((Character: 0, NumOccurrences: parent0.Value.NumOccurrences + link.Value.Value.NumOccurrences));
+
+                        Side side0 = index % 2 == 0 ? Side.Left : Side.Right;
                         
-                        parent0.SetChild(link.Value, Side.Left);
+                        parent0.SetChild(link.Value, side0);
 
-                        if (i % 2 == 1)
+                        if (index % 2 == 1)
                             j++;
                     }
                 }
