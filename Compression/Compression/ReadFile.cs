@@ -77,6 +77,8 @@ namespace Compression
         public static int MaxStringLength = 0;
         public static double MaxStringLengthFraction = 0.0;
 
+        private static DictionaryTree<long> dictionaryTree = new DictionaryTree<long>();
+
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryStrings,
             Dictionary<char, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryCharacters,
@@ -129,6 +131,8 @@ namespace Compression
                                     as DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>;
 
                                 treeNode.SetValue((treeNode.Value.StringKey, treeNode.Value.NumOccurrences, LinkObject: doubleLink));
+
+                                dictionaryTree.Add(0, arr);
                             }
 
                             treeNode = dictionaryStrings[str];
