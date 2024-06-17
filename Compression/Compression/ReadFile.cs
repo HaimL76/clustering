@@ -155,10 +155,6 @@ namespace Compression
 
             TreeNode<(long Character, long NumOccurrences)> parent = null;
 
-            var links = new Link<TreeNode<(long Character, long NumOccurrences)>>[4];
-
-            var parents = new TreeNode<(long Character, long NumOccurrences)>[2];
-
             while (!finished)
             {
                 long totalCount = 0;
@@ -168,11 +164,17 @@ namespace Compression
                 int i = 0;
                 int j = 0;
 
+                var links = new Link<TreeNode<(long Character, long NumOccurrences)>>[4];
+
+                var parents = new TreeNode<(long Character, long NumOccurrences)>[2];
+
+                Link<TreeNode<(long Character, long NumOccurrences)>> link = null;
+
                 while (!finished0 && i < links.Length)
                 {
                     int index = i++;
 
-                    var link = links[index] = sortedLinkedList.RemoveFirst();
+                    link = links[index] = sortedLinkedList.RemoveFirst();
 
                     if (link == null)
                     {
@@ -193,15 +195,22 @@ namespace Compression
                             j++;
                     }
                 }
-                
-                if (i < links.Length)
-                {
-                    finished = true;
-                }
 
-                for (int j0 = 0; j0 < parents.Length; j0++)
-                    if (parents[j0] != null)
-                        sortedLinkedList.AddSorted(parents[j0]);
+                finished = sortedLinkedList.IsEmpty();
+
+                if (finished)
+                {
+                    parent = new TreeNode<(long Character, long NumOccurrences)>((Character: 0, NumOccurrences: 0));
+
+                    parent.SetChild(parents[0], Side.Left);
+                    parent.SetChild(parents[1], Side.Right);
+                }
+                else
+                {
+                    for (int j0 = 0; j0 < parents.Length; j0++)
+                        if (parents[j0] != null)
+                            sortedLinkedList.AddSorted(parents[j0]);
+                }
             }
 
             parent?.Print();

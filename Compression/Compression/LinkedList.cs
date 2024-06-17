@@ -46,6 +46,24 @@ namespace Compression
             Console.WriteLine();
         }
 
+        public long GetCount()
+        {
+            var current = head;
+
+            long counter = 0;
+
+            while (current != null)
+            {
+                counter++;
+
+                current = current.Next;
+            }
+
+            return counter;
+        }
+
+        public bool IsEmpty() => head == null;
+
         public Link<T> RemoveFirst() => RemoveFirst(1)?.FirstOrDefault();
 
         public IList<Link<T>> RemoveFirst(int count)
