@@ -51,7 +51,9 @@ namespace Compression
 
                 DictionaryTreeNode<T> node = null;
 
-                while (numNodes0 == numNodes && index0 < arr.Length)
+                int counter = 0;
+
+                while (numNodes0 == numNodes && counter++ < arr.Length)
                 {
                     node = arr[index0];
 
@@ -61,7 +63,15 @@ namespace Compression
 
                         numNodes++;
                     }
+
+                    index0++;
+
+                    if (index0 == arr.Length)
+                        index0 = 0;
                 }
+
+                if (numNodes0 == numNodes)
+                    _ = 0;
 
                 node.Add(val0, index + 1, path);
             }
