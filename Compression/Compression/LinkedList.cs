@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Policy;
 using System.Text;
@@ -188,7 +190,7 @@ namespace Compression
 
         private readonly int size;
 
-        public override void AddSorted(DoubleLink<T> link, DoubleLink<T> start = null)
+        public override DoubleLink<T> AddSorted(DoubleLink<T> link, DoubleLink<T> start = null, bool addDouble = false)
         {
             if (head == null)
             {
@@ -283,6 +285,8 @@ namespace Compression
                     count--;
                 }
             }
+
+            return link;
         }
     }
 
@@ -307,8 +311,10 @@ namespace Compression
             return newLink;
         }
 
-        public virtual void AddSorted(LType link, LType start = null)
+        public virtual LType AddSorted(LType link, LType start = null, bool addMultiple = false)
         {
+            LType returnValue = null;
+
             var val = link.Value;
 
             int counter0 = counter++;
@@ -321,14 +327,14 @@ namespace Compression
                 if (start != null)
                     throw new ApplicationException(nameof(head));
 
-                head = tail = link;
+                returnValue = head = tail = link;
             }
             else
             {
                 LType current = start ?? head;
                 LType previous = current;
 
-                bool added = false;
+                bool toAdd = true;
 
                 bool finished = false;
 
@@ -336,7 +342,7 @@ namespace Compression
                 {                                                                  
                     int c0 = comparer.Compare(val, current.Value);
 
-                    if (c0 < 0)
+                    if (c0 < 0 || (c0 == 0 && addMultiple))
                     {
                         link.SetNext(current);
 
@@ -346,7 +352,11 @@ namespace Compression
                         if (head == current)
                             head = link;
 
-                        finished = added = true;
+                        returnValue = link;
+
+                        finished = true;
+
+                        toAdd = false;
                     }
                     else if (c0 > 0)
                     {
@@ -354,19 +364,25 @@ namespace Compression
 
                         current = (LType)current.Next;
                     }
-                    else
+                    else if (c0 == 0 && !addMultiple)
                     {
+                        returnValue = current;
+
                         finished = true;
+
+                        toAdd = false;
                     }
                 }
 
-                if (!added)
+                if (toAdd)
                 {
                     tail.SetNext(link);
 
-                    tail = link;
+                    returnValue = tail = link;
                 }
             }
+
+            return returnValue;
         }
     }
 }
