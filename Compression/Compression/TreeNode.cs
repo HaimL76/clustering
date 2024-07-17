@@ -204,4 +204,19 @@ namespace Compression
             return comp;
         }
     }
+
+    public class TreeNodeValueComparer<T> : IComparer<TreeNode<T>>
+    {
+        public bool reverse;
+
+        public int Compare(TreeNode<T> x, TreeNode<T> y)
+        {
+            int comp = Comparer<T>.Default.Compare(x.Value, y.Value);
+
+            if (reverse)
+                comp *= -1;
+
+            return comp;
+        }
+    }
 }

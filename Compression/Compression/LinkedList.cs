@@ -297,7 +297,11 @@ namespace Compression
 
         public IComparer<T> Comparer => comparer;
 
+        private Func<LType, LType, int> myCompare;
+
         public SortedLinkedList(IComparer<T> comp) => comparer = comp;
+
+        public SortedLinkedList(Func<LType, LType, int> myComp) => myCompare = myComp;
 
         private int counter;
 
@@ -306,9 +310,9 @@ namespace Compression
             var newLink = new LType();
             newLink.SetValue(val);
 
-            AddSorted(newLink, start);
+            return AddSorted(newLink, start);
 
-            return newLink;
+            //return newLink;
         }
 
         public virtual LType AddSorted(LType link, LType start = null, bool addMultiple = false)
@@ -339,8 +343,13 @@ namespace Compression
                 bool finished = false;
 
                 while (!finished && current != null)
-                {                                                                  
-                    int c0 = comparer.Compare(val, current.Value);
+                {
+                    int? c0 = null;
+
+                    c0 = comparer?.Compare(val, current.Value) ?? myCompare?.Invoke(link, current);
+
+                    if (!c0.HasValue)
+                        throw new ApplicationException(nameof(c0));
 
                     if (c0 < 0 || (c0 == 0 && addMultiple))
                     {
