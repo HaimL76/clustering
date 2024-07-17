@@ -10,6 +10,10 @@ namespace Compression
 {
     public class DictionaryTreeNode<T> : TreeNode<T>
     {
+        private static Action<TreeNode<T>> action;
+
+        public static Action<DictionaryTreeNode<T>> NodeAction { get; set; }
+
         public DictionaryTreeNode(char keyPart0, T val) : base(val) => keyPart = keyPart0;
 
         private int numNodes;
@@ -24,64 +28,35 @@ namespace Compression
         private readonly SortedLinkedList<DictionaryTreeNode<T>, Link<DictionaryTreeNode<T>>> list
             = new SortedLinkedList<DictionaryTreeNode<T>, Link<DictionaryTreeNode<T>>>(func);
 
-        private T val;
-
         private char keyPart;
 
-        public void Add(T val0, params char[] path)
-            => Add(val0, 0, path);
+        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, params char[] path)
+            => Add(val0, 0, false, path);
 
-        private DictionaryTreeNode<T> PutFirstAvailablePlace(char keyPart0, int startingIndex)
-        {
-            int length = (arr?.Length).GetValueOrDefault();
-
-            if (length <= startingIndex)
-            {
-                var arr0 = new DictionaryTreeNode<T>[startingIndex + 1];
-
-                for (int i = 0; i < length; i++)
-                    arr0[i] = arr[i];
-
-                arr = arr0;
-            }
-
-            DictionaryTreeNode<T> result = null;
-
-            int counter = 0;
-
-            int index = startingIndex;
-
-            while (result == null && counter++ < arr.Length)
-            {
-                DictionaryTreeNode<T> node = arr[index];
-
-                if (node == null)
-                    result = arr[index] = new DictionaryTreeNode<T>(keyPart0, val);
-                else if (node.keyPart == keyPart0)
-                    result = node;
-
-                index++;
-
-                index %= arr.Length;
-            }
-
-            return result;
-        }
-
-        private void Add(T val0, int index, params char[] path)
+        private (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, int index, bool isNew, params char[] path)
         {
             if (index < path.Length)
             {
                 char ch = path[index];
 
-                var node = list.AddSorted(new DictionaryTreeNode<T>(ch, val0))?.Value;
+                var tup = list.AddSorted(new DictionaryTreeNode<T>(ch, val0));
 
-                node?.Add(val0, index + 1, path);
+                var node = tup.LinkObject.Value;
+
+                if (tup.IsNew)
+                    isNew = true;
+
+                return (node?.Add(val0, index + 1, isNew, path))
+                    .GetValueOrDefault();
             }
             else
             {
-                val = val0;
+                //val = val0;
+
+                NodeAction?.Invoke(this);
             }
+
+            return (TreeNodeObject: this, IsNew: isNew);
         }
     }
 
@@ -89,7 +64,7 @@ namespace Compression
     {
         private readonly DictionaryTreeNode<T> root = new DictionaryTreeNode<T>('\0', default);
 
-        public void Add(T val0, params char[] path)
+        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, params char[] path)
             => root.Add(val0, path);
     }
 }

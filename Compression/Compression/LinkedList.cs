@@ -190,7 +190,7 @@ namespace Compression
 
         private readonly int size;
 
-        public override DoubleLink<T> AddSorted(DoubleLink<T> link, DoubleLink<T> start = null, bool addDouble = false)
+        public override (DoubleLink<T> LinkObject, bool IsNew) AddSorted(DoubleLink<T> link, DoubleLink<T> start = null, bool addDouble = false)
         {
             if (head == null)
             {
@@ -286,7 +286,7 @@ namespace Compression
                 }
             }
 
-            return link;
+            return (LinkObject: link, IsNew: true);
         }
     }
 
@@ -305,7 +305,7 @@ namespace Compression
 
         private int counter;
 
-        public Link<T> AddSorted(T val, LType start = null)
+        public (Link<T> LinkObject, bool IsNew) AddSorted(T val, LType start = null)
         {
             var newLink = new LType();
             newLink.SetValue(val);
@@ -315,9 +315,9 @@ namespace Compression
             //return newLink;
         }
 
-        public virtual LType AddSorted(LType link, LType start = null, bool addMultiple = false)
+        public virtual (LType LinkObject, bool IsNew) AddSorted(LType link, LType start = null, bool addMultiple = false)
         {
-            LType returnValue = null;
+            (LType LinkObject, bool IsNew) returnValue = (LinkObject: null, IsNew: false);
 
             var val = link.Value;
 
@@ -331,7 +331,7 @@ namespace Compression
                 if (start != null)
                     throw new ApplicationException(nameof(head));
 
-                returnValue = head = tail = link;
+                returnValue = (LinkObject: head = tail = link, IsNew: true);
             }
             else
             {
@@ -361,7 +361,7 @@ namespace Compression
                         if (head == current)
                             head = link;
 
-                        returnValue = link;
+                        returnValue = (LinkObject: link, IsNew: true);
 
                         finished = true;
 
@@ -375,7 +375,7 @@ namespace Compression
                     }
                     else if (c0 == 0 && !addMultiple)
                     {
-                        returnValue = current;
+                        returnValue = (LinkObject: current, IsNew: false);
 
                         finished = true;
 
@@ -387,7 +387,7 @@ namespace Compression
                 {
                     tail.SetNext(link);
 
-                    returnValue = tail = link;
+                    returnValue = (LinkObject: tail = link, IsNew: true);
                 }
             }
 

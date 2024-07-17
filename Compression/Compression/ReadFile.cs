@@ -77,10 +77,8 @@ namespace Compression
         public static int MaxStringLength = 0;
         public static double MaxStringLengthFraction = 0.0;
 
-        private static DictionaryTree<long> dictionaryTree = new DictionaryTree<long>();
-
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
-            Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryStrings,
+            DictionaryTree<long> dictionaryTree,
             Dictionary<char, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryCharacters,
             SortedBuffer<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> sortedBuffer,
             ref long charsCount, int maxStringLength = 2)
@@ -115,27 +113,25 @@ namespace Compression
 
                     for (int j = MaxStringLength; j >= 2; j--)
                     {
-                        str = new string(arr, 0, j);
+                        //str = new string(arr, 0, j);
 
-                        lock (dictionaryStrings)
+                        lock (dictionaryTree)
                         {
                             DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> doubleLink = null;
 
-                            if (!dictionaryStrings.ContainsKey(str))
+                            var tuple = dictionaryTree.Add(0, arr);
+
+                            if (tuple.IsNew)
                             {
                                 treeNode = new TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>((StringKey: str, NumOccurrences: 0, LinkObject: null));
 
-                                dictionaryStrings.Add(str, treeNode);
-                                
-                                doubleLink = sortedBuffer.AddSorted(treeNode) 
+                                doubleLink = sortedBuffer.AddSorted(treeNode)
                                     as DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>;
 
                                 treeNode.SetValue((treeNode.Value.StringKey, treeNode.Value.NumOccurrences, LinkObject: doubleLink));
 
                                 dictionaryTree.Add(0, arr);
                             }
-
-                            treeNode = dictionaryStrings[str];
 
                             treeNode.SetValue((treeNode.Value.StringKey,
                                 NumOccurrences: treeNode.Value.NumOccurrences + CalculateStringWeight(treeNode.Value.StringKey),
@@ -185,9 +181,11 @@ namespace Compression
         public static async Task CompressFileAsync(string inputPath, int maxStringLength = 2,
             int sortedBufferSize = 28)
         {
-            // Collect all the characters from the input file,
-            // and prepare a dictionary of their statistics. 
-            var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
+            DictionaryTreeNode<long>.NodeAction = node => node.SetValue(node.Value + 1);
+
+    // Collect all the characters from the input file,
+    // and prepare a dictionary of their statistics. 
+    var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
             var dictionaryCharacters = new Dictionary<char, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
 
             bool finished = false;
@@ -198,6 +196,8 @@ namespace Compression
                 new SortedOneWayLinkedList<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>(treeNodeComparer);
 
             var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>(treeNodeComparer, sortedBufferSize);
+
+            var dictionaryTree = new DictionaryTree<long>();
 
             long charsIndex = 0, charsCount = 0;
 
@@ -216,7 +216,7 @@ namespace Compression
                     // refer to the same variable.
                     long capturedCharsIndex = charsIndex;
 
-                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryStrings,
+                    tasks.Add(Task.Run(() => ProcessCharsBuffer(charsBuffer, capturedCharsIndex, readChars, dictionaryTree,
                         dictionaryCharacters, sortedBuffer, ref charsCount, maxStringLength: maxStringLength)));
 
                     charsIndex += readChars;
