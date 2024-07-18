@@ -75,13 +75,22 @@ namespace Compression
                 yield return link.Value;
         }
 
-        public override void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
+        public override void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action, int level = 0)
         {
             foreach (var node in GetChildElements())
             {
                 var node0 = (DictionaryTreeNode<T>) node;
 
+                for (int i = 0; i < level; i++)
+                    Console.Write(" ");
+
                 Console.WriteLine(node0.keyPart);
+
+                stack.Push(node0.KeyPart);
+
+                node0.Traverse(stack, action, level + 1);
+
+                var keyPart = stack.Pop();
             }
         }
     }

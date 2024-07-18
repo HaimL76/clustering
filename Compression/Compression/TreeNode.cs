@@ -46,7 +46,7 @@ namespace Compression
             Console.WriteLine($"{str}, {val}");
         });
 
-        public virtual void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
+        public virtual void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action, int level = 0)
         {
             if (left == null && right == null)
             {
@@ -58,7 +58,7 @@ namespace Compression
                 {
                     stack.Push(0);
 
-                    left.Traverse(stack, action);
+                    left.Traverse(stack, action, level + 1);
 
                     _ = stack.Pop();
                 }
@@ -67,7 +67,7 @@ namespace Compression
                 {
                     stack.Push(1);
 
-                    right.Traverse(stack, action);
+                    right.Traverse(stack, action, level + 1);
 
                     _ = stack.Pop();
                 }
