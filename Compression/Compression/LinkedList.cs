@@ -321,11 +321,6 @@ namespace Compression
 
             var val = link.Value;
 
-            int counter0 = counter++;
-
-            if ((counter0 % 100000) == 0)
-                Console.WriteLine($"[{counter0}], {nameof(val)}: {val}");
-
             if (head == null)
             {
                 if (start != null)

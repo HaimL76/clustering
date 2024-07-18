@@ -30,14 +30,19 @@ namespace Compression
 
         private char keyPart;
 
-        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, params char[] path)
-            => Add(val0, 0, false, path);
+        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int begin, int end)
+            => Add(val0, path, begin, end, false);
 
-        private (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, int index, bool isNew, params char[] path)
+        public static int counter0;
+
+        private (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int begin, int end, bool isNew)
         {
-            if (index < path.Length)
+            if (end >= (path?.Length).GetValueOrDefault())
+                throw new ArgumentException(nameof(end));
+
+            if (begin <= end)
             {
-                char ch = path[index];
+                char ch = path[begin];
 
                 var tup = list.AddSorted(new DictionaryTreeNode<T>(ch, val0));
 
@@ -46,7 +51,7 @@ namespace Compression
                 if (tup.IsNew)
                     isNew = true;
 
-                return (node?.Add(val0, index + 1, isNew, path))
+                return (node?.Add(val0, path, begin + 1, end, isNew))
                     .GetValueOrDefault();
             }
             else
@@ -54,17 +59,22 @@ namespace Compression
                 //val = val0;
 
                 NodeAction?.Invoke(this);
+
+                int counter1 = counter0++;
+
+                if ((counter1 % 100000) == 0)
+                    Console.WriteLine($"[{counter1}], {this}");
             }
 
             return (TreeNodeObject: this, IsNew: isNew);
         }
     }
 
-    public class DictionaryTree<T>
+    public class DictionaryTree<T> : Tree<T>
     {
         private readonly DictionaryTreeNode<T> root = new DictionaryTreeNode<T>('\0', default);
 
-        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, params char[] path)
-            => root.Add(val0, path);
+        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int index, int length)
+            => root.Add(val0, path, index, length);
     }
 }

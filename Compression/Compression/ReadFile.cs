@@ -100,51 +100,15 @@ namespace Compression
 
                 loopCharsCount++;
 
-                //if (ch > 256)
-                  //  ch = '-';//TODO:
-
-                string str = null;
-
                 TreeNode<(string StringKey, double NumOccurrences, object LinkObject)> treeNode = null;
 
                 if (queue.Count >= MaxStringLength)
                 {
                     var arr = queue.ToArray();
 
-                    for (int j = MaxStringLength; j >= 2; j--)
-                    {
-                        //str = new string(arr, 0, j);
-
+                    for (int j = 2; j <= MaxStringLength; j++)
                         lock (dictionaryTree)
-                        {
-                            DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> doubleLink = null;
-
-                            var tuple = dictionaryTree.Add(0, arr);
-
-                            if (tuple.IsNew)
-                            {
-                                treeNode = new TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>((StringKey: str, NumOccurrences: 0, LinkObject: null));
-
-                                doubleLink = sortedBuffer.AddSorted(treeNode)
-                                    as DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>;
-
-                                treeNode.SetValue((treeNode.Value.StringKey, treeNode.Value.NumOccurrences, LinkObject: doubleLink));
-
-                                dictionaryTree.Add(0, arr);
-                            }
-
-                            treeNode.SetValue((treeNode.Value.StringKey,
-                                NumOccurrences: treeNode.Value.NumOccurrences + CalculateStringWeight(treeNode.Value.StringKey),
-                                treeNode.Value.LinkObject));
-
-                            if (doubleLink == null)
-                            {
-                                doubleLink = treeNode.Value.LinkObject as DoubleLink<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>;
-
-                                sortedBuffer.AddSorted(doubleLink);
-                            }
-                        }
-                    }
+                            _ = dictionaryTree.Add(0, arr, 0, j - 1);
 
                     _ = queue.Dequeue();
                 }
@@ -170,6 +134,11 @@ namespace Compression
             }
 
             _ = Interlocked.Add(ref charsCount, loopCharsCount);
+
+            dictionaryTree.Traverse(new Stack<ulong>(), (stack, val) =>
+            {
+                _ = val;
+            });
         }
 
         public const int BufferSize = 1024 * 1024;

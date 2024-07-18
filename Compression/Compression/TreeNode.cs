@@ -135,6 +135,9 @@ namespace Compression
         }
 
         public void Print() => root?.Print();
+
+        public void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action) 
+            => root?.Traverse(stack, action);
     }
 
     public class TreeVisitor<T>
