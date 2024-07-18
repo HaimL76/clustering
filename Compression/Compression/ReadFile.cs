@@ -135,6 +135,8 @@ namespace Compression
 
             _ = Interlocked.Add(ref charsCount, loopCharsCount);
 
+            dictionaryTree.Print();
+
             dictionaryTree.Traverse(new Stack<ulong>(), (stack, val) =>
             {
                 _ = val;

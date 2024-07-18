@@ -65,6 +65,18 @@ namespace Compression
     public class LinkedList<T, LType>
         where LType : Link<T>
     {
+        public virtual IEnumerable<LType> GetElements()
+        {
+            var link = head;
+
+            while (link != null)
+            {
+                yield return link;
+
+                link = (LType) link.Next;
+            }
+        }
+
         public Func<T, string> Format { get; set; }
 
         protected LType head, tail;

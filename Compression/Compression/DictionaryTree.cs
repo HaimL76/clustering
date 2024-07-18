@@ -21,14 +21,14 @@ namespace Compression
         private DictionaryTreeNode<T>[] arr;
 
         private static Func<Link<DictionaryTreeNode<T>>, Link<DictionaryTreeNode<T>>, int> func = (x, y) =>
-        {
-            return 0;
-        };
+            Comparer<char>.Default.Compare((x?.Value?.keyPart).GetValueOrDefault(), (y?.Value?.keyPart).GetValueOrDefault());
 
         private readonly SortedLinkedList<DictionaryTreeNode<T>, Link<DictionaryTreeNode<T>>> list
             = new SortedLinkedList<DictionaryTreeNode<T>, Link<DictionaryTreeNode<T>>>(func);
 
         private char keyPart;
+
+        public char KeyPart => keyPart;
 
         public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int begin, int end)
             => Add(val0, path, begin, end, false);
@@ -68,13 +68,33 @@ namespace Compression
 
             return (TreeNodeObject: this, IsNew: isNew);
         }
+
+        public override IEnumerable<TreeNode<T>> GetChildElements()
+        {
+            foreach (var link in list.GetElements())
+                yield return link.Value;
+        }
+
+        public override void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
+        {
+            foreach (var node in GetChildElements())
+            {
+                var node0 = (DictionaryTreeNode<T>) node;
+
+                Console.WriteLine(node0.keyPart);
+            }
+        }
     }
 
     public class DictionaryTree<T> : Tree<T>
     {
-        private readonly DictionaryTreeNode<T> root = new DictionaryTreeNode<T>('\0', default);
-
         public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int index, int length)
-            => root.Add(val0, path, index, length);
+        {
+            root = root ?? new DictionaryTreeNode<T>('\0', default);
+
+            var root0 = root as DictionaryTreeNode<T>;
+
+            return root0.Add(val0, path, index, length);
+        }
     }
 }

@@ -46,7 +46,7 @@ namespace Compression
             Console.WriteLine($"{str}, {val}");
         });
 
-        public void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
+        public virtual void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action)
         {
             if (left == null && right == null)
             {
@@ -73,11 +73,17 @@ namespace Compression
                 }
             }
         }
+
+        public virtual IEnumerable<TreeNode<T>> GetChildElements()
+        {
+            yield return left;
+            yield return right;
+        }
     }
 
     public class Tree<T>
     {
-        private TreeNode<T> root;
+        protected TreeNode<T> root;
 
         public TreeNode<T> Root => root;
 
