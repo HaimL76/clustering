@@ -154,9 +154,11 @@ namespace Compression
         {
             DictionaryTreeNode<long>.NodeAction = node => node.SetValue(node.Value + 1);
 
-    // Collect all the characters from the input file,
-    // and prepare a dictionary of their statistics. 
-    var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
+            DictionaryTreeNode<long>.NodeIsLeaf = node => node.Value > 0;
+
+            // Collect all the characters from the input file,
+            // and prepare a dictionary of their statistics. 
+            var dictionaryStrings = new Dictionary<string, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
             var dictionaryCharacters = new Dictionary<char, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>();
 
             bool finished = false;

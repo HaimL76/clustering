@@ -41,7 +41,9 @@ namespace Compression
 
         public void Print() => Traverse(new Stack<ulong>(), (stack, val) =>
         {
-            string str = string.Join(string.Empty, stack.Reverse());
+            var chars = stack.Select(x => (char)x).Reverse().ToArray();
+
+            string str = new string(chars);
 
             Console.WriteLine($"{str}, {val}");
         });

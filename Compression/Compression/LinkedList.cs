@@ -158,6 +158,8 @@ namespace Compression
 
             return counter;
         }
+
+        public Link<T> Head => head;
     }
 
     public class DoubleLinkedList<T> : LinkedList<T, DoubleLink<T>>

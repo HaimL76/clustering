@@ -14,6 +14,8 @@ namespace Compression
 
         public static Action<DictionaryTreeNode<T>> NodeAction { get; set; }
 
+        public static Func<DictionaryTreeNode<T>, bool> NodeIsLeaf { get; set; }
+
         public DictionaryTreeNode(char keyPart0, T val) : base(val) => keyPart = keyPart0;
 
         private int numNodes;
@@ -77,14 +79,14 @@ namespace Compression
 
         public override void Traverse(Stack<ulong> stack, Action<Stack<ulong>, T> action, int level = 0)
         {
-            foreach (var node in GetChildElements())
+            var childNodes = GetChildElements()
+                .OfType<DictionaryTreeNode<T>>().ToList();
+
+            int count = (childNodes?.Count).GetValueOrDefault();
+
+            for (int i = 0; i < count; i++)
             {
-                var node0 = (DictionaryTreeNode<T>) node;
-
-                for (int i = 0; i < level; i++)
-                    Console.Write(" ");
-
-                Console.WriteLine(node0.keyPart);
+                var node0 = childNodes[i];
 
                 stack.Push(node0.KeyPart);
 
@@ -92,6 +94,9 @@ namespace Compression
 
                 var keyPart = stack.Pop();
             }
+
+            if ((NodeIsLeaf?.Invoke(this)).GetValueOrDefault())
+                action?.Invoke(stack, Value);
         }
     }
 
