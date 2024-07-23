@@ -80,7 +80,7 @@ namespace Compression
         public static void ProcessCharsBuffer(char[] charsBuffer, long index, int readChars,
             DictionaryTree<long> dictionaryTree,
             Dictionary<char, TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> dictionaryCharacters,
-            SortedBuffer<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>> sortedBuffer,
+            SortedBuffer<(string StringKey, double NumOccurrences)> sortedBuffer,
             ref long charsCount, int maxStringLength = 2)
         {
             MaxStringLength = maxStringLength;
@@ -135,11 +135,16 @@ namespace Compression
 
             _ = Interlocked.Add(ref charsCount, loopCharsCount);
 
-            dictionaryTree.Print();
+            //dictionaryTree.Print();
 
             dictionaryTree.Traverse(new Stack<ulong>(), (stack, val) =>
             {
-                _ = val;
+                var chars = stack.Select(x => (char)x).Reverse().ToArray();
+
+                string str = new string(chars);
+
+                lock(sortedBuffer)
+                    _ = sortedBuffer.AddSorted((StringKey: str, NumOccurrences: val));
             });
         }
 
@@ -168,7 +173,10 @@ namespace Compression
             var sortedLinkedList = 
                 new SortedOneWayLinkedList<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>(treeNodeComparer);
 
-            var sortedBuffer = new SortedBuffer<TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>>(treeNodeComparer, sortedBufferSize);
+            var comparer = Comparer<(string StringKey, double NumOccurrences)>
+                .Create((x, y) => (int)(x.NumOccurrences - y.NumOccurrences));
+
+            var sortedBuffer = new SortedBuffer<(string StringKey, double NumOccurrences)>(comparer, sortedBufferSize);
 
             var dictionaryTree = new DictionaryTree<long>();
 
@@ -205,7 +213,7 @@ namespace Compression
 
             dictionaryCharacters.ToList().ForEach(x => sortedLinkedList.AddSorted(x.Value));
 
-            sortedBuffer.ToList().ForEach(x => sortedLinkedList.AddSorted(x));
+            sortedBuffer.ToList().ForEach(x => sortedLinkedList.AddSorted(new TreeNode<(string StringKey, double NumOccurrences, object LinkObject)>((StringKey: x.StringKey, NumOccurrences: x.NumOccurrences, LinkObject: null))));
 
             Console.WriteLine($"{nameof(dictionaryStrings)}: {dictionaryStrings.Count}");
 
