@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -108,7 +109,13 @@ namespace Compression
 
                     for (int j = 2; j <= MaxStringLength; j++)
                         lock (dictionaryTree)
-                            _ = dictionaryTree.Add(0, arr, 0, j - 1);
+                        {
+                            var tup = dictionaryTree.Add(0, arr, 0, j - 1);
+
+                            string str = new string(tup.WordChars);
+
+                            _ = sortedBuffer.AddSorted((StringKey: str, NumOccurrences: tup.TreeNodeObject.Value));
+                        }
 
                     _ = queue.Dequeue();
                 }
@@ -136,16 +143,6 @@ namespace Compression
             _ = Interlocked.Add(ref charsCount, loopCharsCount);
 
             //dictionaryTree.Print();
-
-            dictionaryTree.Traverse(new Stack<ulong>(), (stack, val) =>
-            {
-                var chars = stack.Select(x => (char)x).Reverse().ToArray();
-
-                string str = new string(chars);
-
-                lock(sortedBuffer)
-                    _ = sortedBuffer.AddSorted((StringKey: str, NumOccurrences: val));
-            });
         }
 
         public const int BufferSize = 1024 * 1024;

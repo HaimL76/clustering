@@ -32,19 +32,19 @@ namespace Compression
 
         public char KeyPart => keyPart;
 
-        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int begin, int end)
-            => Add(val0, path, begin, end, false);
+        public (DictionaryTreeNode<T> TreeNodeObject, char[] WordChars, bool IsNew) Add(T val0, char[] path, int begin, int end)
+            => Add(val0, path, begin, end, begin, false);
 
         public static int counter0;
 
-        private (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int begin, int end, bool isNew)
+        private (DictionaryTreeNode<T> TreeNodeObject, char[] WordChars, bool IsNew) Add(T val0, char[] path, int begin, int end, int index, bool isNew)
         {
             if (end >= (path?.Length).GetValueOrDefault())
                 throw new ArgumentException(nameof(end));
 
-            if (begin <= end)
+            if (index <= end)
             {
-                char ch = path[begin];
+                char ch = path[index];
 
                 var tup = list.AddSorted(new DictionaryTreeNode<T>(ch, val0));
 
@@ -53,7 +53,7 @@ namespace Compression
                 if (tup.IsNew)
                     isNew = true;
 
-                return (node?.Add(val0, path, begin + 1, end, isNew))
+                return (node?.Add(val0, path, begin, end, index + 1, isNew))
                     .GetValueOrDefault();
             }
             else
@@ -68,7 +68,11 @@ namespace Compression
                     Console.WriteLine($"[{counter1}], {this}");
             }
 
-            return (TreeNodeObject: this, IsNew: isNew);
+            char[] wordChars = new char[end - begin + 1];
+
+            Array.Copy(path, begin, wordChars, 0, wordChars.Length);
+
+            return (TreeNodeObject: this, WordChars: wordChars, IsNew: isNew);
         }
 
         public override IEnumerable<TreeNode<T>> GetChildElements()
@@ -102,7 +106,7 @@ namespace Compression
 
     public class DictionaryTree<T> : Tree<T>
     {
-        public (DictionaryTreeNode<T> TreeNodeObject, bool IsNew) Add(T val0, char[] path, int index, int length)
+        public (DictionaryTreeNode<T> TreeNodeObject, char[] WordChars, bool IsNew) Add(T val0, char[] path, int index, int length)
         {
             root = root ?? new DictionaryTreeNode<T>('\0', default);
 
